@@ -120,7 +120,7 @@ public class NetworkManager : ManagerBase
 
         networkCTS = new CancellationTokenSource();
 
-        networkTask = NetworkLoop(networkCTS.Token);
+        networkTask = Task.Run(() => NetworkLoop(networkCTS.Token));
 
         return true;
     }
