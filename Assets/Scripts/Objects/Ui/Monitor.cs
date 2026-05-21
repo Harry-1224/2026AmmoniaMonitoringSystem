@@ -329,6 +329,8 @@ public class Monitor : UiObjectBase
     private ExperimentWrapper MonitorSchedule;
 
 
+    private const string ExperimentInfoPrefabPath = "PreFab/UI/ExperimentInfo";
+
     private void ExperimnetUpdate(bool isRunning)
     {
         if (!isRunning)
@@ -577,7 +579,130 @@ public class Monitor : UiObjectBase
             Experiments = experiments
         };
     }
+    private void RefreshExperimentInfoCards(List<ExperimentInfo> infos)
+    {
+        if (infos == null || infos.Count == 0)
+        {
+            Debug.LogWarning("[DataBox] 생성할 Experiment Information이 없습니다.");
 
+            foreach (var card in experimentDataCards.Values)
+                card.gameObject.SetActive(false);
+
+            RebuildExperimentInfoLayout();
+            return;
+        }
+
+        Dictionary<string, int> actionCounts = new Dictionary<string, int>();
+        HashSet<string> requiredKeys = new HashSet<string>();
+
+        int visualIndex = 0;
+
+        foreach (ExperimentInfo info in infos)
+        {
+            if (info == null)
+                continue;
+
+            string action = info.Action;
+
+            if (!actionCounts.ContainsKey(action))
+                actionCounts[action] = 0;
+
+            int actionIndex = actionCounts[action]++;
+            string key = GetExperimentInfoKey(info, actionIndex);
+
+            requiredKeys.Add(key);
+
+            if (!experimentDataCards.TryGetValue(key, out DataCard card))
+            {
+                card = CreateExperimentInfoCard(info, key);
+
+                if (card == null)
+                    continue;
+            }
+
+            card.gameObject.SetActive(true);
+            card.transform.SetSiblingIndex(visualIndex);
+            visualIndex++;
+
+            card.ObjectID = key;
+            card.cardType = EDataCardType.ExperimentData;
+            card.ExperimentdataSetting(info);
+        }
+
+        foreach (var pair in experimentDataCards)
+        {
+            if (!requiredKeys.Contains(pair.Key))
+                pair.Value.gameObject.SetActive(false);
+        }
+
+        RebuildExperimentInfoLayout();
+    }
+    private string GetExperimentInfoKey(ExperimentInfo info, int actionIndex)
+    {
+        return $"Experiment_{info.Action}_{actionIndex}";
+    }
+    private string GetExperimentInfoPrefabPath(ExperimentInfo info)
+    {
+        switch (info.Action)
+        {
+            case "End":
+            case "None":
+                return "PreFab/UI/ExperimentInfo";
+
+            default:
+                return $"PreFab/UI/ExperimentInfo_{info.Action}";
+        }
+    }
+    private DataCard CreateExperimentInfoCard(ExperimentInfo info, string key)
+    {
+        if (Container == null)
+        {
+            Debug.LogError("[DataBox] Container가 null입니다.");
+            return null;
+        }
+
+        string path = GetExperimentInfoPrefabPath(info);
+
+        GameObject prefab = Resources.Load<GameObject>(path);
+
+        if (prefab == null)
+        {
+            Debug.LogWarning($"[DataBox] Experiment Prefab Load 실패: {path}");
+            return null;
+        }
+
+        GameObject obj = Instantiate(prefab, Container, false);
+        obj.name = key;
+
+        DataCard card = obj.GetComponent<DataCard>();
+
+        if (card == null)
+        {
+            Debug.LogWarning($"[DataBox] {key}에 DataCard 스크립트가 없습니다.");
+            Destroy(obj);
+            return null;
+        }
+
+        card.ObjectID = key;
+        card.cardType = EDataCardType.ExperimentData;
+        card.RegistBox(this);
+
+        experimentDataCards[key] = card;
+
+        return card;
+    }
+    private void RebuildExperimentInfoLayout()
+    {
+        if (Container == null)
+            return;
+
+        RectTransform rect = Container.GetComponent<RectTransform>();
+
+        if (rect != null)
+            LayoutRebuilder.ForceRebuildLayoutImmediate(rect);
+    }
+
+    /*
     private void RefreshExperimentInfoCards(List<ExperimentInfo> infos)
     {
         if (infos == null || infos.Count == 0)
@@ -674,7 +799,7 @@ public class Monitor : UiObjectBase
 
             card.ExperimentdataSetting(info);
         }
-    }
+    }*/
     private void EnterNewScheduleMode(bool resetType)
     {
         currentScheduleIndex = -1;

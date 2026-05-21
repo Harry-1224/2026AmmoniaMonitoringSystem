@@ -41,6 +41,12 @@ public class DataBox : UiObjectBase
 
     private bool isSherinkged = false; // DataBox가 최소화 상태인지 여부를 나타내는 변수
 
+    [SerializeField] private GameObject scrollViewObject;
+    [SerializeField] private float expandedHeight = 600f;
+    [SerializeField] private float shrinkHeight = 80f;
+
+    private RectTransform rectTransform;
+
     protected override void Update()
     {
         base.Update();
@@ -49,6 +55,12 @@ public class DataBox : UiObjectBase
     protected override void Intialize()
     {
         base.Intialize();
+
+        rectTransform = GetComponent<RectTransform>();
+
+        if (scrollViewObject == null)
+            scrollViewObject = transform.Find("Scroll View").gameObject;
+
         if (Container == null)
         {
             Container = transform.Find("Scroll View/Viewport/Content");
@@ -160,6 +172,8 @@ public class DataBox : UiObjectBase
     {
         base.OnClick();
         if (dataBoxType == EDataBoxType.Experiment) return;
+
+        ToggleBox();
     }
 
     /// <summary>
@@ -304,6 +318,25 @@ public class DataBox : UiObjectBase
             dataCards[key] = card;
         }
     }
+
+    private void ToggleBox()
+    {
+        isSherinkged = !isSherinkged;
+
+        // ScrollView 활성/비활성
+        scrollViewObject.SetActive(!isSherinkged);
+
+        // Box 크기 변경
+        Vector2 size = rectTransform.sizeDelta;
+
+        size.y = isSherinkged
+            ? shrinkHeight
+            : expandedHeight;
+
+        rectTransform.sizeDelta = size;
+    }
+
+
     #endregion
 
     #region MonitoringBox 관련
