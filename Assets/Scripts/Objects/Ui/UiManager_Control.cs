@@ -40,6 +40,22 @@ public partial class UiManager
                 break;
         }
     }
+    public void OnDataBoxClicked(Monitor clickedBox)
+    {
+        if (clickedBox == null)
+            return;
+
+        switch (clickedBox.MonitorType)
+        {
+            case EMonitorType.Monitoring:
+                ResizeDataBoxes(MonitoringBox, ExperimentBox);
+                break;
+
+            case EMonitorType.Experiment:
+                ResizeDataBoxes(ExperimentBox, MonitoringBox);
+                break;
+        }
+    }
 
     public void UiSelect(EUi ui = EUi.HUD)
     {
@@ -91,4 +107,6 @@ public partial class UiManager
     /// <param name="selectedSchedule">선택된 실험 Shedule</param>
     public void SetExperimentMonitor(ExperimentWrapper selectedSchedule) => HUDScreen[EUiScreen.Experiment.ToString()].GetComponent<Monitor>().SetExperimentMonitor(selectedSchedule);
     #endregion
+
+
 }

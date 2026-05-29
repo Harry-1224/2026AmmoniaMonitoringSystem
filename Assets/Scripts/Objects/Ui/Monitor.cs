@@ -165,6 +165,7 @@ public class Monitor : UiObjectBase
         }
     }
 
+
     protected override void OnDataChanged(Dictionary<string, Datas> obj)
     {
         // DataManager에서 데이터가 변경될 때마다 monitoringTexts에 등록된  컴포넌트들의 텍스트를 업데이트하는 로직
@@ -244,6 +245,24 @@ public class Monitor : UiObjectBase
         }
 
     }
+
+
+    public override void OnClick()
+    {
+        switch (MonitorType)
+        {
+            case EMonitorType.Monitoring:
+            case EMonitorType.Experiment:
+
+                Debug.Log($"[Monitor] 클릭됨 : {MonitorType}");
+
+                Manager.Ui.OnDataBoxClicked(this);
+                break;
+
+        }
+    }
+
+
 
     #region Data Monitoring
     private Dictionary<string, TextMeshProUGUI> monitoringTexts = new Dictionary<string, TextMeshProUGUI>();

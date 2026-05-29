@@ -47,7 +47,7 @@ public class ModbusService : INetworkSevice
         catch (SocketException ex)
         {
             client = null;
-            return (false, "[ModbusService] : " + ex.Message);
+            return (false, $"[ModbusService] : {ex.Message} / Slave ID: {slaveID}, IP: {IpAdress}, Port: {portNumber}");
         }
 
         return (true, "[ModbusService] : Network Connecting Success");

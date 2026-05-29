@@ -201,7 +201,7 @@ public class DataCard : UiObjectBase
         experimentInfo = info;
         scheduleNameText.text = info.Name;
         scheduleDescriptionText.text = info.Description;
-        scheduleValue.text = info.Value.ToString();
+        SetInfoValues(info);
     }
     public void ExperimentScheduleSetting(ExperimentWrapper wrapper)
     {
@@ -210,7 +210,12 @@ public class DataCard : UiObjectBase
     }
     public ExperimentInfo GetExperimentInfo()
     {
-        int.TryParse(scheduleValue.text, out int value);
+        int value = 0;
+
+        if(scheduleValue != null)
+        {
+            int.TryParse(scheduleValue.text, out value);
+        }
 
         return new ExperimentInfo
         {
@@ -223,6 +228,13 @@ public class DataCard : UiObjectBase
             Value = value,
             Process = experimentInfo.Process
         };
+    }
+
+    private void SetInfoValues(ExperimentInfo info)
+    {
+        if (info.Action == "End") return;
+
+        scheduleValue.text = info.Value.ToString();
     }
     #endregion
 }

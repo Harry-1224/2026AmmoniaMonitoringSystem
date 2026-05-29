@@ -164,4 +164,35 @@ public partial class UiManager : ManagerBase
 
 
     #endregion
+
+
+    #region DataBox Methods
+
+    public RectTransform MonitoringBox;
+    public RectTransform ExperimentBox;
+
+    [SerializeField] private float expandedWidth = 1400f;
+    [SerializeField] private float collapsedWidth = 500f;
+
+
+    private void ResizeDataBoxes(RectTransform expandBox, RectTransform collapseBox)
+    {
+        if (expandBox != null)
+        {
+            expandBox.SetSizeWithCurrentAnchors(
+                RectTransform.Axis.Horizontal,
+                expandedWidth
+            );
+        }
+
+        if (collapseBox != null)
+        {
+            collapseBox.SetSizeWithCurrentAnchors(
+                RectTransform.Axis.Horizontal,
+                collapsedWidth
+            );
+        }
+    }
+
+    #endregion
 }

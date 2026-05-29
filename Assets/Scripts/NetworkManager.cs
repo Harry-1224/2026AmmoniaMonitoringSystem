@@ -4,6 +4,8 @@ using System.Data;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 public enum ENetworkState
@@ -16,7 +18,7 @@ public enum ENetworkState
 
 public enum EDataAddressRange
 {
-    SlaveID = 1, 
+    SlaveID = 0, 
     AddressStart = 0,
     AddressEnd = 50,
     OutputAddressStart = 30,
@@ -55,10 +57,41 @@ public class NetworkManager : ManagerBase
         //StartNetworkLoop();
     }
 
+    protected override void Update()
+    {
+
+        lock (NetworkEventActions)
+        {
+            while (NetworkEventActions.Count > 0)
+            {
+                NetworkEventActions.Dequeue()?.Invoke();
+            }
+        }
+    }
+
     // 프로그램 종료 시 네트워크 루프 종료
     private void OnApplicationQuit()
     {
         StopNetwork();
+    }
+
+    protected override void EventSubscriber()
+    {
+        Manager.Network.OnTryNetworkConnect += HandleTryNetworkConnect;
+        Manager.Network.OnNetworkConnected += HandleNetworkConnected;
+        Manager.Network.OnNetworkDisconnected += HandleNetworkDisconnected;
+        Manager.Network.OnNetworkConnectionFailed += HandleNetworkConnectionFailed;
+        Manager.Network.OnNetworkError += HandleNetworkError;
+    }
+    protected override void EventUnsubscriber()
+    {
+        base.EventUnsubscriber();
+
+        Manager.Network.OnTryNetworkConnect -= HandleTryNetworkConnect;
+        Manager.Network.OnNetworkConnected -= HandleNetworkConnected;
+        Manager.Network.OnNetworkDisconnected -= HandleNetworkDisconnected;
+        Manager.Network.OnNetworkConnectionFailed -= HandleNetworkConnectionFailed;
+        Manager.Network.OnNetworkError -= HandleNetworkError;
     }
 
     #region Singleton
@@ -84,16 +117,20 @@ public class NetworkManager : ManagerBase
     public event Action OnNetworkConnected;
     public event Action OnNetworkDisconnected;
     public event Action OnNetworkConnectionFailed;
+    public event Action<string> OnTryNetworkConnect;
     public event Action<string> OnNetworkError;
     // TODO : 데이터 수신 예제 - 이벤트 정리할것.
     public event Action OnDataCall;
     public event Action OnDataSet;
     public event Action<ushort[]> OnDataReceived;
 
+    private readonly Queue<Action> NetworkEventActions = new Queue<Action>();
+
+
     private ModbusService modbusService;
 
-    private byte SlaveID  = 1;
-    private string IpAddress = "192.168.0.11";
+    private byte SlaveID  = 0;
+    private string IpAddress = "192.168.1.2";
     private int Port = 502;
     public ENetworkState NetworkState { get; private set; } = ENetworkState.Disconnected;
     public bool isConnected { get; private set; } = false;
@@ -156,7 +193,7 @@ public class NetworkManager : ManagerBase
         });
     }
 
-
+    /*
     // NOTE : 네트워크 상태 머신 LOOP
     private async Task NetworkLoop(CancellationToken token)
     {
@@ -215,11 +252,116 @@ public class NetworkManager : ManagerBase
             await Task.Delay(10, token);
         }
     }
+    */
 
+    private async Task NetworkLoop(CancellationToken token)
+    {
+        int Failed = 0;
+
+        while (!token.IsCancellationRequested)
+        {
+            switch (NetworkState)
+            {
+                case ENetworkState.Connected:
+
+                    Failed = 0;
+
+                    try
+                    {
+                        NetworkAction();
+                    }
+                    catch (Exception ex)
+                    {
+                        isConnected = false;
+
+                        NetworkState = ENetworkState.Disconnected;
+
+                        OnNetworkDisconnected?.Invoke();
+
+                        OnNetworkError?.Invoke(
+                            $"NetworkAction Error : {ex.Message}"
+                        );
+                    }
+
+                    break;
+
+                case ENetworkState.Connecting:
+
+                    try
+                    {
+
+                        bool success = TryConnect();
+
+                        if (success)
+                        {
+                            NetworkState = ENetworkState.Connected;
+
+                            isConnected = true;
+
+                            OnNetworkConnected?.Invoke();
+                        }
+                        else
+                        {
+                            OnNetworkConnectionFailed?.Invoke();
+
+                            OnNetworkError?.Invoke(
+                                $"Connection Failed ({Failed + 1}/3)"
+                            );
+
+                            NetworkState = ENetworkState.Disconnected;
+
+                            await Task.Delay(50, token);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        NetworkState = ENetworkState.Disconnected;
+
+                        OnNetworkError?.Invoke(
+                            $"TryConnect Exception : {ex.Message}"
+                        );
+                    }
+
+                    break;
+
+                case ENetworkState.Disconnected:
+
+                    if (Failed >= 3)
+                    {
+                        NetworkState = ENetworkState.ConnectFail;
+
+                        OnNetworkError?.Invoke(
+                            "Network Connect Failed. Enter ConnectFail State."
+                        );
+                    }
+                    else
+                    {
+                        NetworkState = ENetworkState.Connecting;
+                    }
+
+                    Failed++;
+
+                    await Task.Delay(50, token);
+
+                    break;
+
+                case ENetworkState.ConnectFail:
+
+                    Failed = 0;
+
+                    await Task.Delay(50, token);
+
+                    break;
+            }
+
+            await Task.Delay(10, token);
+        }
+    }
     // NOTE : LOOP 내부에서 작동 - 연결 시도
     private bool TryConnect()
     {
         // TODO : TCP 연결 시도 로직 구현, 타임아웃 및 예외 처리 포함
+        OnTryNetworkConnect?.Invoke($"Trying to connect to {IpAddress}:{Port} with SlaveID {SlaveID}");
         (bool result , string msg) = modbusService.ConnectNetwork();
         if (!result)
         {
@@ -327,6 +469,54 @@ public class NetworkManager : ManagerBase
 
         return data;
     }
+    private void HandleTryNetworkConnect(string msg)
+    {
+        EnqueueMainThreadAction(() =>
+        {
+            Debug.Log($"[Network] Try Connect : {msg}");
+        });
+    }
+
+    private void HandleNetworkConnected()
+    {
+        EnqueueMainThreadAction(() =>
+        {
+            Debug.Log("[Network] Connected");
+        });
+    }
+
+    private void HandleNetworkDisconnected()
+    {
+        EnqueueMainThreadAction(() =>
+        {
+            Debug.LogWarning("[Network] Disconnected");
+        });
+    }
+
+    private void HandleNetworkConnectionFailed()
+    {
+        EnqueueMainThreadAction(() =>
+        {
+            Debug.LogWarning("[Network] Connection Failed");
+        });
+    }
+
+    private void HandleNetworkError(string msg)
+    {
+        EnqueueMainThreadAction(() =>
+        {
+            Debug.LogError(msg);
+        });
+    }
+
+    private void EnqueueMainThreadAction(Action action)
+    {
+        lock (NetworkEventActions)
+        {
+            NetworkEventActions.Enqueue(action);
+        }
+    }
+
 
     /// <summary>
     /// 네트워크 관련 이벤트를 모두 초기화 하는 함수
