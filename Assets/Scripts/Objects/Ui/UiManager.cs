@@ -26,6 +26,7 @@ public partial class UiManager : ManagerBase
     //  - 각 상황에 따라 적절한 UI를 표출.
     //  - 데이터 수집 시 
 
+    
     private Transform canvasTransform;
     Dictionary<string, GameObject> UiGameObject = new Dictionary<string, GameObject>();
     Dictionary<string, GameObject> HUDScreen = new Dictionary<string, GameObject>();
