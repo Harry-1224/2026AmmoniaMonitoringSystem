@@ -27,7 +27,7 @@ public partial class UiManager : ManagerBase
     //  - 데이터 수집 시 
 
     private Transform canvasTransform;
-    Dictionary<string, GameObject> UiObject = new Dictionary<string, GameObject>();
+    Dictionary<string, GameObject> UiGameObject = new Dictionary<string, GameObject>();
     Dictionary<string, GameObject> HUDScreen = new Dictionary<string, GameObject>();
 
 
@@ -116,7 +116,7 @@ public partial class UiManager : ManagerBase
     }
     private void RegisterUIObjects()
     {
-        UiObject.Clear();
+        UiGameObject.Clear();
 
         var transforms = canvasTransform.GetComponentsInChildren<Transform>(true);
 
@@ -139,7 +139,7 @@ public partial class UiManager : ManagerBase
                 continue;
             }
 
-            UiObject[name] = obj;
+            UiGameObject[name] = obj;
         }
     }
     private void RegisterHUDScreens()

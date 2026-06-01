@@ -60,13 +60,13 @@ public partial class UiManager
     public void UiSelect(EUi ui = EUi.HUD)
     {
         // 전체 UI 끄기
-        foreach (var obj in UiObject.Values)
+        foreach (var obj in UiGameObject.Values)
         {
             obj.SetActive(false);
         }
 
         // 해당 UI 켜기
-        if (!UiObject.TryGetValue(ui.ToString(), out var target))
+        if (!UiGameObject.TryGetValue(ui.ToString(), out var target))
         {
             Debug.LogWarning($"[UiManager] UI 없음: {ui}");
             return;
@@ -76,7 +76,7 @@ public partial class UiManager
     }
     public void OnMonitorChanged(EUiScreen screen)
     {
-        foreach(var obj in UiObject.Values)
+        foreach(var obj in HUDScreen.Values)
         {
             obj.SetActive(false);
         }
