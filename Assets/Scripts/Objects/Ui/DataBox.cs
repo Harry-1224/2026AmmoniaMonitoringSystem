@@ -142,7 +142,7 @@ public class DataBox : UiObjectBase
         return;
     }
 
-    protected override void EventSubscriber()
+    protected override void                                                                                                                                                                                                                                                                                                                                                          EventSubscriber()
     {
         if (dataBoxType == EDataBoxType.Experiment) Manager.Experiment.ExperimentScheduleChange += OnExperimentScheduleChanged;
         Manager.Data.OnDataChanged += OnDataChanged;
@@ -195,7 +195,7 @@ public class DataBox : UiObjectBase
         }
         else
         {
-            // TODO : DataCard가 클릭 되었을 때 3D View에서 해당 System으로 화면을 옮기는 기능 추가 필요
+            
         }
     }
 
