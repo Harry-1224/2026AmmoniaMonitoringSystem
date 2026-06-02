@@ -30,7 +30,24 @@ public class DataManager : ManagerBase
     private Dictionary<string, Datas> dataBuffer = new();
 
     private DocumentController documentController = new DocumentController();
+    protected override void Update()
+    {
+        while (true)
+        {
+            Dictionary<string, Datas> changedData = null;
 
+            lock (dataChangedLock)
+            {
+                if (recivedDataQueue.Count == 0)
+                    break;
+
+                changedData = recivedDataQueue.Dequeue();
+            }
+
+            OnDataChanged?.Invoke(changedData);
+        }
+    }
+    
     protected override void Intialize()
     {
         base.Intialize();
@@ -254,6 +271,9 @@ public class DataManager : ManagerBase
     #region NetworkingSystem
     private bool isReceived = false;
 
+    private Queue<Dictionary<string, Datas>> recivedDataQueue = new Queue<Dictionary<string, Datas>>();
+    private readonly object dataChangedLock = new();
+
     private void OnDataReceived(ushort[] _datas)
     {
         if (isReceived) return;
@@ -263,14 +283,13 @@ public class DataManager : ManagerBase
         try
         {
             float value = 0;
-            // 1. Tag별로 데이터 변환 후 저장
+
             foreach (var info in InstrumentInfos)
             {
                 InstrumentInfo _info = info.Value;
 
                 value = ConvertPLCToData(_info, _datas);
 
-                // 2. 데이터 변경 감지 후 이벤트 발생
                 if (!DataDictionary.TryGetValue(_info.Tag, out var data))
                 {
                     data = new Datas();
@@ -292,10 +311,22 @@ public class DataManager : ManagerBase
                     buffer.Value = value;
                 }
             }
-            // 3. 데이터 변환 완료 이벤트 발생
+
             if (dataBuffer.Count > 0)
             {
-                OnDataChanged?.Invoke( new Dictionary<string, Datas>(dataBuffer) );
+                var snapshot = dataBuffer.ToDictionary(
+                    x => x.Key,
+                    x => new Datas
+                    {
+                        Name = x.Value.Name,
+                        Value = x.Value.Value
+                    }
+                );
+
+                lock (dataChangedLock)
+                {
+                    recivedDataQueue.Enqueue(snapshot);
+                }
 
                 dataBuffer.Clear();
             }
@@ -308,7 +339,6 @@ public class DataManager : ManagerBase
         {
             isReceived = false;
         }
-
     }
 
     private float ConvertPLCToData(InstrumentInfo info, ushort[] rawData)

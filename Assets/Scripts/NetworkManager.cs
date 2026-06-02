@@ -130,7 +130,7 @@ public class NetworkManager : ManagerBase
     private ModbusService modbusService;
 
     private byte SlaveID  = 0;
-    private string IpAddress = "192.168.0.118";
+    public string IpAddress = "192.168.0.118";
     private int Port = 502;
     public ENetworkState NetworkState { get; private set; } = ENetworkState.Disconnected;
     public bool isConnected { get; private set; } = false;

@@ -156,15 +156,22 @@ public class DataBox : UiObjectBase
 
     protected override void OnDataChanged(Dictionary<string, Datas> datas)
     {
-        // DataManager에서 Data가 변경될 때마다 DataBox는 DataManager에서 Data를 받아와서 DataCard를 업데이트한다.
-        foreach(var item in instruments)
+        try
         {
-            string key = item.Key;
-            if (datas.ContainsKey(key))
+            // DataManager에서 Data가 변경될 때마다 DataBox는 DataManager에서 Data를 받아와서 DataCard를 업데이트한다.
+            foreach (var item in instruments)
             {
-                Datas data = datas[key];
-                if(dataBoxType != EDataBoxType.Experiment) dataCards[item.Value.Group].OnFunctionCalled(data);
+                string key = item.Key;
+                if (datas.ContainsKey(key))
+                {
+                    Datas data = datas[key];
+                    if (dataBoxType != EDataBoxType.Experiment) dataCards[item.Value.Group].OnFunctionCalled(data);
+                }
             }
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"[DataBox/{dataBoxType.ToString()}] Data 변경 처리 중 오류 발생: {ex.Message}");
         }
     }
 
