@@ -28,6 +28,7 @@ public partial class UiManager : ManagerBase
 
     
     private Transform canvasTransform;
+    public GameObject background;
     Dictionary<string, GameObject> UiGameObject = new Dictionary<string, GameObject>();
     Dictionary<string, GameObject> HUDScreen = new Dictionary<string, GameObject>();
 

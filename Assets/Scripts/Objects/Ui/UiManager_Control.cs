@@ -22,18 +22,23 @@ public partial class UiManager
                 break;
             case "MonitorMain":
                 OnMonitorChanged(EUiScreen.Basic);
+                background.gameObject.SetActive(false);
                 break;
             case "MonitorPNID":
                 OnMonitorChanged(EUiScreen.PNID);
+                background.gameObject.SetActive(true);
                 break;
             case "MonitorGraph":
                 OnMonitorChanged(EUiScreen.Graph);
+                background.gameObject.SetActive(true);
                 break;
             case "MonitorSetting":
                 OnMonitorChanged(EUiScreen.Setting);
+                background.gameObject.SetActive(true);
                 break;
             case "MonitorExperiment":
                 OnMonitorChanged(EUiScreen.Experiment);
+                background.gameObject.SetActive(true);
                 break;
             case "Exit":
                 Application.Quit();
@@ -53,6 +58,7 @@ public partial class UiManager
 
             case EMonitorType.Experiment:
                 ResizeDataBoxes(ExperimentBox, MonitoringBox);
+                background.gameObject.SetActive(true);
                 break;
         }
     }
