@@ -188,7 +188,7 @@ public class Monitor : UiObjectBase
                 {
                     key = $"Experiment_Process_{MonitorSchedule.Group}";
                 }
-                else if (MonitorSchedule.ReservedState == EReservedExperimentState.Stopping)
+                else
                 {
                     key = "Experiment_Process_End";
                 }
@@ -199,6 +199,18 @@ public class Monitor : UiObjectBase
                     Debug.LogWarning($"[Monitor] Process Data 없음: {key}");
                     return;
                 }
+
+                // 비트 데이터
+                ushort processBits = (ushort)processData.Value;
+
+                foreach (var card in experimentDataCards.Values)
+                {
+                    if (!card.gameObject.activeSelf)
+                        continue;
+
+                    card.UpdateExperimentInfoCardColor(processBits);
+                }
+
                 break;
             case EMonitorType.Setting:
                 break;
@@ -351,6 +363,9 @@ public class Monitor : UiObjectBase
     {
         if (!isRunning)
             return;
+
+        if (experimentLampImage == null)
+            return;
         // =====================================
         // Lamp 색 변경
         // =====================================
@@ -396,6 +411,8 @@ public class Monitor : UiObjectBase
     {
         if (selectedExperiment == null)
             return;
+
+        MonitorSchedule = selectedExperiment;
 
         int scheduleIndex = ScheduleNo.options.FindIndex(option =>
         {

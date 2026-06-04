@@ -279,6 +279,24 @@ public class DataCard : UiObjectBase
             Process = experimentInfo.Process
         };
     }
+    public void UpdateExperimentInfoCardColor(int processBits)
+    {
+        if (experimentInfo == null)
+            return;
+
+        int bitIndex = experimentInfo.No - 1; // No가 1부터 시작하는 경우
+
+        bool completed = ((processBits >> bitIndex) & 1) == 1;
+
+        if (completed)
+        {
+            cardImage.color = Color.green;
+        }
+        else
+        {
+            cardImage.color = Color.gray;
+        }
+    }
 
     private void SetInfoValues(ExperimentInfo info)
     {
@@ -286,5 +304,7 @@ public class DataCard : UiObjectBase
 
         scheduleValue.text = info.Value.ToString();
     }
+
+    
     #endregion
 }

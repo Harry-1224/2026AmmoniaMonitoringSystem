@@ -96,6 +96,7 @@ public partial class ExperimentManager
             yield break;
 
         schedule.ReservedState = EReservedExperimentState.Processing;
+        ExperimentScheduleChange?.Invoke(new List<ExperimentWrapper>(experimentSchedules));
 
         // 실험 타입 설정 리셋
         Manager.Network.ReserveDateWriteing("AI", 46, 0);
@@ -168,6 +169,7 @@ public partial class ExperimentManager
         }
 
         currentSchedule.ReservedState = EReservedExperimentState.Stopping;
+        ExperimentScheduleChange?.Invoke(new List<ExperimentWrapper>(experimentSchedules));
 
         Debug.Log($"[Schedule Stop] Type_End Start: {currentSchedule.Name}");
 
@@ -181,6 +183,7 @@ public partial class ExperimentManager
         }
 
         currentSchedule.ReservedState = EReservedExperimentState.Finished;
+        ExperimentScheduleChange?.Invoke(new List<ExperimentWrapper>(experimentSchedules));
 
         Debug.Log($"[Schedule Stop] Type_End Finished: {currentSchedule.Name}");
     }
@@ -265,10 +268,12 @@ public partial class ExperimentManager
             var schedule = experimentSchedules[CurrentScheduleIndex];
 
             schedule.ReservedState = EReservedExperimentState.Stopping;
+            ExperimentScheduleChange?.Invoke(new List<ExperimentWrapper>(experimentSchedules));
 
             yield return StartCoroutine(RunEndProcedure(schedule));
 
             schedule.ReservedState = EReservedExperimentState.Finished;
+            ExperimentScheduleChange?.Invoke(new List<ExperimentWrapper>(experimentSchedules));
 
             CurrentScheduleIndex++;
         }
