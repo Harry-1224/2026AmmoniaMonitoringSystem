@@ -33,19 +33,22 @@ public class DataBox : UiObjectBase
 
     [Header("DataBox Settings")]
     public EDataBoxType dataBoxType;
-    public Transform content; // DataCard가 생성될 부모 오브젝트
+    //public Transform content; // DataCard가 생성될 부모 오브젝트
     private Dictionary<string, DataCard> dataCards = new Dictionary<string, DataCard>();
     private Dictionary<string, InstrumentInfo> instruments = new();
     private List<ExperimentWrapper> schedules = new List<ExperimentWrapper>();
 
     public Transform Container; // ScrollView의 Content오브젝트
-    [SerializeField] private GameObject scrollViewObject;
+    //[SerializeField] private GameObject scrollViewObject;
 
 
     [Header("DataBox Shrink/Expand Settings")]
     public bool isSherinkged = false; // DataBox가 최소화 상태인지 여부를 나타내는 변수
     [SerializeField] private float expandedHeight = 1690f;
     [SerializeField] private float shrinkHeight = 130f;
+
+    public GameObject ExpandContent;
+    public GameObject ShrinkContent;
 
     private RectTransform rectTransform;
 
@@ -60,8 +63,7 @@ public class DataBox : UiObjectBase
 
         rectTransform = GetComponent<RectTransform>();
 
-        if (scrollViewObject == null)
-            scrollViewObject = transform.Find("Scroll View").gameObject;
+        //if (scrollViewObject == null)  scrollViewObject = transform.Find("Scroll View").gameObject;
 
         if (Container == null)
         {
@@ -202,14 +204,17 @@ public class DataBox : UiObjectBase
             // TODO : ExperimentDataCard가 클릭 되었을 때 Experiment Monitor를 활성화 시키고 현재 클릭된 Schedule의 상세 정보를 보여주는 기능 추가 필요
 
             // 1. Experiment Monitor 활성화
-            Manager.Ui.OnMonitorChanged("Experiment");
+            Manager.Ui.OnMonitorChanged(EUiScreen.Experiment);
 
             // 2. 클릭된 Schedule의 상세 정보를 보여주는 기능 추가 (예: 새로운 UI 패널, 팝업 등)
             Manager.Ui.SetExperimentMonitor(dataCards[cardId].experimentSchedule);
         }
-        else
+        else if(dataBoxType == EDataBoxType.Monitoring || dataBoxType == EDataBoxType.Control)
         {
-            
+            //TODO : Monitoring, Control DataCard가 클릭 되었을 때 해당 데이터 중 System을 잘 보여주는 위치로 카메라 이동시키는 기능.
+            // 1. 클릭된 DataCard의 Group을 이용하여 해당 System의 위치를 파악한다.
+
+            // 2. 카메라를 해당 위치로 이동시키는 기능 추가 (예: CameraController 스크립트의 MoveToSystem 함수 호출)
         }
     }
 
@@ -338,7 +343,7 @@ public class DataBox : UiObjectBase
         isSherinkged = !isSherinkged;
 
         // ScrollView 활성/비활성
-        scrollViewObject.SetActive(!isSherinkged);
+        //scrollViewObject.SetActive(!isSherinkged);
 
         // Box 크기 변경
         Vector2 size = rectTransform.sizeDelta;
@@ -353,7 +358,10 @@ public class DataBox : UiObjectBase
     {
         isSherinkged = false;
 
-        scrollViewObject.SetActive(true);
+        ExpandContent.SetActive(!isSherinkged);
+        ShrinkContent.SetActive(isSherinkged);
+
+        //scrollViewObject.SetActive(!isSherinkged);
 
         Vector2 size = rectTransform.sizeDelta;
         size.y = expandedHeight;
@@ -365,7 +373,10 @@ public class DataBox : UiObjectBase
     {
         isSherinkged = true;
 
-        scrollViewObject.SetActive(false);
+        ExpandContent.SetActive(!isSherinkged);
+        ShrinkContent.SetActive(isSherinkged);
+
+        //scrollViewObject.SetActive(!isSherinkged);
 
         Vector2 size = rectTransform.sizeDelta;
         size.y = shrinkHeight;

@@ -366,13 +366,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DataCard
   ObjectID: 
+  isManagable: 0
   cardType: 6
   tagText: {fileID: 0}
-  valueText: {fileID: 0}
+  valueText: {fileID: 3068558482010092560}
   StateButton: {fileID: 0}
   scheduleNameText: {fileID: 309354840384606546}
   scheduleDescriptionText: {fileID: 0}
   scheduleValue: {fileID: 0}
+  cardImage: {fileID: 8659041267266851476}
 --- !u!1 &6539194343016532759
 GameObject:
   m_ObjectHideFlags: 0

@@ -82,6 +82,16 @@ public class DataCard : UiObjectBase
 
         UpdateTagText(ObjectID);
     }
+
+    protected override void EventSubscriber()
+    {
+        base.EventSubscriber();
+    }
+    protected override void EventUnsubscriber()
+    {
+        base.EventUnsubscriber();
+    }
+
     public void RegistBox(object containing)
     {
         if (containing is DataBox box)
@@ -197,6 +207,42 @@ public class DataCard : UiObjectBase
         }
     }
 
+    #region ExperimentScheduleCard
+
+    [SerializeField] private Image cardImage;
+
+    public void UpdateExperimentStateColor()
+    {
+        if (experimentSchedule == null)
+            return;
+
+        switch (experimentSchedule.ReservedState)
+        {
+            case EReservedExperimentState.None:
+                cardImage.color = Color.white;
+                break;
+
+            case EReservedExperimentState.Processing:
+                cardImage.color = Color.green;
+                break;
+
+            case EReservedExperimentState.Stopping:
+                cardImage.color = new Color(1f, 0.5f, 0f);
+                break;
+
+            case EReservedExperimentState.Failed:
+                cardImage.color = Color.red;
+                break;
+
+            case EReservedExperimentState.Finished:
+                cardImage.color = Color.gray;
+                break;
+        }
+    }
+    #endregion
+
+
+
     #region ExperimentInfomationCard
     public void ExperimentdataSetting(ExperimentInfo info)
     {
@@ -209,6 +255,8 @@ public class DataCard : UiObjectBase
     {
         experimentSchedule = wrapper;
         scheduleNameText.text = wrapper.Name;
+        valueText.text = wrapper.ReservedState.ToString();
+        UpdateExperimentStateColor();
     }
     public ExperimentInfo GetExperimentInfo()
     {

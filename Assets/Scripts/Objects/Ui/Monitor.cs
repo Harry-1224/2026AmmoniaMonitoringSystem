@@ -246,7 +246,6 @@ public class Monitor : UiObjectBase
 
     }
 
-
     public override void OnClick()
     {
         switch (MonitorType)
@@ -261,8 +260,6 @@ public class Monitor : UiObjectBase
 
         }
     }
-
-
 
     #region Data Monitoring
     private Dictionary<string, TextMeshProUGUI> monitoringTexts = new Dictionary<string, TextMeshProUGUI>();
@@ -873,7 +870,8 @@ public class Monitor : UiObjectBase
     #endregion
 
     #region Setting
-
+    // 1. Network 변수
+    // 2. InstrumentInfo 변수
 
     #endregion
 }
