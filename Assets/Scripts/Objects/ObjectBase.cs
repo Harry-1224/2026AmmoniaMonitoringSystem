@@ -14,7 +14,7 @@ public class ObjectBase : MonoBehaviour, IObject
 {
     private bool isInitialized = false;
 
-
+    [Header("Object Setting")]
     public string ObjectID;
 
     protected virtual void Awake()

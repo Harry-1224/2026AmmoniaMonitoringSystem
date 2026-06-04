@@ -256,7 +256,7 @@ public class Monitor : UiObjectBase
 
                 Debug.Log($"[Monitor] Å¬¸¯µÊ : {MonitorType}");
 
-                Manager.Ui.OnDataBoxClicked(this);
+                //Manager.Ui.OnDataBoxClicked(this);
                 break;
 
         }

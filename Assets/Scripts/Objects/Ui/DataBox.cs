@@ -31,6 +31,7 @@ public class DataBox : UiObjectBase
     //  - NOTE : DataCard 생성 시 Prefab을 이용하여 생성한다.
     //  - NOTE : DataManager에서 Data가 변경될 때마다 DataBox는 DataManager에서 Data를 받아와서 DataCard를 업데이트한다.
 
+    [Header("DataBox Settings")]
     public EDataBoxType dataBoxType;
     public Transform content; // DataCard가 생성될 부모 오브젝트
     private Dictionary<string, DataCard> dataCards = new Dictionary<string, DataCard>();
@@ -38,12 +39,13 @@ public class DataBox : UiObjectBase
     private List<ExperimentWrapper> schedules = new List<ExperimentWrapper>();
 
     public Transform Container; // ScrollView의 Content오브젝트
-
-    private bool isSherinkged = false; // DataBox가 최소화 상태인지 여부를 나타내는 변수
-
     [SerializeField] private GameObject scrollViewObject;
-    [SerializeField] private float expandedHeight = 600f;
-    [SerializeField] private float shrinkHeight = 80f;
+
+
+    [Header("DataBox Shrink/Expand Settings")]
+    public bool isSherinkged = false; // DataBox가 최소화 상태인지 여부를 나타내는 변수
+    [SerializeField] private float expandedHeight = 1690f;
+    [SerializeField] private float shrinkHeight = 130f;
 
     private RectTransform rectTransform;
 
@@ -71,6 +73,8 @@ public class DataBox : UiObjectBase
             Debug.LogError("[DataBox] Container를 찾을 수 없습니다. Inspector에 직접 할당하세요.");
             return;
         }
+
+
         switch (dataBoxType)
         {
             case EDataBoxType.Monitoring :
@@ -178,9 +182,12 @@ public class DataBox : UiObjectBase
     public override void OnClick()
     {
         base.OnClick();
-        if (dataBoxType == EDataBoxType.Experiment) return;
 
-        ToggleBox();
+        if (dataBoxType == EDataBoxType.Control) return;
+        
+        Debug.Log($"[DataBox] {dataBoxType} Box가 클릭되었습니다. 현재 상태: {(isSherinkged ? "최소화" : "최대화")}");
+
+        Manager.Ui.OnDataBoxExpanded(this);
     }
 
     /// <summary>
@@ -339,6 +346,29 @@ public class DataBox : UiObjectBase
         size.y = isSherinkged
             ? shrinkHeight
             : expandedHeight;
+
+        rectTransform.sizeDelta = size;
+    }
+    public void Expand()
+    {
+        isSherinkged = false;
+
+        scrollViewObject.SetActive(true);
+
+        Vector2 size = rectTransform.sizeDelta;
+        size.y = expandedHeight;
+
+        rectTransform.sizeDelta = size;
+    }
+
+    public void Shrink()
+    {
+        isSherinkged = true;
+
+        scrollViewObject.SetActive(false);
+
+        Vector2 size = rectTransform.sizeDelta;
+        size.y = shrinkHeight;
 
         rectTransform.sizeDelta = size;
     }

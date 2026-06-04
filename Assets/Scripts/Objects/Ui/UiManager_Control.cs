@@ -45,21 +45,41 @@ public partial class UiManager
                 break;
         }
     }
-    public void OnDataBoxClicked(Monitor clickedBox)
+    public void OnDataBoxExpanded(DataBox selectedBox)
     {
-        if (clickedBox == null)
+        if (selectedBox == null)
+        {
+            Debug.LogWarning("[UiManager] 선택된 DataBox가 null입니다.");
+            return;
+        }
+        if (!uiObjects.TryGetValue("MonitoringBox", out UiObjectBase monitoringObj))
+        {
+            Debug.LogWarning("[UiManager] MonitoringBox UI 없음");
+            return;
+        }
+        if (!uiObjects.TryGetValue("ExperimentBox", out UiObjectBase experimentObj))
+        {
+            Debug.LogWarning("[UiManager] ControlBox UI 없음");
+            return;
+        }
+
+        DataBox monitoringBox = monitoringObj as DataBox;
+        DataBox experimentBox = experimentObj as DataBox;
+
+        if (monitoringBox == null || experimentBox == null)
             return;
 
-        switch (clickedBox.MonitorType)
+        if (selectedBox == monitoringBox)
         {
-            case EMonitorType.Monitoring:
-                ResizeDataBoxes(MonitoringBox, ExperimentBox);
-                break;
-
-            case EMonitorType.Experiment:
-                ResizeDataBoxes(ExperimentBox, MonitoringBox);
-                background.gameObject.SetActive(true);
-                break;
+            monitoringBox.Expand();
+            experimentBox.Shrink();
+            Debug.Log("Monitoring Box Expanded, Control Box Shrinked");
+        }
+        else if (selectedBox == experimentBox)
+        {
+            experimentBox.Expand();
+            monitoringBox.Shrink();
+            Debug.Log("Control Box Expanded, Monitoring Box Shrinked");
         }
     }
 

@@ -1447,6 +1447,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Monitor
   ObjectID: 
+  isManagable: 0
   MonitorType: 0
   ScheduleNo: {fileID: 0}
   Name: {fileID: 0}
@@ -2574,6 +2575,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DataCard
   ObjectID: 
+  isManagable: 0
   cardType: 8
   tagText: {fileID: 176679559}
   valueText: {fileID: 176679558}
@@ -3007,6 +3009,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DataCard
   ObjectID: 
+  isManagable: 0
   cardType: 8
   tagText: {fileID: 199306935}
   valueText: {fileID: 199306934}
@@ -3810,7 +3813,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &312450853
 RectTransform:
   m_ObjectHideFlags: 0
@@ -4802,6 +4805,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DataCard
   ObjectID: 
+  isManagable: 0
   cardType: 8
   tagText: {fileID: 383970843}
   valueText: {fileID: 383970842}
@@ -8944,6 +8948,7 @@ GameObject:
   - component: {fileID: 746029233}
   - component: {fileID: 746029232}
   - component: {fileID: 746029234}
+  - component: {fileID: 746029235}
   m_Layer: 5
   m_Name: ExperimentBox
   m_TagString: Untagged
@@ -8970,9 +8975,9 @@ RectTransform:
   m_Father: {fileID: 1483186662}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 20, y: 10}
-  m_SizeDelta: {x: 600, y: -1730}
+  m_SizeDelta: {x: 600, y: 130}
   m_Pivot: {x: 0, y: 0}
 --- !u!114 &746029232
 MonoBehaviour:
@@ -9024,13 +9029,59 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dead6cced8eb43d4cba9535b34a492ee, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DataBox
-  ObjectID: 
+  ObjectID: ExperimentBox
+  isManagable: 1
   dataBoxType: 2
   content: {fileID: 0}
   Container: {fileID: 0}
   scrollViewObject: {fileID: 0}
-  expandedHeight: 600
-  shrinkHeight: 80
+  isSherinkged: 1
+  expandedHeight: 1690
+  shrinkHeight: 130
+--- !u!114 &746029235
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 746029230}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Button
+  m_Navigation:
+    m_Mode: 3
+    m_WrapAround: 0
+    m_SelectOnUp: {fileID: 0}
+    m_SelectOnDown: {fileID: 0}
+    m_SelectOnLeft: {fileID: 0}
+    m_SelectOnRight: {fileID: 0}
+  m_Transition: 1
+  m_Colors:
+    m_NormalColor: {r: 1, g: 1, b: 1, a: 1}
+    m_HighlightedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
+    m_PressedColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 1}
+    m_SelectedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
+    m_DisabledColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.5019608}
+    m_ColorMultiplier: 1
+    m_FadeDuration: 0.1
+  m_SpriteState:
+    m_HighlightedSprite: {fileID: 0}
+    m_PressedSprite: {fileID: 0}
+    m_SelectedSprite: {fileID: 0}
+    m_DisabledSprite: {fileID: 0}
+  m_AnimationTriggers:
+    m_NormalTrigger: Normal
+    m_HighlightedTrigger: Highlighted
+    m_PressedTrigger: Pressed
+    m_SelectedTrigger: Selected
+    m_DisabledTrigger: Disabled
+  m_Interactable: 1
+  m_TargetGraphic: {fileID: 746029232}
+  m_OnClick:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &748673575
 GameObject:
   m_ObjectHideFlags: 0
@@ -9228,6 +9279,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DataCard
   ObjectID: 
+  isManagable: 0
   cardType: 8
   tagText: {fileID: 752400676}
   valueText: {fileID: 752400675}
@@ -9558,6 +9610,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DataCard
   ObjectID: 
+  isManagable: 0
   cardType: 8
   tagText: {fileID: 768282801}
   valueText: {fileID: 768282800}
@@ -9772,6 +9825,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DataCard
   ObjectID: 
+  isManagable: 0
   cardType: 8
   tagText: {fileID: 785294979}
   valueText: {fileID: 785294978}
@@ -10362,6 +10416,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DataCard
   ObjectID: 
+  isManagable: 0
   cardType: 8
   tagText: {fileID: 858546324}
   valueText: {fileID: 858546323}
@@ -10811,7 +10866,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &932115377
 RectTransform:
   m_ObjectHideFlags: 0
@@ -10844,6 +10899,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DataCard
   ObjectID: 
+  isManagable: 0
   cardType: 0
   tagText: {fileID: 0}
   valueText: {fileID: 0}
@@ -11160,6 +11216,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DataCard
   ObjectID: 
+  isManagable: 0
   cardType: 8
   tagText: {fileID: 945687312}
   valueText: {fileID: 945687311}
@@ -11675,6 +11732,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 811eec81b55d71f45ab1b7265b2a575c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NetworkManager
+  IpAddress: 192.168.1.2
 --- !u!1 &1028855720
 GameObject:
   m_ObjectHideFlags: 0
@@ -15120,6 +15178,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DataCard
   ObjectID: 
+  isManagable: 0
   cardType: 8
   tagText: {fileID: 1306864770}
   valueText: {fileID: 1306864769}
@@ -15546,6 +15605,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DataCard
   ObjectID: 
+  isManagable: 0
   cardType: 8
   tagText: {fileID: 1330064512}
   valueText: {fileID: 1330064511}
@@ -15698,6 +15758,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DataCard
   ObjectID: 
+  isManagable: 0
   cardType: 8
   tagText: {fileID: 1369881753}
   valueText: {fileID: 1369881752}
@@ -16737,13 +16798,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dead6cced8eb43d4cba9535b34a492ee, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DataBox
-  ObjectID: 
+  ObjectID: ControlBox
+  isManagable: 1
   dataBoxType: 1
   content: {fileID: 0}
   Container: {fileID: 0}
   scrollViewObject: {fileID: 0}
-  expandedHeight: 600
-  shrinkHeight: 80
+  isSherinkged: 0
+  expandedHeight: 1690
+  shrinkHeight: 130
 --- !u!1 &1476787746
 GameObject:
   m_ObjectHideFlags: 0
@@ -16761,7 +16824,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1476787747
 RectTransform:
   m_ObjectHideFlags: 0
@@ -17640,6 +17703,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DataCard
   ObjectID: 
+  isManagable: 0
   cardType: 0
   tagText: {fileID: 0}
   valueText: {fileID: 0}
@@ -19284,7 +19348,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1803714456
 RectTransform:
   m_ObjectHideFlags: 0
@@ -19540,13 +19604,14 @@ GameObject:
   - component: {fileID: 1816341562}
   - component: {fileID: 1816341561}
   - component: {fileID: 1816341563}
+  - component: {fileID: 1816341564}
   m_Layer: 5
-  m_Name: MonitorinBox
+  m_Name: MonitoringBox
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1816341560
 RectTransform:
   m_ObjectHideFlags: 0
@@ -19564,11 +19629,11 @@ RectTransform:
   - {fileID: 896724580}
   m_Father: {fileID: 1483186662}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 20, y: 160}
-  m_SizeDelta: {x: 600, y: -170}
-  m_Pivot: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 20, y: -10}
+  m_SizeDelta: {x: 600, y: 1690}
+  m_Pivot: {x: 0, y: 1}
 --- !u!114 &1816341561
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -19619,13 +19684,59 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dead6cced8eb43d4cba9535b34a492ee, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DataBox
-  ObjectID: 
+  ObjectID: MonitoringBox
+  isManagable: 1
   dataBoxType: 0
   content: {fileID: 0}
   Container: {fileID: 0}
   scrollViewObject: {fileID: 0}
-  expandedHeight: 600
-  shrinkHeight: 80
+  isSherinkged: 0
+  expandedHeight: 1690
+  shrinkHeight: 130
+--- !u!114 &1816341564
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1816341559}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Button
+  m_Navigation:
+    m_Mode: 3
+    m_WrapAround: 0
+    m_SelectOnUp: {fileID: 0}
+    m_SelectOnDown: {fileID: 0}
+    m_SelectOnLeft: {fileID: 0}
+    m_SelectOnRight: {fileID: 0}
+  m_Transition: 1
+  m_Colors:
+    m_NormalColor: {r: 1, g: 1, b: 1, a: 1}
+    m_HighlightedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
+    m_PressedColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 1}
+    m_SelectedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
+    m_DisabledColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.5019608}
+    m_ColorMultiplier: 1
+    m_FadeDuration: 0.1
+  m_SpriteState:
+    m_HighlightedSprite: {fileID: 0}
+    m_PressedSprite: {fileID: 0}
+    m_SelectedSprite: {fileID: 0}
+    m_DisabledSprite: {fileID: 0}
+  m_AnimationTriggers:
+    m_NormalTrigger: Normal
+    m_HighlightedTrigger: Highlighted
+    m_PressedTrigger: Pressed
+    m_SelectedTrigger: Selected
+    m_DisabledTrigger: Disabled
+  m_Interactable: 1
+  m_TargetGraphic: {fileID: 1816341561}
+  m_OnClick:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &1817197608
 GameObject:
   m_ObjectHideFlags: 0
@@ -20352,6 +20463,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DataCard
   ObjectID: 
+  isManagable: 0
   cardType: 8
   tagText: {fileID: 1852156290}
   valueText: {fileID: 1852156289}
@@ -21201,6 +21313,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Monitor
   ObjectID: 
+  isManagable: 0
   MonitorType: 1
   ScheduleNo: {fileID: 1134467437}
   Name: {fileID: 1489547478}
@@ -21462,10 +21575,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9bde35ce4257a094eba383c603b7de45, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UiManager
-  MonitoringBox: {fileID: 0}
-  ExperimentBox: {fileID: 0}
-  expandedWidth: 1400
-  collapsedWidth: 500
+  background: {fileID: 0}
+  monitoringDataBox: {fileID: 0}
+  controlDataBox: {fileID: 0}
 --- !u!1 &1956668082
 GameObject:
   m_ObjectHideFlags: 0
@@ -22466,7 +22578,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &2033194781
 RectTransform:
   m_ObjectHideFlags: 0
@@ -22502,10 +22614,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DataBox
   ObjectID: 
+  isManagable: 0
   dataBoxType: 2
   content: {fileID: 0}
   Container: {fileID: 0}
   scrollViewObject: {fileID: 0}
+  isSherinkged: 0
   expandedHeight: 600
   shrinkHeight: 80
 --- !u!114 &2033194783
@@ -23194,6 +23308,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DataCard
   ObjectID: 
+  isManagable: 0
   cardType: 8
   tagText: {fileID: 2100551540}
   valueText: {fileID: 2100551539}
@@ -23555,6 +23670,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Monitor
   ObjectID: 
+  isManagable: 0
   MonitorType: 2
   ScheduleNo: {fileID: 0}
   Name: {fileID: 0}
@@ -24114,6 +24230,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DataCard
   ObjectID: 
+  isManagable: 0
   cardType: 8
   tagText: {fileID: 4347019778309025205}
   valueText: {fileID: 4347019778309025204}

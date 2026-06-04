@@ -366,7 +366,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DataCard
   ObjectID: 
-  cardType: 0
+  cardType: 1
   tagText: {fileID: 309354840384606546}
   valueText: {fileID: 3068558482010092560}
   StateButton: {fileID: 0}

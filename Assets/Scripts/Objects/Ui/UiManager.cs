@@ -29,8 +29,9 @@ public partial class UiManager : ManagerBase
     
     private Transform canvasTransform;
     public GameObject background;
-    Dictionary<string, GameObject> UiGameObject = new Dictionary<string, GameObject>();
-    Dictionary<string, GameObject> HUDScreen = new Dictionary<string, GameObject>();
+    private Dictionary<string, GameObject> UiGameObject = new Dictionary<string, GameObject>();
+    private Dictionary<string, GameObject> HUDScreen = new Dictionary<string, GameObject>();
+    private Dictionary<string, UiObjectBase> uiObjects = new Dictionary<string, UiObjectBase>();
 
 
     protected override void Intialize()
@@ -85,7 +86,6 @@ public partial class UiManager : ManagerBase
 
     private ConcurrentQueue<Dictionary<string, Datas>> dataQueue = new ConcurrentQueue<Dictionary<string, Datas>>();
 
-    private Dictionary<string, UiObjectBase> uiObjects = new Dictionary<string, UiObjectBase>();
 
     public void RegistUiObject(string key, UiObjectBase obj) => uiObjects[key] = obj;
 
@@ -170,31 +170,8 @@ public partial class UiManager : ManagerBase
 
     #region DataBox Methods
 
-    public RectTransform MonitoringBox;
-    public RectTransform ExperimentBox;
-
-    [SerializeField] private float expandedWidth = 1400f;
-    [SerializeField] private float collapsedWidth = 500f;
-
-
-    private void ResizeDataBoxes(RectTransform expandBox, RectTransform collapseBox)
-    {
-        if (expandBox != null)
-        {
-            expandBox.SetSizeWithCurrentAnchors(
-                RectTransform.Axis.Horizontal,
-                expandedWidth
-            );
-        }
-
-        if (collapseBox != null)
-        {
-            collapseBox.SetSizeWithCurrentAnchors(
-                RectTransform.Axis.Horizontal,
-                collapsedWidth
-            );
-        }
-    }
+    [SerializeField] private DataBox monitoringDataBox;
+    [SerializeField] private DataBox controlDataBox;
 
     #endregion
 }

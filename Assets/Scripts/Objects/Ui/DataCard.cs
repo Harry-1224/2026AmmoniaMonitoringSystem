@@ -7,6 +7,7 @@ using UnityEngine.UI;
 
 public enum EDataCardType
 {
+
     InputDataA,
     InputDataB,
     InputDataC,
@@ -15,6 +16,7 @@ public enum EDataCardType
     OutputDataC,
     ExperimentSchedule,
     ExperimentData,
+    //Monitor에 들어가는 카드
     MonitoringCardA,
     MonitoringCardB,
     MonitoringCardC,

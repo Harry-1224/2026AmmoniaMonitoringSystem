@@ -9,6 +9,15 @@ public class UiObjectBase : ObjectBase, IUiObject,
     IPointerDownHandler,
     IPointerUpHandler
 {
+    [Header("UI Setting")]
+    public bool isManagable = false; // UiManager에서 관리할지 여부
+
+    protected override void Intialize()
+    {
+        base.Intialize();
+
+        if(isManagable) Manager.Ui.RegistUiObject(ObjectID, this);
+    }
     
     #region Ui System
     public virtual void OnClick()
