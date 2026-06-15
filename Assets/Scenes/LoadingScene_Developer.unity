@@ -2583,6 +2583,7 @@ MonoBehaviour:
   scheduleNameText: {fileID: 0}
   scheduleDescriptionText: {fileID: 0}
   scheduleValue: {fileID: 0}
+  cardImage: {fileID: 0}
 --- !u!1 &181951739
 GameObject:
   m_ObjectHideFlags: 0
@@ -3017,6 +3018,7 @@ MonoBehaviour:
   scheduleNameText: {fileID: 0}
   scheduleDescriptionText: {fileID: 0}
   scheduleValue: {fileID: 0}
+  cardImage: {fileID: 0}
 --- !u!1 &214432516
 GameObject:
   m_ObjectHideFlags: 0
@@ -4851,6 +4853,7 @@ MonoBehaviour:
   scheduleNameText: {fileID: 0}
   scheduleDescriptionText: {fileID: 0}
   scheduleValue: {fileID: 0}
+  cardImage: {fileID: 0}
 --- !u!1 &397153026
 GameObject:
   m_ObjectHideFlags: 0
@@ -9325,6 +9328,7 @@ MonoBehaviour:
   scheduleNameText: {fileID: 0}
   scheduleDescriptionText: {fileID: 0}
   scheduleValue: {fileID: 0}
+  cardImage: {fileID: 0}
 --- !u!1 &758190458
 GameObject:
   m_ObjectHideFlags: 0
@@ -9656,6 +9660,7 @@ MonoBehaviour:
   scheduleNameText: {fileID: 0}
   scheduleDescriptionText: {fileID: 0}
   scheduleValue: {fileID: 0}
+  cardImage: {fileID: 0}
 --- !u!1 &768935171
 GameObject:
   m_ObjectHideFlags: 0
@@ -9871,6 +9876,7 @@ MonoBehaviour:
   scheduleNameText: {fileID: 0}
   scheduleDescriptionText: {fileID: 0}
   scheduleValue: {fileID: 0}
+  cardImage: {fileID: 0}
 --- !u!1 &787477776
 GameObject:
   m_ObjectHideFlags: 0
@@ -10462,6 +10468,7 @@ MonoBehaviour:
   scheduleNameText: {fileID: 0}
   scheduleDescriptionText: {fileID: 0}
   scheduleValue: {fileID: 0}
+  cardImage: {fileID: 0}
 --- !u!1 &881261390
 GameObject:
   m_ObjectHideFlags: 0
@@ -10945,6 +10952,7 @@ MonoBehaviour:
   scheduleNameText: {fileID: 0}
   scheduleDescriptionText: {fileID: 0}
   scheduleValue: {fileID: 0}
+  cardImage: {fileID: 0}
 --- !u!114 &932115379
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -11262,6 +11270,7 @@ MonoBehaviour:
   scheduleNameText: {fileID: 0}
   scheduleDescriptionText: {fileID: 0}
   scheduleValue: {fileID: 0}
+  cardImage: {fileID: 0}
 --- !u!1 &945715959
 GameObject:
   m_ObjectHideFlags: 0
@@ -15259,6 +15268,7 @@ MonoBehaviour:
   scheduleNameText: {fileID: 0}
   scheduleDescriptionText: {fileID: 0}
   scheduleValue: {fileID: 0}
+  cardImage: {fileID: 0}
 --- !u!1 &1320053284
 GameObject:
   m_ObjectHideFlags: 0
@@ -15686,6 +15696,7 @@ MonoBehaviour:
   scheduleNameText: {fileID: 0}
   scheduleDescriptionText: {fileID: 0}
   scheduleValue: {fileID: 0}
+  cardImage: {fileID: 0}
 --- !u!1001 &1369881750
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -15839,6 +15850,7 @@ MonoBehaviour:
   scheduleNameText: {fileID: 0}
   scheduleDescriptionText: {fileID: 0}
   scheduleValue: {fileID: 0}
+  cardImage: {fileID: 0}
 --- !u!1 &1376469897
 GameObject:
   m_ObjectHideFlags: 0
@@ -17784,6 +17796,7 @@ MonoBehaviour:
   scheduleNameText: {fileID: 0}
   scheduleDescriptionText: {fileID: 0}
   scheduleValue: {fileID: 0}
+  cardImage: {fileID: 0}
 --- !u!114 &1525515211
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -20578,6 +20591,7 @@ MonoBehaviour:
   scheduleNameText: {fileID: 0}
   scheduleDescriptionText: {fileID: 0}
   scheduleValue: {fileID: 0}
+  cardImage: {fileID: 0}
 --- !u!1 &1862986676
 GameObject:
   m_ObjectHideFlags: 0
@@ -21331,7 +21345,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1910092096
 RectTransform:
   m_ObjectHideFlags: 0
@@ -23505,6 +23519,7 @@ MonoBehaviour:
   scheduleNameText: {fileID: 0}
   scheduleDescriptionText: {fileID: 0}
   scheduleValue: {fileID: 0}
+  cardImage: {fileID: 0}
 --- !u!1 &2114318476
 GameObject:
   m_ObjectHideFlags: 0
@@ -24427,6 +24442,7 @@ MonoBehaviour:
   scheduleNameText: {fileID: 0}
   scheduleDescriptionText: {fileID: 0}
   scheduleValue: {fileID: 0}
+  cardImage: {fileID: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

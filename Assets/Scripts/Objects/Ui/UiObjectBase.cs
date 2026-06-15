@@ -12,9 +12,9 @@ public class UiObjectBase : ObjectBase, IUiObject,
     [Header("UI Setting")]
     public bool isManagable = false; // UiManager에서 관리할지 여부
 
-    protected override void Intialize()
+    protected override void Initialize()
     {
-        base.Intialize();
+        base.Initialize();
 
         if(isManagable) Manager.Ui.RegistUiObject(ObjectID, this);
     }

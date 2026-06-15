@@ -270,6 +270,7 @@ public class DataManager : ManagerBase
 
     #region NetworkingSystem
     private bool isReceived = false;
+    private bool isFirstReceived = true;
 
     private Queue<Dictionary<string, Datas>> recivedDataQueue = new Queue<Dictionary<string, Datas>>();
     private readonly object dataChangedLock = new();
@@ -297,7 +298,9 @@ public class DataManager : ManagerBase
                     DataDictionary[_info.Tag] = data;
                 }
 
-                if (data.Value != value)
+                bool isChanged = data.Value != value;
+
+                if (isFirstReceived || isChanged)
                 {
                     data.Value = value;
 
@@ -330,6 +333,8 @@ public class DataManager : ManagerBase
 
                 dataBuffer.Clear();
             }
+
+            isFirstReceived = false;
         }
         catch (Exception ex)
         {

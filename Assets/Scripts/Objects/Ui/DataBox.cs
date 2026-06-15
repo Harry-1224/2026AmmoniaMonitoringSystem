@@ -57,9 +57,9 @@ public class DataBox : UiObjectBase
         base.Update();
     }
 
-    protected override void Intialize()
+    protected override void Initialize()
     {
-        base.Intialize();
+        base.Initialize();
 
         rectTransform = GetComponent<RectTransform>();
 
@@ -75,7 +75,6 @@ public class DataBox : UiObjectBase
             Debug.LogError("[DataBox] Container를 찾을 수 없습니다. Inspector에 직접 할당하세요.");
             return;
         }
-
 
         switch (dataBoxType)
         {
@@ -172,6 +171,7 @@ public class DataBox : UiObjectBase
                 {
                     Datas data = datas[key];
                     if (dataBoxType != EDataBoxType.Experiment) dataCards[item.Value.Group].OnFunctionCalled(data);
+                    Debug.Log($"[DataBox] Finish to Update DataCards - {item.Value.Group} / {data.Name}");
                 }
             }
         }
@@ -243,7 +243,7 @@ public class DataBox : UiObjectBase
             if (dataCards.TryGetValue(info.Group, out DataCard existingCard))
             {
                 //만약 같은 Group의 DataCard가 이미 존재한다면, 해당 DataCard를 업데이트한다.
-                existingCard.Intialize(info);
+                existingCard.Initialize(info);
                 continue;
             }
 
@@ -270,7 +270,7 @@ public class DataBox : UiObjectBase
                 continue;
             }
 
-            card.Intialize(info);
+            card.Initialize(info);
             card.RegistBox(this);
             dataCards[info.Group] = card;
         }

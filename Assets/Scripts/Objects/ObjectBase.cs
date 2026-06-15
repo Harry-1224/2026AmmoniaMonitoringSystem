@@ -32,7 +32,7 @@ public class ObjectBase : MonoBehaviour, IObject
     }
     protected virtual void OnEnable()
     {
-        if(!isInitialized) Intialize();
+        if(!isInitialized) Initialize();
         EventSubscriber();
     }
     protected virtual void OnDisable()
@@ -43,13 +43,13 @@ public class ObjectBase : MonoBehaviour, IObject
     /// <summary>
     /// OnEnable 시점에서 작동하며, Object의 종류에 따라 필요한 컴포넌트나 데이터를 초기화한다.
     /// </summary>
-    protected virtual void Intialize()
+    protected virtual void Initialize()
     {
         isInitialized = true;
     }
-    protected virtual void ReIntialize()
+    protected virtual void ReInitialize()
     {
-        Intialize();
+        Initialize();
     }
 
     public virtual void OnFunctionCalled(object obj = null)

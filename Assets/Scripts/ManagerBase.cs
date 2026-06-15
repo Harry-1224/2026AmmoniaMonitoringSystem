@@ -34,6 +34,9 @@ public class ManagerBase : MonoBehaviour
         EventUnsubscriber();
     }
 
+    /// <summary>
+    /// Manager를 초기화하는 코드 Object들과 다르게 Awake에서 초기화하는 이유는 Manager는 게임 전체에서 하나만 존재하기 때문에, 다른 Object들이 Manager의 초기화가 완료된 후에 접근할 수 있도록 하기 위함이다.
+    /// </summary>
     protected virtual void Intialize()
     {
 

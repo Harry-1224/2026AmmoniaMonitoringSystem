@@ -119,9 +119,7 @@ public partial class ExperimentManager
         );
 
         // 현재 실험 타입에 해당하는 Step만 전송
-        foreach (var step in schedule.Experiments
-            .Where(x => x.Group == schedule.Group)
-            .OrderBy(x => x.Process))
+        foreach (var step in schedule.Experiments.Where(x => x.Group == schedule.Group).OrderBy(x => x.Process))
         {
             ApplyStepValue(step);
 
@@ -349,7 +347,7 @@ public partial class ExperimentManager
                     (ushort)step.Value
                 );
                 break;
-            case "Sol_Set":
+            case "SolSet":
                 ApplySolSet(step);
                 break;
             case "End":
@@ -412,7 +410,18 @@ public partial class ExperimentManager
         }
 
         Debug.LogError($"[Schedule Timeout] {schedule.Name} / {targetGroup}");
-        SetState(EExperimentStateMachine.Error);
+
+        if (isEnd)
+        {
+            SetState(EExperimentStateMachine.Error);
+        }
+        else
+        {
+            schedule.ReservedState = EReservedExperimentState.Stopping;
+            ExperimentScheduleChange?.Invoke(new List<ExperimentWrapper>(experimentSchedules));
+
+            SetState(EExperimentStateMachine.Stopping);
+        }
     }
     private bool IsProcessComplete(int value, int processCount)
     {
@@ -438,7 +447,7 @@ public partial class ExperimentManager
 
         if (allData == null)
         {
-            Debug.LogError("[Sol_Set Error] Instrument 전체 데이터 없음");
+            Debug.LogError("[SolSet Error] Instrument 전체 데이터 없음");
             SetState(EExperimentStateMachine.Error);
             return;
         }
@@ -458,7 +467,7 @@ public partial class ExperimentManager
 
         if (solList.Count == 0)
         {
-            Debug.LogError($"[Sol_Set Error] Sol 태그 없음: {step.Tag}_1, {step.Tag}_2 ...");
+            Debug.LogError($"[SolSet Error] Sol 태그 없음: {step.Tag}_1, {step.Tag}_2 ...");
             SetState(EExperimentStateMachine.Error);
             return;
         }

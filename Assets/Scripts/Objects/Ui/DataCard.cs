@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -16,6 +17,7 @@ public enum EDataCardType
     OutputDataC,
     ExperimentSchedule,
     ExperimentData,
+    ExperimentData_DoubleToggle,
     //Monitor에 들어가는 카드
     MonitoringCardA,
     MonitoringCardB,
@@ -55,6 +57,7 @@ public class DataCard : UiObjectBase
     public TextMeshProUGUI scheduleNameText;
     public TextMeshProUGUI scheduleDescriptionText;
     public TMP_InputField scheduleValue;
+    private List<Toggle> Toggles = new List<Toggle>();
 
     // NOTE : 초기화 시 Card에 필요한 Info를 저장하고 데이터 변화 시 currentData를 사용하여 Key값이 Info와 일치하는 데이터를 저장.
     public Dictionary<string, InstrumentInfo> info { get; private set; } = new Dictionary<string, InstrumentInfo>();
@@ -69,18 +72,38 @@ public class DataCard : UiObjectBase
     private ExperimentInfo experimentInfo;
 
 
-    protected override void Intialize()
+    protected override void Initialize()
     {
-        base.Intialize();
+        base.Initialize();
     }
 
-    public void Intialize(InstrumentInfo InstrumentInfo)
+    public void Initialize(InstrumentInfo InstrumentInfo)
     {
         ObjectID = InstrumentInfo.Group;
 
         info[InstrumentInfo.Tag] = InstrumentInfo;
 
         UpdateTagText(ObjectID);
+
+    }
+    public void Initialize(ExperimentInfo experimentInfo)
+    {
+        //만약 Toggle을 찾아야한다면, "Toggle_"규칙을 가진 Toggle을 찾아서 Toggles라는 List에 저장
+        if (cardType == EDataCardType.ExperimentData_DoubleToggle)
+        {
+            Toggles = GetComponentsInChildren<Toggle>(true)
+                .Where(t => t.name.StartsWith("Toggle_"))
+                .OrderBy(t =>
+                {
+                    string numberText = t.name.Replace("Toggle_", "");
+
+                    if (int.TryParse(numberText, out int number))
+                        return number;
+
+                    return int.MaxValue;
+                })
+                .ToList();
+        }
     }
 
     protected override void EventSubscriber()
@@ -187,7 +210,10 @@ public class DataCard : UiObjectBase
     private void UpdateValueText(Datas data)
     {
         if (valueText != null)
+        {
             valueText.text = data.Value.ToString();
+        }
+        Debug.Log($"[DataCard] Value Update : {ObjectID}");
     }
 
     private void UpdateCustomText(Datas data)
@@ -247,8 +273,13 @@ public class DataCard : UiObjectBase
     public void ExperimentdataSetting(ExperimentInfo info)
     {
         experimentInfo = info;
+
         scheduleNameText.text = info.Name;
         scheduleDescriptionText.text = info.Description;
+
+        // Toggle 초기화
+        Initialize(info);
+
         SetInfoValues(info);
     }
     public void ExperimentScheduleSetting(ExperimentWrapper wrapper)
@@ -262,9 +293,25 @@ public class DataCard : UiObjectBase
     {
         int value = 0;
 
-        if(scheduleValue != null)
+        if (cardType == EDataCardType.ExperimentData_DoubleToggle)
         {
-            int.TryParse(scheduleValue.text, out value);
+            if (Toggles != null)
+            {
+                for (int i = 0; i < Toggles.Count; i++)
+                {
+                    if (Toggles[i] != null && Toggles[i].isOn)
+                    {
+                        value |= (1 << i);
+                    }
+                }
+            }
+        }
+        else
+        {
+            if (scheduleValue != null)
+            {
+                int.TryParse(scheduleValue.text, out value);
+            }
         }
 
         return new ExperimentInfo
@@ -297,14 +344,30 @@ public class DataCard : UiObjectBase
             cardImage.color = Color.gray;
         }
     }
-
     private void SetInfoValues(ExperimentInfo info)
     {
-        if (info.Action == "End") return;
+        if (info.Action == "End")
+            return;
 
-        scheduleValue.text = info.Value.ToString();
+        if (cardType == EDataCardType.ExperimentData_DoubleToggle)
+        {
+            for (int i = 0; i < Toggles.Count; i++)
+            {
+                if (Toggles[i] == null)
+                    continue;
+
+                Toggles[i].isOn = (info.Value & (1 << i)) != 0;
+            }
+        }
+        else
+        {
+            if (scheduleValue != null)
+            {
+                scheduleValue.text = info.Value.ToString();
+            }
+        }
     }
 
-    
+
     #endregion
 }

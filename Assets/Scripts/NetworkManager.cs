@@ -375,11 +375,10 @@ public class NetworkManager : ManagerBase
     {
         try
         {
-    // 1. PLC에 데이터 작성
+            // 1. PLC에 데이터 작성
             ushort[] setData = ProcessWriteQueue();
-    // 2. PLC에서 데이터 습득, 작성한 데이터가 잘 들어갔는지 파악
+            // 2. PLC에서 데이터 습득, 작성한 데이터가 잘 들어갔는지 파악
             ProcessReadData(setData);
-
         }
         catch (Exception ex) 
         {
@@ -392,11 +391,11 @@ public class NetworkManager : ManagerBase
     // NOTE : PLC에서 데이터 읽어오기
     private ushort[] ProcessReadData(ushort[] CompaereData = null)
     {
-    // 1. 데이터 수신 시도이벤트 발생
+        // 1. 데이터 수신 시도이벤트 발생
         OnDataCall?.Invoke();
         try
         {
-    // 2. 데이터 요청
+            // 2. 데이터 요청
             GetDatas = modbusService.CallData((byte)EDataAddressRange.SlaveID, (ushort)EDataAddressRange.AddressStart, (ushort)EDataAddressRange.AddressEnd);
 
             // * 매개변수가 null이 아닐경우 데이터 비교
@@ -408,7 +407,7 @@ public class NetworkManager : ManagerBase
 
         if (GetDatas == null) throw new Exception("[NetworkManager] Non-Data");
 
-    //3. 데이터 수신 이벤트 발생
+        //3. 데이터 수신 이벤트 발생
         OnDataReceived?.Invoke(GetDatas);
         return GetDatas;
     }

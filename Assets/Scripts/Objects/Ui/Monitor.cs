@@ -77,9 +77,9 @@ public class Monitor : UiObjectBase
     }
 
     // ObjectBase에서 상속받았으며, Enable 시점에서 작동.
-    protected override void Intialize()
+    protected override void Initialize()
     {
-        base.Intialize();
+        base.Initialize();
         // MonitorType에 따라 필요한 컴포넌트나 데이터를 초기화
         switch (MonitorType)
         {
@@ -658,7 +658,7 @@ public class Monitor : UiObjectBase
             visualIndex++;
 
             card.ObjectID = key;
-            card.cardType = EDataCardType.ExperimentData;
+            card.cardType = GetExperimentInfoCardType(info);
             card.ExperimentdataSetting(info);
         }
 
@@ -684,6 +684,17 @@ public class Monitor : UiObjectBase
 
             default:
                 return $"PreFab/UI/ExperimentInfo_{info.Action}";
+        }
+    }
+    private EDataCardType GetExperimentInfoCardType(ExperimentInfo info)
+    {
+        switch (info.Action)
+        {
+            case "SolSet":
+                return EDataCardType.ExperimentData_DoubleToggle;
+
+            default:
+                return EDataCardType.ExperimentData;
         }
     }
     private DataCard CreateExperimentInfoCard(ExperimentInfo info, string key)
@@ -717,8 +728,9 @@ public class Monitor : UiObjectBase
         }
 
         card.ObjectID = key;
-        card.cardType = EDataCardType.ExperimentData;
+        card.cardType = GetExperimentInfoCardType(info);
         card.RegistBox(this);
+        card.Initialize(info);
 
         experimentDataCards[key] = card;
 
@@ -735,104 +747,6 @@ public class Monitor : UiObjectBase
             LayoutRebuilder.ForceRebuildLayoutImmediate(rect);
     }
 
-    /*
-    private void RefreshExperimentInfoCards(List<ExperimentInfo> infos)
-    {
-        if (infos == null || infos.Count == 0)
-        {
-            Debug.LogWarning("[DataBox] 생성할 Experiment Information이 없습니다.");
-
-            EnsureExperimentInfoCards(0);
-            return;
-        }
-
-        EnsureExperimentInfoCards(infos.Count);
-        ApplyExperimentInfoCards(infos);
-    }
-    private void EnsureExperimentInfoCards(int requiredCount)
-    {
-        if (Container == null)
-        {
-            Debug.LogError("[DataBox] Container가 null입니다.");
-            return;
-        }
-
-        string path = "PreFab/UI/ExperimentInfo";
-        GameObject prefab = Resources.Load<GameObject>(path);
-
-        if (prefab == null)
-        {
-            Debug.LogWarning($"[DataBox] Experiment Prefab Load 실패: {path}");
-            return;
-        }
-
-        int currentCount = experimentDataCards.Count;
-
-        // 부족한 카드 생성
-        for (int i = currentCount; i < requiredCount; i++)
-        {
-            string key = $"Experiment_{i}";
-
-            GameObject obj = Instantiate(prefab, Container, false);
-            obj.name = key;
-
-            DataCard card = obj.GetComponent<DataCard>();
-
-            if (card == null)
-            {
-                Debug.LogWarning("[DataBox] ExperimentDataCard에 DataCard 스크립트가 없습니다.");
-                Destroy(obj);
-                continue;
-            }
-
-            card.ObjectID = key;
-            card.cardType = EDataCardType.ExperimentData;
-            card.RegistBox(this);
-
-            experimentDataCards[key] = card;
-        }
-
-        // 필요한 개수보다 많은 카드는 비활성화
-        for (int i = 0; i < experimentDataCards.Count; i++)
-        {
-            string key = $"Experiment_{i}";
-
-            if (!experimentDataCards.TryGetValue(key, out DataCard card))
-                continue;
-
-            card.gameObject.SetActive(i < requiredCount);
-        }
-    }
-    private void ApplyExperimentInfoCards(List<ExperimentInfo> infos)
-    {
-        if (infos == null)
-            return;
-
-        for (int i = 0; i < infos.Count; i++)
-        {
-            string key = $"Experiment_{i}";
-
-            if (!experimentDataCards.TryGetValue(key, out DataCard card))
-            {
-                Debug.LogWarning($"[DataBox] DataCard 없음: {key}");
-                continue;
-            }
-
-            ExperimentInfo info = infos[i];
-
-            if (info == null)
-            {
-                card.gameObject.SetActive(false);
-                continue;
-            }
-
-            card.gameObject.SetActive(true);
-            card.ObjectID = key;
-            card.cardType = EDataCardType.ExperimentData;
-
-            card.ExperimentdataSetting(info);
-        }
-    }*/
     private void EnterNewScheduleMode(bool resetType)
     {
         currentScheduleIndex = -1;
