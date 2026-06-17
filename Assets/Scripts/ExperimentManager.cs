@@ -15,7 +15,7 @@ public class ExperimentWrapper
     public string Group { get; set; }
     public int Timer { get; set; }
     public List<ExperimentInfo> Experiments { get; set; }
-    public EReservedExperimentState ReservedState { get; set; } = EReservedExperimentState.None;
+    public EReservedExperimentState ReservedState { get; set; } = EReservedExperimentState.Reserved;
 }
 
 public class ExperimentInfo
@@ -42,7 +42,7 @@ public enum EExperimentStateMachine
 
 public enum  EReservedExperimentState
 {
-    None,
+    Reserved,
     Processing,// 현재 진행중
     Stopping,// 종료 절차 진행중
     Failed,// 실험 실패
@@ -78,6 +78,64 @@ public partial class ExperimentManager : ManagerBase
             Debug.Log("[Experiment] 저장된 Schedule 없음");
         }
     }
+    protected override void Update()
+    {
+        base.Update();
+
+        // 현재 진행 중인 스케줄이 없으면 종료
+        if (experimentSchedules == null || experimentSchedules.Count == 0)
+            return;
+
+        // Processing 상태인 Schedule 찾기
+        ExperimentWrapper processingSchedule = experimentSchedules.FirstOrDefault(x => x.ReservedState == EReservedExperimentState.Processing);
+
+        if (processingSchedule != null)
+        {
+            // Ex_Start 확인
+            if (!UpdatedDataForExperiment.TryGetValue("Ex_Start", out Datas exStart))
+                return;
+
+            // Ex_Reset 확인
+            if (!UpdatedDataForExperiment.TryGetValue("Ex_Reset", out Datas exReset))
+                return;
+
+            // Ex_Start == 0 && Ex_Reset == 1
+            if (exStart.Value == 0 && exReset.Value == 1)
+            {
+                processingSchedule.ReservedState = EReservedExperimentState.Stopping;
+
+                ExperimentScheduleChange?.Invoke(
+                    new List<ExperimentWrapper>(experimentSchedules)
+                );
+            }
+            return;
+        }
+
+        // Stopping 상태인 Schedule 찾기
+        ExperimentWrapper stoppingSchedule = experimentSchedules.FirstOrDefault(x => x.ReservedState == EReservedExperimentState.Stopping);
+
+        if (stoppingSchedule != null)
+        {
+            // Ex_Start 확인
+            if (!UpdatedDataForExperiment.TryGetValue("Ex_Start", out Datas exStart))
+                return;
+
+            // Ex_Reset 확인
+            if (!UpdatedDataForExperiment.TryGetValue("Ex_Reset", out Datas exReset))
+                return;
+
+            // Ex_Start == 0 && Ex_Reset == 1
+            if (exStart.Value == 0 && exReset.Value == 0)
+            {
+                stoppingSchedule.ReservedState = EReservedExperimentState.Finished;
+
+                ExperimentScheduleChange?.Invoke(
+                    new List<ExperimentWrapper>(experimentSchedules)
+                );
+            }
+            return;
+        }
+    }
 
     protected override void EventSubscriber()
     {
@@ -96,8 +154,11 @@ public partial class ExperimentManager : ManagerBase
         if (measurementData == null)
             return;
 
-        UpdatedDataForExperiment = measurementData
-            .Where(x => x.Key.StartsWith("Experiment_Process_"))
+        UpdatedDataForExperiment = measurementData.Where(x =>
+            x.Key.StartsWith("Experiment_Process_") ||
+            x.Key == "Ex_Start" ||
+            x.Key == "Ex_Stop" ||
+            x.Key == "Ex_Reset")
             .ToDictionary(x => x.Key, x => x.Value);
 
         Debug.Log($"[Experiment] Process 데이터 초기화 : {UpdatedDataForExperiment.Count}");

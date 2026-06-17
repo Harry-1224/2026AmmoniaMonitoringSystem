@@ -51,12 +51,18 @@ public class DataCard : UiObjectBase
 
     public TextMeshProUGUI tagText;
     public TextMeshProUGUI valueText;
+
+    public TMP_InputField DataSettingField;
+
     public Button StateButton;
 
     [Header("Experiment Schedule")]
     public TextMeshProUGUI scheduleNameText;
     public TextMeshProUGUI scheduleDescriptionText;
     public TMP_InputField scheduleValue;
+
+
+    private TextMeshProUGUI experimentScheduleNo;
     private List<Toggle> Toggles = new List<Toggle>();
 
     // NOTE : 초기화 시 Card에 필요한 Info를 저장하고 데이터 변화 시 currentData를 사용하여 Key값이 Info와 일치하는 데이터를 저장.
@@ -71,10 +77,20 @@ public class DataCard : UiObjectBase
     private Monitor containingMonitor;
     private ExperimentInfo experimentInfo;
 
-
     protected override void Initialize()
     {
         base.Initialize();
+
+        Transform scheduleNo = transform.Find("ScheduleNo");
+
+        if (scheduleNo != null)
+        {
+            experimentScheduleNo = scheduleNo.GetComponent<TextMeshProUGUI>();
+        }
+        else
+        {
+            Debug.LogWarning($"[{name}] ScheduleNo 오브젝트를 찾을 수 없습니다.");
+        }
     }
 
     public void Initialize(InstrumentInfo InstrumentInfo)
@@ -149,13 +165,21 @@ public class DataCard : UiObjectBase
 
     }
 
+    /// <summary>
+    /// DataCard에 있는 Button이 클릭이 되면 작동되는 함수
+    /// </summary>
+    /// <param name="buttonType">버튼의 이름 or 종류</param>
     public void IsButtonClick(string buttonType)
     {
         if (Manager.Experiment.isProcessing) return;
+
+        InstrumentInfo target = new InstrumentInfo();
+        ushort value = 0;
+
         switch (buttonType) 
         {
             case nameof(EButtonType.ButtonToggle):
-                var target = info.Values.FirstOrDefault(x => x.PointType == "DO");
+                target = info.Values.FirstOrDefault(x => x.PointType == "DO");
 
                 if (target == null)
                 {
@@ -163,16 +187,19 @@ public class DataCard : UiObjectBase
                     return;
                 }
 
-                ushort value = 0;
-
                 if (currentData.TryGetValue(target.Tag, out var data))
                 {
                     value = data.Value > 0 ? (ushort)0 : (ushort)1;
                 }
                 else value = 1;
+                Manager.Network.ReserveDateWriteing(target.PointType, (ushort)target.Address, value);
+                break;
+            case nameof(EButtonType.ButtonDataSet):
+                target = info.Values.FirstOrDefault(x => x.Type == EDataCategory.Setting);
 
-                    Manager.Network.ReserveDateWriteing(target.PointType, (ushort)target.Address, value);
+                value = ushort.Parse(DataSettingField.text);
 
+                Manager.Network.ReserveDateWriteing(target.PointType, (ushort)target.Address, value);
                 break;
             case nameof(EButtonType.ButtonTimeSet):
                 break;
@@ -244,7 +271,7 @@ public class DataCard : UiObjectBase
 
         switch (experimentSchedule.ReservedState)
         {
-            case EReservedExperimentState.None:
+            case EReservedExperimentState.Reserved:
                 cardImage.color = Color.white;
                 break;
 
@@ -284,9 +311,20 @@ public class DataCard : UiObjectBase
     }
     public void ExperimentScheduleSetting(ExperimentWrapper wrapper)
     {
+        if (experimentScheduleNo == null)
+        {
+            experimentScheduleNo = GetComponentsInChildren<TextMeshProUGUI>(true)
+                .FirstOrDefault(x => x.name == "ScheduleNo");
+        }
+
         experimentSchedule = wrapper;
+
+        if (experimentScheduleNo != null)
+            experimentScheduleNo.text = wrapper.No.ToString();
+
         scheduleNameText.text = wrapper.Name;
         valueText.text = wrapper.ReservedState.ToString();
+
         UpdateExperimentStateColor();
     }
     public ExperimentInfo GetExperimentInfo()
