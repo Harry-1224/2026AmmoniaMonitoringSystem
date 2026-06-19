@@ -1,9 +1,10 @@
 using System.Collections.Generic;
+using System.Linq;
 using TMPro;
 using UnityEditor;
 using UnityEngine;
-using UnityEngine.UI;
 using UnityEngine.InputSystem;
+using UnityEngine.UI;
 
 public enum EMonitorType
 {
@@ -366,9 +367,6 @@ public class Monitor : UiObjectBase
 
         if (experimentLampImage == null)
             return;
-        // =====================================
-        // Lamp 색 변경
-        // =====================================
 
         switch (MonitorSchedule.ReservedState)
         {
@@ -377,8 +375,7 @@ public class Monitor : UiObjectBase
                 break;
 
             case EReservedExperimentState.Stopping:
-                experimentLampImage.color =
-                    new Color(1f, 0.5f, 0f);
+                experimentLampImage.color = new Color(1f, 0.5f, 0f);
                 break;
 
             case EReservedExperimentState.Failed:
@@ -390,20 +387,10 @@ public class Monitor : UiObjectBase
                 break;
         }
 
-        // =====================================
-        // Process 진행률 계산
-        // =====================================
+        currentProcess = MonitorSchedule.CurrentProcess;
+        totalProcess = MonitorSchedule.TotalProcess;
 
-
-        if (processData == null)
-            return;
-
-        int processValue = int.Parse(processData.Value.ToString());
-
-        totalProcess = MonitorSchedule.Experiments.Count;
-        currentProcess = CountCompletedBits(processValue, totalProcess);
-
-        Debug.Log($"[Experiment] Progress : {currentProcess} / {totalProcess}"); // TODO : 추후 삭제할 것.
+        Debug.Log($"[Experiment] Progress : {currentProcess} / {totalProcess}");
     }
 
     // - NOTE : ExperimentBox에서 선택된 실험을 화면에 셋팅
@@ -524,6 +511,7 @@ public class Monitor : UiObjectBase
 
         SetExperimentMonitor(schedule);
     }
+
     private void ClearExperimentMonitor()
     {
         if (ScheduleNo != null && ScheduleNo.options.Count > 0)
@@ -535,6 +523,7 @@ public class Monitor : UiObjectBase
 
         EnterNewScheduleMode(true);
     }
+
     private void ScheduleChangerEventLisener(List<ExperimentWrapper> schedules)
     {
         if (schedules == null || schedules.Count == 0)
@@ -669,6 +658,10 @@ public class Monitor : UiObjectBase
         }
 
         RebuildExperimentInfoLayout();
+
+
+        UpdateExperimentLampColor();
+        UpdateExperimentInfoCardColors();
     }
     private string GetExperimentInfoKey(ExperimentInfo info, int actionIndex)
     {
@@ -798,6 +791,71 @@ public class Monitor : UiObjectBase
 
         return count;
     }
+
+    private void UpdateExperimentLampColor()
+    {
+        if (experimentLampImage == null || MonitorSchedule == null)
+            return;
+
+        switch (MonitorSchedule.ReservedState)
+        {
+            case EReservedExperimentState.Reserved:
+                experimentLampImage.color = Color.white;
+                break;
+
+            case EReservedExperimentState.Processing:
+                experimentLampImage.color = Color.green;
+                break;
+
+            case EReservedExperimentState.Stopping:
+                experimentLampImage.color = new Color(1f, 0.5f, 0f);
+                break;
+
+            case EReservedExperimentState.Failed:
+                experimentLampImage.color = Color.red;
+                break;
+
+            case EReservedExperimentState.Finished:
+                experimentLampImage.color = Color.black;
+                break;
+        }
+    }
+
+    /// <summary>
+    /// 현재 모니터링 하는 실험의 진행 률을 계산
+    /// </summary>
+    private void UpdateExperimentProgress()
+    {
+        if (MonitorSchedule == null)
+            return;
+
+        currentProcess = MonitorSchedule.CurrentProcess;
+        totalProcess = MonitorSchedule.TotalProcess;
+
+        Debug.Log($"[Experiment] Progress : {currentProcess} / {totalProcess}");
+    }
+
+    /// <summary>
+    /// 현재 모니터링 하는 실험의 절차 진행을 보고 ExperimentInfoCard의 색상을 갱신
+    /// </summary>
+    private void UpdateExperimentInfoCardColors()
+    {
+        if (MonitorSchedule == null)
+            return;
+
+        int current = MonitorSchedule.CurrentProcess;
+
+        int index = 0;
+
+        foreach (var card in experimentDataCards.Values
+                     .Where(x => x.gameObject.activeSelf)
+                     .OrderBy(x => x.transform.GetSiblingIndex()))
+        {
+            card.SetExperimentInfoCardColor(index < current);
+            index++;
+        }
+    }
+
     #endregion
 
     #region Setting

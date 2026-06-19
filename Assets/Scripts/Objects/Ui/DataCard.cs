@@ -61,7 +61,6 @@ public class DataCard : UiObjectBase
     public TextMeshProUGUI scheduleDescriptionText;
     public TMP_InputField scheduleValue;
 
-
     private TextMeshProUGUI experimentScheduleNo;
     private List<Toggle> Toggles = new List<Toggle>();
 
@@ -382,6 +381,15 @@ public class DataCard : UiObjectBase
             cardImage.color = Color.gray;
         }
     }
+
+    public void SetExperimentInfoCardColor(bool completed)
+    {
+        if (cardImage == null)
+            return;
+
+        cardImage.color = completed ? Color.green : Color.gray;
+    }
+
     private void SetInfoValues(ExperimentInfo info)
     {
         if (info.Action == "End")

@@ -11,6 +11,7 @@ public partial class ExperimentManager
     public int CurrentScheduleIndex { get; private set; } = 0;
     public EExperimentStateMachine CurrentState { get; private set; } = EExperimentStateMachine.Idle;
     public bool isProcessing { get; private set; }
+    private bool startRequested = false;
 
     private Coroutine experimentRoutine; //실험을 진행하는 Coroutine을 저장하는 변수 
     private List<ExperimentWrapper> experimentSchedules = new List<ExperimentWrapper>();
@@ -20,6 +21,55 @@ public partial class ExperimentManager
     public event Action<EExperimentStateMachine> ExperimentStateChange;
     public event Action<List<ExperimentWrapper>> ExperimentScheduleChange;
 
+
+    private IEnumerator RunStateMachine()
+    {
+        while (true)
+        {
+            switch (CurrentState)
+            {
+                case EExperimentStateMachine.Idle:
+                    isProcessing = false;
+
+                    if (startRequested)
+                    {
+                        startRequested = false;
+                        CurrentScheduleIndex = 0;
+                        isProcessing = true;
+                        SetState(EExperimentStateMachine.Running);
+                    }
+                    break;
+
+                case EExperimentStateMachine.Running:
+                    yield return StartCoroutine(RunCurrentScheduleFlow());
+                    break;
+
+                case EExperimentStateMachine.Stopping:
+                    yield return StartCoroutine(StopRoutine());
+                    MoveNextSchedule();
+                    break;
+
+                case EExperimentStateMachine.Shutdown:
+                    yield return StartCoroutine(ShutdownRoutine());
+                    SetState(EExperimentStateMachine.Idle);
+                    break;
+
+                case EExperimentStateMachine.Resetting:
+                    yield return StartCoroutine(ResetRoutine());
+                    SetState(EExperimentStateMachine.Idle);
+                    break;
+
+                case EExperimentStateMachine.Error:
+                    yield return StartCoroutine(ErrorRoutine());
+                    SetState(EExperimentStateMachine.Idle);
+                    break;
+            }
+
+            yield return null;
+        }
+    }
+
+    /*
     private IEnumerator RunStateMachine()
     {
         SetState(EExperimentStateMachine.Running);
@@ -61,7 +111,8 @@ public partial class ExperimentManager
             SetState(CurrentState);
             yield return null;
         }
-    }
+    }*/
+
     private IEnumerator RunCurrentScheduleFlow()
     {
         if (!Manager.Network.isConnected)
@@ -362,6 +413,91 @@ public partial class ExperimentManager
 
         Debug.Log($"[Step Apply] {step.Name} / {step.Tag} = {step.Value}");
     }
+
+    private IEnumerator WaitScheduleComplete(ExperimentWrapper schedule, string type = null)
+    {
+        if (schedule == null)
+            yield break;
+
+        float timeout = schedule.Timer;
+        float elapsed = 0f;
+
+        bool isEnd = type == "End";
+
+        while (elapsed < timeout)
+        {
+            if (CurrentState != EExperimentStateMachine.Running &&
+                CurrentState != EExperimentStateMachine.Stopping)
+            {
+                yield break;
+            }
+
+            UpdateScheduleProgress(schedule, isEnd);
+
+            if (!UpdatedDataForExperiment.TryGetValue("Ex_Start", out Datas exStart))
+            {
+                yield return new WaitForSeconds(0.1f);
+                elapsed += 0.1f;
+                continue;
+            }
+
+            if (!UpdatedDataForExperiment.TryGetValue("Ex_Reset", out Datas exReset))
+            {
+                yield return new WaitForSeconds(0.1f);
+                elapsed += 0.1f;
+                continue;
+            }
+
+            // 본 실험 완료 판단
+            if (!isEnd && exStart.Value == 0 && exReset.Value == 1)
+            {
+                schedule.ReservedState = EReservedExperimentState.Stopping;
+
+                ExperimentScheduleChange?.Invoke(
+                    new List<ExperimentWrapper>(experimentSchedules)
+                );
+
+                Debug.Log($"[Schedule Complete] {schedule.Name} / Main");
+
+                yield break;
+            }
+
+            // End 절차 완료 판단
+            if (isEnd && exStart.Value == 0 && exReset.Value == 0)
+            {
+                schedule.ReservedState = EReservedExperimentState.Finished;
+
+                ExperimentScheduleChange?.Invoke(
+                    new List<ExperimentWrapper>(experimentSchedules)
+                );
+
+                Debug.Log($"[Schedule Complete] {schedule.Name} / End");
+
+                yield break;
+            }
+
+            elapsed += 0.1f;
+            yield return new WaitForSeconds(0.1f);
+        }
+
+        Debug.LogError($"[Schedule Timeout] {schedule.Name} / {(isEnd ? "End" : "Main")}");
+
+        if (isEnd)
+        {
+            SetState(EExperimentStateMachine.Error);
+        }
+        else
+        {
+            schedule.ReservedState = EReservedExperimentState.Stopping;
+
+            ExperimentScheduleChange?.Invoke(
+                new List<ExperimentWrapper>(experimentSchedules)
+            );
+
+            SetState(EExperimentStateMachine.Stopping);
+        }
+    }
+    /*
     private IEnumerator WaitScheduleComplete(ExperimentWrapper schedule, string type = null)
     {
         if (schedule == null)
@@ -422,22 +558,22 @@ public partial class ExperimentManager
 
             SetState(EExperimentStateMachine.Stopping);
         }
-    }
-    private bool IsProcessComplete(int value, int processCount)
+    }*/
+
+    private int CountCompletedBits(int value, int processCount)
     {
         if (processCount <= 0)
-            return true;
+            return 0;
 
-        if (processCount >= 31)
+        int count = 0;
+
+        for (int i = 0; i < processCount; i++)
         {
-            Debug.LogError($"[Process Error] processCount 초과: {processCount}");
-            SetState(EExperimentStateMachine.Error);
-            return false;
+            if ((value & (1 << i)) != 0)
+                count++;
         }
 
-        int completeMask = (1 << processCount) - 1;
-
-        return (value & completeMask) == completeMask;
+        return count;
     }
     private void ApplySolSet(ExperimentInfo step)
     {
@@ -486,5 +622,32 @@ public partial class ExperimentManager
 
             Debug.Log($"[Sol_Set] {sol.Key} = {(isOn ? 1 : 0)}");
         }
+    }
+
+    private void UpdateScheduleProgress(ExperimentWrapper schedule, bool isEnd)
+    {
+        if (schedule == null)
+            return;
+
+        string targetGroup = isEnd ? "Type_End" : schedule.Group;
+        string group = targetGroup.Replace("Type_", "");
+        string processKey = $"Experiment_Process_{group}";
+
+        if (!UpdatedDataForExperiment.TryGetValue(processKey, out Datas processData))
+            return;
+
+        int total = schedule.Experiments.Count(x => x.Group == targetGroup);
+        int current = CountCompletedBits((int)processData.Value, total);
+
+        if (schedule.CurrentProcess == current &&
+            schedule.TotalProcess == total)
+            return;
+
+        schedule.CurrentProcess = current;
+        schedule.TotalProcess = total;
+
+        ExperimentScheduleChange?.Invoke(
+            new List<ExperimentWrapper>(experimentSchedules)
+        );
     }
 }

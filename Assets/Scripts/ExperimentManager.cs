@@ -16,6 +16,18 @@ public class ExperimentWrapper
     public int Timer { get; set; }
     public List<ExperimentInfo> Experiments { get; set; }
     public EReservedExperimentState ReservedState { get; set; } = EReservedExperimentState.Reserved;
+    public int CurrentProcess { get; set; } = 0;
+    public int TotalProcess { get; set; } = 0;
+    public float ProgressRatio
+    {
+        get
+        {
+            if (TotalProcess <= 0)
+                return 0f;
+
+            return (float)CurrentProcess / TotalProcess;
+        }
+    }
 }
 
 public class ExperimentInfo
@@ -77,6 +89,8 @@ public partial class ExperimentManager : ManagerBase
         {
             Debug.Log("[Experiment] 저장된 Schedule 없음");
         }
+
+        experimentRoutine = StartCoroutine(RunStateMachine());
     }
     protected override void Update()
     {
@@ -136,20 +150,26 @@ public partial class ExperimentManager : ManagerBase
             return;
         }
     }
+    private void OnApplicationQuit()
+    {
+        //현재 진행중인 실험을 살리고, List중 결과가 Reserved인 것들만 저장
+        SaveRemainSchedulesOnQuit();
+    }
 
     protected override void EventSubscriber()
     {
         Manager.Data.OnDataChanged += DataChangeHandler;
+        Manager.Network.OnNetworkConnected += HandleNetworkConnected;
     }
     protected override void EventUnsubscriber()
     {
         Manager.Data.OnDataChanged -= DataChangeHandler;
+        Manager.Network.OnNetworkConnected -= HandleNetworkConnected;
     }
 
     private void InitializeExperimentProcessData()
     {
-        var measurementData =
-            Manager.Data.CallData<Dictionary<string, Datas>>();
+        var measurementData = Manager.Data.CallData<Dictionary<string, Datas>>();
 
         if (measurementData == null)
             return;
@@ -202,12 +222,18 @@ public partial class ExperimentManager : ManagerBase
 
     #region Experiment Management System
 
-
     public void StartExperiment()
     {
-        if (CurrentState != EExperimentStateMachine.Idle) return;
+        if (CurrentState != EExperimentStateMachine.Idle)
+            return;
 
-        experimentRoutine = StartCoroutine(RunStateMachine());
+        if (experimentSchedules == null || experimentSchedules.Count == 0)
+        {
+            Debug.LogWarning("[Experiment] 실행할 Schedule이 없습니다.");
+            return;
+        }
+
+        startRequested = true;
     }
 
     public void Pause()
@@ -317,7 +343,12 @@ public partial class ExperimentManager : ManagerBase
 
         ExperimentScheduleChange?.Invoke(new List<ExperimentWrapper>(experimentSchedules));
     }
-    public bool SaveCurrentSchedules(string fileName = null) => Manager.Data.SaveSchedulesToExsh( experimentSchedules, fileName);
+    public bool SaveCurrentSchedules(List<ExperimentWrapper> Schedules = null, string fileName = null)
+    {
+        if(Schedules == null) return Manager.Data.SaveSchedulesToExsh(experimentSchedules, fileName);
+
+        return Manager.Data.SaveSchedulesToExsh(Schedules, fileName);
+    }
 
     public bool LoadSchedules(string filePath)
     {
@@ -335,7 +366,41 @@ public partial class ExperimentManager : ManagerBase
 
         return true;
     }
+    /// <summary>
+    /// 프로그램 종료 시 현재 진행중인 실험은 Reserved로 바꾸고 Reserved만 저장
+    /// </summary>
+    private void SaveRemainSchedulesOnQuit()
+    {
+        if (experimentSchedules == null || experimentSchedules.Count == 0)
+            return;
 
+        List<ExperimentWrapper> remainSchedules = experimentSchedules
+            .Where(x => x != null &&
+                        x.ReservedState != EReservedExperimentState.Finished &&
+                        x.ReservedState != EReservedExperimentState.Failed)
+            .ToList();
+
+        foreach (var schedule in remainSchedules)
+        {
+            schedule.ReservedState = EReservedExperimentState.Reserved;
+            schedule.CurrentProcess = 0;
+            schedule.TotalProcess = 0;
+        }
+
+        SaveCurrentSchedules(remainSchedules);
+    }
+
+    #endregion
+
+    #region Network System
+
+    /// <summary>
+    /// 네트워크 연결시 실험에 필요한 통신 초기화를 담당하는 코드
+    /// </summary>
+    private void HandleNetworkConnected()
+    {
+        // 만약에 네트워크 연결이 되었을 때 실험이 작동하고 있다면(Ex_Start가 1이라면), 취소 후 종료절차 실행 
+    }
     #endregion
 
 }
