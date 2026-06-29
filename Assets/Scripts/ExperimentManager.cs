@@ -55,10 +55,10 @@ public enum EExperimentStateMachine
 public enum  EReservedExperimentState
 {
     Reserved,
-    Processing,// 현재 진행중
-    Stopping,// 종료 절차 진행중
-    Failed,// 실험 실패
-    Finished//예약된 실험 종료
+    Processing, // 현재 진행중
+    Resetting, // 종료 절차 진행중
+    Failed, // 실험 실패
+    Finished //예약된 실험 종료
 }
 
 public partial class ExperimentManager : ManagerBase
@@ -116,7 +116,7 @@ public partial class ExperimentManager : ManagerBase
             // Ex_Start == 0 && Ex_Reset == 1
             if (exStart.Value == 0 && exReset.Value == 1)
             {
-                processingSchedule.ReservedState = EReservedExperimentState.Stopping;
+                processingSchedule.ReservedState = EReservedExperimentState.Resetting;
 
                 ExperimentScheduleChange?.Invoke(
                     new List<ExperimentWrapper>(experimentSchedules)
@@ -125,8 +125,9 @@ public partial class ExperimentManager : ManagerBase
             return;
         }
 
+        /*
         // Stopping 상태인 Schedule 찾기
-        ExperimentWrapper stoppingSchedule = experimentSchedules.FirstOrDefault(x => x.ReservedState == EReservedExperimentState.Stopping);
+        ExperimentWrapper stoppingSchedule = experimentSchedules.FirstOrDefault(x => x.ReservedState == EReservedExperimentState.Resetting);
 
         if (stoppingSchedule != null)
         {
@@ -148,12 +149,13 @@ public partial class ExperimentManager : ManagerBase
                 );
             }
             return;
-        }
+        }*/
     }
     private void OnApplicationQuit()
     {
-        //현재 진행중인 실험을 살리고, List중 결과가 Reserved인 것들만 저장
-        SaveRemainSchedulesOnQuit();
+        // 현재 진행중인 실험을 살리고, List중 결과가 Reserved인 것들만 저장
+        // TODO : 개발중에는 잠깐 꺼놓을것.
+        //SaveRemainSchedulesOnQuit();
     }
 
     protected override void EventSubscriber()
@@ -236,24 +238,11 @@ public partial class ExperimentManager : ManagerBase
         startRequested = true;
     }
 
-    public void Pause()
-    {
-        // 버튼으로 눌렀을 때 Stopping 상태로 변경
-        // 버튼으로 정지했을 때 현재 진행중인 실험을 끝내고 Stoppoing 상태로 진입.
-        // Stopping 절차가 완료 돼었을 때 Start대기.
-        if (CurrentState == EExperimentStateMachine.Running) SetState(EExperimentStateMachine.Stopping);
-    }
+    public void Pause() => stopRequested = true;
 
-    public void Resume()
-    {
-        // 버튼으로 눌렀을 때 Running 상태로 변경
-        // 버튼으로 재개했을 때 다음 진행중인 실험을 계속 진행하고 Running 상태로 진입.
-        if (CurrentState == EExperimentStateMachine.Stopping) SetState(EExperimentStateMachine.Running);
-    }
+    public void ESD() => shutdownRequested = true;
 
-    public void ESD() =>SetState(EExperimentStateMachine.Shutdown);
-
-    public void ResetExperiment() => SetState(EExperimentStateMachine.Resetting);
+    public void ResetExperiment() => resetRequested = true;
 
     public List<ExperimentWrapper> CallCurrentSchedules() => experimentSchedules;
     public ExperimentWrapper CallCurrentSchedule(int num) => experimentSchedules[num];
@@ -376,13 +365,22 @@ public partial class ExperimentManager : ManagerBase
 
         List<ExperimentWrapper> remainSchedules = experimentSchedules
             .Where(x => x != null &&
-                        x.ReservedState != EReservedExperimentState.Finished &&
+                        x.ReservedState != EReservedExperimentState.Finished
+                        &&
                         x.ReservedState != EReservedExperimentState.Failed)
             .ToList();
 
-        foreach (var schedule in remainSchedules)
+        for (int i = 0; i < remainSchedules.Count; i++)
         {
+            ExperimentWrapper schedule = remainSchedules[i];
+
+            // Schedule 번호 재정렬
+            schedule.No = i + 1;
+
+            // 상태 초기화
             schedule.ReservedState = EReservedExperimentState.Reserved;
+
+            // 진행률 초기화
             schedule.CurrentProcess = 0;
             schedule.TotalProcess = 0;
         }
@@ -393,14 +391,114 @@ public partial class ExperimentManager : ManagerBase
     #endregion
 
     #region Network System
+    private Coroutine networkRecoveryRoutine;
 
     /// <summary>
     /// 네트워크 연결시 실험에 필요한 통신 초기화를 담당하는 코드
     /// </summary>
-    private void HandleNetworkConnected()
+    private void HandleNetworkConnected(string test)
     {
         // 만약에 네트워크 연결이 되었을 때 실험이 작동하고 있다면(Ex_Start가 1이라면), 취소 후 종료절차 실행 
+
+        //1. 만약 상태머신이 꺼져있다면 켜질 때 까지 대기
+        //2. 만약 Ex_Start의 상태값이 1일 경우 0으로 바꾸고 Pause실행
     }
+
+    private void HandleNetworkConnected()
+    {
+        if (networkRecoveryRoutine != null)
+            StopCoroutine(networkRecoveryRoutine);
+
+        networkRecoveryRoutine = StartCoroutine(NetworkRecoveryRoutine());
+    }
+    private IEnumerator NetworkRecoveryRoutine()
+    {
+        yield return null;
+
+        ResetStateMachineForNetworkRecovery();
+
+        if (!UpdatedDataForExperiment.TryGetValue("Ex_Start", out Datas exStart))
+        {
+            Debug.LogWarning("[Network Recovery] Ex_Start 데이터 없음");
+            networkRecoveryRoutine = null;
+            yield break;
+        }
+
+        if (exStart.Value > 0)
+        {
+            Debug.LogWarning("[Network Recovery] PLC 실험 진행 감지 → 종료 절차 요청");
+
+            resetRequested = true;
+        }
+
+        networkRecoveryRoutine = null;
+    }
+    private void ResetStateMachineForNetworkRecovery()
+    {
+        commandState = EExperimentStateMachine.Idle;
+
+        startRequested = false;
+        stopRequested = false;
+        resetRequested = false;
+        shutdownRequested = false;
+
+        timeoutRunning = false;
+        stateStartTime = 0f;
+        stateTimeout = 0f;
+
+        waitPLCResponse = false;
+        isProcessing = false;
+    }
+    /*
+    private IEnumerator NetworkRecoveryRoutine()
+    {
+        // 1. 상태머신 코루틴이 없으면 시작
+        if (experimentRoutine == null)
+        {
+            experimentRoutine = StartCoroutine(RunStateMachine());
+        }
+
+        // 2. 상태머신이 완전히 준비될 때까지 1프레임 대기
+        yield return null;
+
+        // 3. Ex_Start 데이터 확인
+        if (!UpdatedDataForExperiment.TryGetValue("Ex_Start", out Datas exStart))
+        {
+            Debug.LogWarning("[Network Recovery] Ex_Start 데이터 없음");
+            yield break;
+        }
+
+        // 4. PLC가 이미 실험 중이면
+        if (exStart.Value > 0)
+        {
+            Debug.LogWarning("[Network Recovery] PLC 실험 진행 감지 → Ex_Start OFF 후 종료 절차 진입");
+
+            InstrumentInfo startInfo = Manager.Data.CallData<InstrumentInfo>("Ex_Start");
+
+            if (startInfo == null)
+            {
+                Debug.LogError("[Network Recovery] Ex_Start Instrument 없음");
+                SetState(EExperimentStateMachine.Error);
+                yield break;
+            }
+
+            // Ex_Start = 0
+            Manager.Network.ReserveDateWriteing(
+                startInfo.PointType,
+                (ushort)startInfo.Address,
+                0
+            );
+
+            // 현재 스케줄이 없다면 첫 번째 스케줄 기준
+            if (CurrentScheduleIndex < 0 && experimentSchedules.Count > 0)
+                CurrentScheduleIndex = 0;
+
+            // 상태머신을 종료 절차로 전환
+            SetState(EExperimentStateMachine.Stopping);
+        }
+
+        networkRecoveryRoutine = null;
+    }*/
     #endregion
 
 }

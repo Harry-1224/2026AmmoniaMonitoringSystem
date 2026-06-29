@@ -130,7 +130,7 @@ public class NetworkManager : ManagerBase
     private ModbusService modbusService;
 
     private byte SlaveID  = 0;
-    public string IpAddress = "192.168.0.118";
+    public string IpAddress = "192.168.1.2";
     private int Port = 502;
     public ENetworkState NetworkState { get; private set; } = ENetworkState.Disconnected;
     public bool isConnected { get; private set; } = false;
@@ -185,12 +185,21 @@ public class NetworkManager : ManagerBase
     }
     public void ReserveDateWriteing(string type, ushort address, ushort data)
     {
-        writeQueue.Enqueue(new WriteRequest
+        try
         {
-            Type = type,
-            Address = address,
-            Data = data
-        });
+            writeQueue.Enqueue(new WriteRequest
+            {
+                Type = type,
+                Address = address,
+                Data = data
+            });
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError( $"Writing Data - {address} :"+ ex.ToString());
+        }
+
+        
     }
 
     /*
@@ -257,6 +266,7 @@ public class NetworkManager : ManagerBase
     private async Task NetworkLoop(CancellationToken token)
     {
         int Failed = 0;
+        string errorMsg = "";
 
         while (!token.IsCancellationRequested)
         {
@@ -276,7 +286,10 @@ public class NetworkManager : ManagerBase
 
                         NetworkState = ENetworkState.Disconnected;
 
-                        OnNetworkDisconnected?.Invoke();
+                        EnqueueMainThreadAction(() =>
+                        {
+                            OnNetworkDisconnected?.Invoke();
+                        });
 
                         OnNetworkError?.Invoke(
                             $"NetworkAction Error : {ex.Message}"
@@ -286,40 +299,35 @@ public class NetworkManager : ManagerBase
                     break;
 
                 case ENetworkState.Connecting:
+                    bool success = TryConnect();
 
-                    try
+                    if (success)
                     {
+                        NetworkState = ENetworkState.Connected;
 
-                        bool success = TryConnect();
-
-                        if (success)
+                        isConnected = true;
+                        EnqueueMainThreadAction(() =>
                         {
-                            NetworkState = ENetworkState.Connected;
-
-                            isConnected = true;
-
                             OnNetworkConnected?.Invoke();
-                        }
-                        else
+                        });
+                    }
+                    else
+                    {
+                        EnqueueMainThreadAction(() =>
                         {
                             OnNetworkConnectionFailed?.Invoke();
+                        });
 
-                            OnNetworkError?.Invoke(
-                                $"Connection Failed ({Failed + 1}/3)"
-                            );
 
-                            NetworkState = ENetworkState.Disconnected;
+                        errorMsg = $"Connection Failed ({Failed + 1}/3)";
+                        EnqueueMainThreadAction(() =>
+                        {
+                            OnNetworkError?.Invoke(errorMsg);
+                        });
 
-                            await Task.Delay(50, token);
-                        }
-                    }
-                    catch (Exception ex)
-                    {
                         NetworkState = ENetworkState.Disconnected;
 
-                        OnNetworkError?.Invoke(
-                            $"TryConnect Exception : {ex.Message}"
-                        );
+                        await Task.Delay(50, token);
                     }
 
                     break;
@@ -330,9 +338,11 @@ public class NetworkManager : ManagerBase
                     {
                         NetworkState = ENetworkState.ConnectFail;
 
-                        OnNetworkError?.Invoke(
-                            "Network Connect Failed. Enter ConnectFail State."
-                        );
+                        errorMsg = "Network Connect Failed. Enter ConnectFail State.";
+                        EnqueueMainThreadAction(() =>
+                        {
+                            OnNetworkError?.Invoke(errorMsg);
+                        });
                     }
                     else
                     {
@@ -362,12 +372,23 @@ public class NetworkManager : ManagerBase
     {
         // TODO : TCP 연결 시도 로직 구현, 타임아웃 및 예외 처리 포함
         OnTryNetworkConnect?.Invoke($"Trying to connect to {IpAddress}:{Port} with SlaveID {SlaveID}");
-        (bool result , string msg) = modbusService.ConnectNetwork();
-        if (!result)
+
+        try
         {
-            OnNetworkError?.Invoke(msg);
+            (bool result, string msg) = modbusService.ConnectNetwork();
+
+            if (!result)
+            {
+                OnNetworkError?.Invoke(msg);
+            }
+
+            return result;
         }
-        return result;
+        catch (Exception ex)
+        {
+            OnNetworkError?.Invoke($"TryConnect Exception : {ex.Message}");
+            return false;
+        }
     }
 
     // NOTE : LOOP 내부에서 작동 - Connect시 작동

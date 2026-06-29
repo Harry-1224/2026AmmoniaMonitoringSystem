@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices.WindowsRuntime;
 using UnityEngine;
 
 public partial class ExperimentManager
@@ -10,8 +11,18 @@ public partial class ExperimentManager
 
     public int CurrentScheduleIndex { get; private set; } = 0;
     public EExperimentStateMachine CurrentState { get; private set; } = EExperimentStateMachine.Idle;
+    public EExperimentStateMachine commandState { get; private set; } = EExperimentStateMachine.Idle;
     public bool isProcessing { get; private set; }
+    private bool waitPLCResponse = false;
+
     private bool startRequested = false;
+    private bool stopRequested = false;
+    private bool resetRequested = false;
+    private bool shutdownRequested = false;
+
+    private float stateStartTime;
+    private float stateTimeout;
+    private bool timeoutRunning;
 
     private Coroutine experimentRoutine; //실험을 진행하는 Coroutine을 저장하는 변수 
     private List<ExperimentWrapper> experimentSchedules = new List<ExperimentWrapper>();
@@ -21,9 +32,390 @@ public partial class ExperimentManager
     public event Action<EExperimentStateMachine> ExperimentStateChange;
     public event Action<List<ExperimentWrapper>> ExperimentScheduleChange;
 
+    #region State Machine
 
+    //1. 현재 State상태 파악
+    //2. PLC의 값에 따른 상태 파악
+    //3. 현재 적용해야할 State 상태 파악
+    //4. switch입장
+    //5. 상태별 로직 실행
     private IEnumerator RunStateMachine()
     {
+        Debug.Log("[Experiment] State Machine Started");
+
+        while (true)
+        {
+            // 1. PLC 값을 보고 외부 공개용 CurrentState 갱신
+            CurrentState = CheckPLCState();
+
+            // 2. 버튼 요청 / PLC 상태 / Timeout 보고 controlState 결정
+            commandState = CheckMachineState();
+
+            if (commandState != EExperimentStateMachine.Idle) Debug.Log($"Experiment State Machine 명령 변경 - {commandState}");
+
+            //3. commandState를 체크한 후 결과에 따라 1회 명령 수행
+            switch (commandState)
+            {
+                case EExperimentStateMachine.Running:
+                    // NOTE : 자동 실험 진행 시작
+                    // NOTE : Command가 Running으로 들어왔을 때, 현재 실험이 Running이 아니면 ReservedState를 Processing으로 변경하고, 실험 절차 진행 시작. Running인 경우는 무시.
+
+                    // 1. 예약된 실험 확인
+                    if (CurrentScheduleIndex < 0 || CurrentScheduleIndex >= experimentSchedules.Count)
+                        break;
+                    var runningSchedule = experimentSchedules[CurrentScheduleIndex];
+
+
+                    // 2. 검색한 실험 절차 Value 입력
+                    if (!SettingValue(runningSchedule))
+                    {
+                        Debug.LogError("[StateMachine] Running SettingValue 실패");
+                        break;
+                    }
+                    // 3. isProcessing 참 전환 / 다음 실험 절차 검색/ 현재 실험 index 최신화(현재 실험 State를 Processing으로 설정)
+                    isProcessing = true;
+                    waitPLCResponse = true;
+                    SettingExperimentState(runningSchedule, EReservedExperimentState.Processing);
+
+                    // 4. Timeout 횟수와 시간 입력
+                    stateStartTime = Time.time;
+                    stateTimeout = runningSchedule.Timer;
+                    timeoutRunning = true;
+
+                    break;
+                case EExperimentStateMachine.Stopping:
+                    // NOTE : 자동 실험 진행 종료(현재 실험 완료 후 종료)
+                    // NOTE : 만약 실험 중이라면 현재 실험 종료(Reset까지) 후 정지.
+                    // NOTE : isProcessing을 보고 실험이 자동 진행되는지 판단 따라서 isProcessing이 거짓이면 현재 실험 까지만 진행 후 종료
+
+                    // 1. isProcessing 거짓
+                    isProcessing = false;
+
+                    break;
+                case EExperimentStateMachine.Resetting:
+                    // NOTE : Reset은 즉시 실험 환경 재시작.
+                    // NOTE : Reset Data 입력 후 현재 실험중일 경우 Failed로 상태 변경,
+                    //        다음 실험 절차 검색/ 현재 실험 index 최신화(현재 실험 State를 Failed로 설정)
+
+                    // 1. isProcessing 거짓(CheckMachineState()함수 중 명령에 의해 작동될 때로 수정)
+
+                    waitPLCResponse = true;
+
+                    // 2. 종료 절차 검색
+                    if (!experimentDefines.TryGetValue("Type_End", out var endDefine))
+                        break;
+
+                    // 3. Stopping절차 Value 입력
+                    if (!SettingValue(endDefine))
+                        break;
+
+
+                    if (CurrentScheduleIndex >= 0 && CurrentScheduleIndex < experimentSchedules.Count)
+                    {
+                        var resetSchedule = experimentSchedules[CurrentScheduleIndex];
+
+                        if (resetSchedule.ReservedState == EReservedExperimentState.Processing)
+                            SettingExperimentState(resetSchedule, EReservedExperimentState.Resetting);
+                    }
+
+                    // 5. Timeout 횟수와 시간 입력
+                    stateStartTime = Time.time;
+                    stateTimeout = endDefine.Timer;
+                    timeoutRunning = true;
+
+                    break;
+                case EExperimentStateMachine.Shutdown:
+                    // NOTE : 즉시 시스템 종료(FAN, Water Supply, MFC 정지)
+
+                    // 1. isProcessing 거짓(CheckMachineState()함수 중 명령에 의해 작동될 때로 수정)
+
+                    // 2. 다음 실험 절차 검색/현재 실험 index 최신화(진행했던 실험의 State는 Failed로 설정)
+                    if (CurrentScheduleIndex >= 0 && CurrentScheduleIndex < experimentSchedules.Count)
+                    {
+                        SettingExperimentState(experimentSchedules[CurrentScheduleIndex], EReservedExperimentState.Failed);
+                    }
+
+                    // 3. All Shutdown Value 입력if
+                    if(!experimentDefines.TryGetValue("Type_ESD", out var esdDefine))
+                    {
+                        Debug.LogError("[Shutdown] Type_ESD 정의가 없습니다.");
+                        break;
+                    }
+
+                    if (!SettingValue(esdDefine))
+                    {
+                        Debug.LogError("[Shutdown] Type_ESD SettingValue 실패");
+                        break;
+                    }
+                    break;
+            }
+
+            //컨트롤의 입력은 한번만 이루어져야함
+            commandState = EExperimentStateMachine.Idle;
+
+            yield return null;
+        }
+    }
+
+    /// <summary>
+    /// 현재 PLC의 상태를 확인하고, CurrentState를 갱신하는 함수(StateMachine안에서 사용)
+    /// </summary>
+    /// <returns></returns>
+    private EExperimentStateMachine CheckPLCState()
+    {
+        if (!UpdatedDataForExperiment.TryGetValue("Ex_Start", out Datas exStart))
+            return CurrentState;
+
+        if (!UpdatedDataForExperiment.TryGetValue("Ex_Reset", out Datas exReset))
+            return CurrentState;
+
+        // 실험 진행 중
+        if (exStart.Value == 1)
+        {
+            return EExperimentStateMachine.Running;
+        }
+
+        // 본 실험 완료 후 End 절차 대기
+        if (exStart.Value == 0 && exReset.Value == 1)
+        {
+            return EExperimentStateMachine.Resetting;
+        }
+
+        // End 절차까지 완료
+        if (exStart.Value == 0 && exReset.Value == 0)
+        {
+            return EExperimentStateMachine.Idle;
+        }
+
+        // 알 수 없는 상태면 이전 상태 유지
+        return CurrentState;
+    }
+
+    /// <summary>
+    /// PLC상태와 내부 명령을 판단 후, controlState를 결정하는 함수(StateMachine안에서 사용)
+    /// </summary>
+    /// <returns></returns>
+    private EExperimentStateMachine CheckMachineState()
+    {
+
+        // 1. PLC 상태 확인(Running, Resetting, Idle) - CheckPLCState에서 이미 체크함
+
+        // 2. 외부 명령 요청 확인(Shutdown, Reset, Stop, Start)
+        //      - Start : PLC상태가 Idle일 때만 허용 -> Running 반환
+        //      - Stop : isProcessing이 참일 때 허용 -> Stopping 반환
+        //      - Reset : Running, Idle에서만 허용(단! 둘다 로직은 다름) -> Resetting 반환
+        //      - Shutdown : 어느 상태에서든 허용 -> Shutdown 반환
+        if (shutdownRequested)
+        {
+            ClearRequests();
+
+            isProcessing = false;
+            return EExperimentStateMachine.Shutdown;
+        }
+        if (stopRequested && isProcessing)
+        {
+            ClearRequests();
+            return EExperimentStateMachine.Stopping;
+        }
+        if (resetRequested && (CurrentState == EExperimentStateMachine.Running || CurrentState == EExperimentStateMachine.Idle))
+        {
+            ClearRequests();
+
+            isProcessing = false;
+            return EExperimentStateMachine.Resetting;
+        }
+        if (startRequested && CurrentState == EExperimentStateMachine.Idle)
+        {
+            ClearRequests();
+            return EExperimentStateMachine.Running;
+        }
+        ClearRequests();
+
+        // 3. Timeout 확인
+        if (IsTimeout())
+        {
+            if (CurrentState == EExperimentStateMachine.Running)
+            {
+                Debug.LogError("[Experiment] Running Timeout → Resetting");
+                return EExperimentStateMachine.Resetting;
+            }
+
+            if (CurrentState == EExperimentStateMachine.Resetting)
+            {
+                Debug.LogError("[Experiment] Resetting Timeout : Table문서 오류. 종료 절차의 Timeout변수를 수정해 주세요. ");
+                return EExperimentStateMachine.Error;
+            }
+        }
+
+
+        // 4. CurrentExperiment정보 습득 / 만약 Range에서 문제가 생기면 오류
+        ExperimentWrapper currentEx;
+        if (CurrentScheduleIndex >= 0 && CurrentScheduleIndex < experimentSchedules.Count)
+        {
+            currentEx = experimentSchedules[CurrentScheduleIndex];
+        }
+        else 
+        {
+            Debug.LogWarning("[ExperimentManger] Error - CheckMachineState : Out of Experiment Index Range");
+            CurrentState = EExperimentStateMachine.Error;
+            return EExperimentStateMachine.Shutdown;
+        }
+
+        // 5. waitPLCResponse는 상태 머신이 자동으로 바껴야 하는 순간 1회 명령을 주기 위해 구현한 변수이다.
+        if ((currentEx.ReservedState == EReservedExperimentState.Processing && CurrentState == EExperimentStateMachine.Running) || 
+            (currentEx.ReservedState == EReservedExperimentState.Resetting && CurrentState == EExperimentStateMachine.Resetting))
+        {
+            waitPLCResponse = false;
+        }
+
+
+        // 6. 명령 없고 Timeout도 없을 때, CurrentState가 Idle이면(Running, Resetting, Idle밖에 없음), isProcessing을 확인할 것.
+        //      - isProcessing이 참이면, 현재 실험 진행 중이므로, CurrentScheduleIndex++ 후 Running 반환
+        //      - isProcessing이 거짓이면, 현재 실험 진행 중이 아니므로, Idle 반환
+        if (isProcessing && !waitPLCResponse && CurrentState == EExperimentStateMachine.Idle)
+        {
+            if (currentEx.ReservedState == EReservedExperimentState.Processing) return EExperimentStateMachine.Resetting;
+            else if (currentEx.ReservedState == EReservedExperimentState.Resetting)
+            {
+                timeoutRunning = false;
+                CurrentScheduleIndex++;
+
+                // 다음 예약된 실험이 있는경우
+                if (CurrentScheduleIndex < experimentSchedules.Count)
+                {
+                    return EExperimentStateMachine.Running;
+                }
+
+                // 다음 예약된 실험이 없는경우
+                isProcessing = false;
+                CurrentScheduleIndex = 0;
+                return EExperimentStateMachine.Idle;
+
+            }
+        }
+
+        return EExperimentStateMachine.Idle;
+    }
+
+    // 모든 요청 reset
+    private void ClearRequests()
+    {
+        startRequested = false;
+        stopRequested = false;
+        resetRequested = false;
+        shutdownRequested = false;
+    }
+
+    // 타임아웃을 체크하는 함수 
+    private bool IsTimeout()
+    {
+        if (CurrentState != EExperimentStateMachine.Running && CurrentState != EExperimentStateMachine.Resetting)
+            return false;
+
+        if (!timeoutRunning)
+            return false;
+
+        if (stateTimeout <= 0)
+            return false;
+
+        return Time.time - stateStartTime >= stateTimeout;
+    }
+
+    /// <summary>
+    /// PLC로 실험 Value를 Network에 전송하는 함수(StateMachine 안에서 사용)
+    /// 상태 변경은 하지 않고, PLC Write 요청만 예약한다.
+    /// </summary>
+    private bool SettingValue(ExperimentWrapper experiment)
+    {
+        if (experiment == null)
+        {
+            Debug.LogError("[SettingValue Error] ExperimentWrapper가 null입니다.");
+            return false;
+        }
+
+        // 실험 타입 설정 리셋
+        Manager.Network.ReserveDateWriteing("AI", 45, 0); // 실험 시작 버튼 초기화
+        Manager.Network.ReserveDateWriteing("AI", 46, 0); // 실험 설정 버튼 초기화
+
+        // 현재 Schedule의 실험 타입 선택
+        string commandKey = "Experiment_" + experiment.Group;
+        var instrumentData = Manager.Data.CallData<InstrumentInfo>(commandKey);
+
+        if (instrumentData == null)
+        {
+            Debug.LogError($"[SettingValue Error] 실험 타입 없음: {commandKey}");
+            return false;
+        }
+        else
+        {
+            //Debug.Log($"[SettingValue Error] 실험 타입 발견 : {commandKey} => Address - {instrumentData.Address}");
+        }
+        Manager.Network.ReserveDateWriteing(
+              instrumentData.PointType,
+              (ushort)instrumentData.Address,
+              1
+          );
+
+
+        // 현재 실험 타입에 해당하는 Step 값 전송
+        foreach (var step in experiment.Experiments.Where(x => x.Group == experiment.Group).OrderBy(x => x.Process))
+        {
+            if (!ApplyStepValue(step)) return false;
+        }
+
+        string name = "";
+
+        // 실험 시작 트리거
+        if(experiment.Group != "Type_End")  name ="Ex_Start";
+        else name = "Ex_Reset";
+
+        instrumentData = Manager.Data.CallData<InstrumentInfo>(name);
+
+        if (instrumentData == null)
+        {
+            Debug.LogError($"[SettingValue Error] {name} Data 없음");
+            return false;
+        }
+        else
+        {
+            Debug.Log($"[SettingValue] {name} Data 발견 : {name} => Address ( {instrumentData.Address} )");
+        }
+
+        Manager.Network.ReserveDateWriteing(
+            instrumentData.PointType,
+            (ushort)instrumentData.Address,
+            1
+        );
+
+        Debug.Log($"[SettingValue] Start Command Sent: {experiment.Name}");
+        return true;
+    }
+    private void SettingExperimentState(ExperimentWrapper experiment, EReservedExperimentState setState)
+    {
+        if (experiment == null)
+        {
+            Debug.LogError("[SettingExperimentState] experiment가 null입니다.");
+            return;
+        }
+
+        if (experiment.ReservedState == setState)
+            return;
+
+        Debug.Log($"[SettingExperimentState] experiment {experiment.Name} 상태 전환 : {experiment.ReservedState} -> {setState}");
+        experiment.ReservedState = setState;
+
+        ExperimentScheduleChange?.Invoke(new List<ExperimentWrapper>(experimentSchedules));
+
+        Debug.Log($"[Experiment State] {experiment.Name} -> {setState}");
+    }
+
+    #endregion
+
+    #region Before Machine Code
+    /*
+    private IEnumerator RunStateMachine()
+    {
+        Debug.Log("[Experiment] State Machine Started");
         while (true)
         {
             switch (CurrentState)
@@ -67,7 +459,7 @@ public partial class ExperimentManager
 
             yield return null;
         }
-    }
+    }*/
 
     /*
     private IEnumerator RunStateMachine()
@@ -217,7 +609,7 @@ public partial class ExperimentManager
             yield break;
         }
 
-        currentSchedule.ReservedState = EReservedExperimentState.Stopping;
+        currentSchedule.ReservedState = EReservedExperimentState.Resetting;
         ExperimentScheduleChange?.Invoke(new List<ExperimentWrapper>(experimentSchedules));
 
         Debug.Log($"[Schedule Stop] Type_End Start: {currentSchedule.Name}");
@@ -276,7 +668,7 @@ public partial class ExperimentManager
         }
 
         // 종료 절차 시작 트리거
-        var instrumentData = Manager.Data.CallData<InstrumentInfo>("Ex_Start");
+        var instrumentData = Manager.Data.CallData<InstrumentInfo>("Ex_Stop");
 
         if (instrumentData == null)
         {
@@ -316,7 +708,7 @@ public partial class ExperimentManager
         {
             var schedule = experimentSchedules[CurrentScheduleIndex];
 
-            schedule.ReservedState = EReservedExperimentState.Stopping;
+            schedule.ReservedState = EReservedExperimentState.Resetting;
             ExperimentScheduleChange?.Invoke(new List<ExperimentWrapper>(experimentSchedules));
 
             yield return StartCoroutine(RunEndProcedure(schedule));
@@ -373,7 +765,49 @@ public partial class ExperimentManager
         CurrentState = newState;
         ExperimentStateChange?.Invoke(CurrentState);
     }
+    /// <summary>
+    /// 저장된 데이터를 적용하는 코드
+    /// </summary>
+    /// <param name="step"></param>
+    private bool ApplyStepValue(ExperimentInfo step)
+    {
+        switch (step.Action)
+        {
+            case "Set":
+            case "Timer":
 
+                var instrumentData = Manager.Data.CallData<InstrumentInfo>(step.Tag);
+
+                if (instrumentData == null)
+                {
+                    Debug.LogError($"[Step Error] Instrument 없음: {step.Tag}");
+                    return false;
+                }
+
+                Manager.Network.ReserveDateWriteing(
+                    instrumentData.PointType,
+                    (ushort)instrumentData.Address,
+                    (ushort)step.Value
+                );
+
+                break;
+
+            case "SolSet":
+                ApplySolSet(step);
+                break;
+
+            case "End":
+            case "None":
+                return true;
+
+            default:
+                Debug.LogError($"[Step Error] 알 수 없는 Action: {step.Action}");
+                return false;
+        }
+
+        return true;
+    }
+    /*
     /// <summary>
     /// 저장된 데이터를 적용하는 코드
     /// </summary>
@@ -412,7 +846,7 @@ public partial class ExperimentManager
         }
 
         Debug.Log($"[Step Apply] {step.Name} / {step.Tag} = {step.Value}");
-    }
+    }*/
 
     private IEnumerator WaitScheduleComplete(ExperimentWrapper schedule, string type = null)
     {
@@ -451,7 +885,7 @@ public partial class ExperimentManager
             // 본 실험 완료 판단
             if (!isEnd && exStart.Value == 0 && exReset.Value == 1)
             {
-                schedule.ReservedState = EReservedExperimentState.Stopping;
+                schedule.ReservedState = EReservedExperimentState.Resetting;
 
                 ExperimentScheduleChange?.Invoke(
                     new List<ExperimentWrapper>(experimentSchedules)
@@ -488,7 +922,7 @@ public partial class ExperimentManager
         }
         else
         {
-            schedule.ReservedState = EReservedExperimentState.Stopping;
+            schedule.ReservedState = EReservedExperimentState.Resetting;
 
             ExperimentScheduleChange?.Invoke(
                 new List<ExperimentWrapper>(experimentSchedules)
@@ -650,4 +1084,5 @@ public partial class ExperimentManager
             new List<ExperimentWrapper>(experimentSchedules)
         );
     }
+    #endregion 
 }

@@ -80,15 +80,18 @@ public class DataCard : UiObjectBase
     {
         base.Initialize();
 
-        Transform scheduleNo = transform.Find("ScheduleNo");
+        if (cardType == EDataCardType.ExperimentSchedule)
+        {
+            Transform scheduleNo = transform.Find("ScheduleNo");
 
-        if (scheduleNo != null)
-        {
-            experimentScheduleNo = scheduleNo.GetComponent<TextMeshProUGUI>();
-        }
-        else
-        {
-            Debug.LogWarning($"[{name}] ScheduleNo 오브젝트를 찾을 수 없습니다.");
+            if (scheduleNo != null)
+            {
+                experimentScheduleNo = scheduleNo.GetComponent<TextMeshProUGUI>();
+            }
+            else
+            {
+                Debug.LogWarning($"[{name}] ScheduleNo 오브젝트를 찾을 수 없습니다.");
+            }
         }
     }
 
@@ -278,7 +281,7 @@ public class DataCard : UiObjectBase
                 cardImage.color = Color.green;
                 break;
 
-            case EReservedExperimentState.Stopping:
+            case EReservedExperimentState.Resetting:
                 cardImage.color = new Color(1f, 0.5f, 0f);
                 break;
 

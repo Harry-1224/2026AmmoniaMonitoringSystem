@@ -1,184 +1,6 @@
 [
   {
     "No": 1,
-    "Name": "123456",
-    "Group": "Type_A",
-    "Timer": 10000,
-    "Experiments": [
-      {
-        "No": 1,
-        "Name": "Fan 가동",
-        "Description": "실험에 필요한 내부 유속을 공급하기 위해 특정 RPM만큼 Fan 가동",
-        "Group": "Type_A",
-        "Tag": "Ex_Value_1",
-        "Action": "Set",
-        "Value": 16000,
-        "Process": 1
-      },
-      {
-        "No": 2,
-        "Name": "Fan 가동 후 안정화 대기",
-        "Description": "풍속계를 확인하여 원하는 풍속이 안정화 되는 시간을 설정",
-        "Group": "Type_A",
-        "Tag": "Ex_Time_1",
-        "Action": "Timer",
-        "Value": 20,
-        "Process": 2
-      },
-      {
-        "No": 3,
-        "Name": "암모니아 공급 시작",
-        "Description": "실험 조건(암모니아 누출량)에 따라 MFC 개방 Value 조절",
-        "Group": "Type_A",
-        "Tag": "Ex_Value_2",
-        "Action": "Set",
-        "Value": 100,
-        "Process": 3
-      },
-      {
-        "No": 4,
-        "Name": "암모니아 공급 후 암모니아 농도 검출",
-        "Description": "암모니아 공급 후 챔버 까지 도달하는 시간 고려",
-        "Group": "Type_A",
-        "Tag": "Ex_Value_3",
-        "Action": "Set",
-        "Value": 100,
-        "Process": 4
-      },
-      {
-        "No": 5,
-        "Name": "암모니아 검출 후 대기",
-        "Description": null,
-        "Group": "Type_A",
-        "Tag": "Ex_Time_2",
-        "Action": "Timer",
-        "Value": 20,
-        "Process": 5
-      },
-      {
-        "No": 6,
-        "Name": "Water Curtain 작동",
-        "Description": null,
-        "Group": "Type_A",
-        "Tag": "Ex_Sol",
-        "Action": "SolSet",
-        "Value": 3,
-        "Process": 6
-      },
-      {
-        "No": 7,
-        "Name": "실험 종료 시간까지 대기",
-        "Description": null,
-        "Group": "Type_A",
-        "Tag": "Ex_Time_3",
-        "Action": "Timer",
-        "Value": 100,
-        "Process": 7
-      },
-      {
-        "No": 8,
-        "Name": "실험 종료",
-        "Description": null,
-        "Group": "Type_A",
-        "Tag": null,
-        "Action": "None",
-        "Value": 0,
-        "Process": 8
-      }
-    ],
-    "ReservedState": 0
-  },
-  {
-    "No": 2,
-    "Name": "1236",
-    "Group": "Type_A",
-    "Timer": 10000,
-    "Experiments": [
-      {
-        "No": 1,
-        "Name": "Fan 가동",
-        "Description": "실험에 필요한 내부 유속을 공급하기 위해 특정 RPM만큼 Fan 가동",
-        "Group": "Type_A",
-        "Tag": "Ex_Value_1",
-        "Action": "Set",
-        "Value": 16000,
-        "Process": 1
-      },
-      {
-        "No": 2,
-        "Name": "Fan 가동 후 안정화 대기",
-        "Description": "풍속계를 확인하여 원하는 풍속이 안정화 되는 시간을 설정",
-        "Group": "Type_A",
-        "Tag": "Ex_Time_1",
-        "Action": "Timer",
-        "Value": 20,
-        "Process": 2
-      },
-      {
-        "No": 3,
-        "Name": "암모니아 공급 시작",
-        "Description": "실험 조건(암모니아 누출량)에 따라 MFC 개방 Value 조절",
-        "Group": "Type_A",
-        "Tag": "Ex_Value_2",
-        "Action": "Set",
-        "Value": 100,
-        "Process": 3
-      },
-      {
-        "No": 4,
-        "Name": "암모니아 공급 후 암모니아 농도 검출",
-        "Description": "암모니아 공급 후 챔버 까지 도달하는 시간 고려",
-        "Group": "Type_A",
-        "Tag": "Ex_Value_3",
-        "Action": "Set",
-        "Value": 100,
-        "Process": 4
-      },
-      {
-        "No": 5,
-        "Name": "암모니아 검출 후 대기",
-        "Description": null,
-        "Group": "Type_A",
-        "Tag": "Ex_Time_2",
-        "Action": "Timer",
-        "Value": 20,
-        "Process": 5
-      },
-      {
-        "No": 6,
-        "Name": "Water Curtain 작동",
-        "Description": null,
-        "Group": "Type_A",
-        "Tag": "Ex_Sol",
-        "Action": "SolSet",
-        "Value": 2,
-        "Process": 6
-      },
-      {
-        "No": 7,
-        "Name": "실험 종료 시간까지 대기",
-        "Description": null,
-        "Group": "Type_A",
-        "Tag": "Ex_Time_3",
-        "Action": "Timer",
-        "Value": 100,
-        "Process": 7
-      },
-      {
-        "No": 8,
-        "Name": "실험 종료",
-        "Description": null,
-        "Group": "Type_A",
-        "Tag": null,
-        "Action": "None",
-        "Value": 0,
-        "Process": 8
-      }
-    ],
-    "ReservedState": 0
-  },
-  {
-    "No": 3,
     "Name": "789789",
     "Group": "Type_A",
     "Timer": 10000,
@@ -190,7 +12,7 @@
         "Group": "Type_A",
         "Tag": "Ex_Value_1",
         "Action": "Set",
-        "Value": 16000,
+        "Value": 1500,
         "Process": 1
       },
       {
@@ -264,10 +86,13 @@
         "Process": 8
       }
     ],
-    "ReservedState": 0
+    "ReservedState": 0,
+    "CurrentProcess": 0,
+    "TotalProcess": 0,
+    "ProgressRatio": 0.0
   },
   {
-    "No": 4,
+    "No": 2,
     "Name": "75389",
     "Group": "Type_A",
     "Timer": 10000,
@@ -353,6 +178,9 @@
         "Process": 8
       }
     ],
-    "ReservedState": 0
+    "ReservedState": 0,
+    "CurrentProcess": 0,
+    "TotalProcess": 0,
+    "ProgressRatio": 0.0
   }
 ]

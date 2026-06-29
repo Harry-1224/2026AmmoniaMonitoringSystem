@@ -66,7 +66,7 @@ public class Monitor : UiObjectBase
                 // 2. Processing / Stopping 상태만 허용
                 bool isRunning =
                     MonitorSchedule.ReservedState == EReservedExperimentState.Processing
-                    || MonitorSchedule.ReservedState == EReservedExperimentState.Stopping;
+                    || MonitorSchedule.ReservedState == EReservedExperimentState.Resetting;
 
                 ExperimnetUpdate(isRunning);
 
@@ -180,7 +180,7 @@ public class Monitor : UiObjectBase
                     return;
 
                 if (MonitorSchedule.ReservedState != EReservedExperimentState.Processing &&
-                    MonitorSchedule.ReservedState != EReservedExperimentState.Stopping)
+                    MonitorSchedule.ReservedState != EReservedExperimentState.Resetting)
                     return;
 
                 string key = "";
@@ -227,10 +227,10 @@ public class Monitor : UiObjectBase
                 Manager.Experiment.StartExperiment();
                 break;
             case nameof(EMonitorBtnFunc.ExperimentStop):
-                Manager.Experiment.ESD();
+                Manager.Experiment.Pause();
                 break;
             case nameof(EMonitorBtnFunc.ExperimentESD):
-                //Manager.Experiment.;
+                Manager.Experiment.ESD();
                 break;
             case nameof(EMonitorBtnFunc.ExperimentSave):
                 Manager.Experiment.SaveSchedule(WrappingCurrentExperiment());
@@ -374,7 +374,7 @@ public class Monitor : UiObjectBase
                 experimentLampImage.color = Color.green;
                 break;
 
-            case EReservedExperimentState.Stopping:
+            case EReservedExperimentState.Resetting:
                 experimentLampImage.color = new Color(1f, 0.5f, 0f);
                 break;
 
@@ -807,7 +807,7 @@ public class Monitor : UiObjectBase
                 experimentLampImage.color = Color.green;
                 break;
 
-            case EReservedExperimentState.Stopping:
+            case EReservedExperimentState.Resetting:
                 experimentLampImage.color = new Color(1f, 0.5f, 0f);
                 break;
 
