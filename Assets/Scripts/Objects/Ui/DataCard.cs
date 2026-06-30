@@ -24,7 +24,7 @@ public enum EDataCardType
     MonitoringCardC,
 }
 
-public enum EButtonType
+public enum EDataCardButtonType
 {
     ButtonToggle,
     ButtonTimeSet,
@@ -180,7 +180,7 @@ public class DataCard : UiObjectBase
 
         switch (buttonType) 
         {
-            case nameof(EButtonType.ButtonToggle):
+            case nameof(EDataCardButtonType.ButtonToggle):
                 target = info.Values.FirstOrDefault(x => x.PointType == "DO");
 
                 if (target == null)
@@ -196,14 +196,14 @@ public class DataCard : UiObjectBase
                 else value = 1;
                 Manager.Network.ReserveDateWriteing(target.PointType, (ushort)target.Address, value);
                 break;
-            case nameof(EButtonType.ButtonDataSet):
+            case nameof(EDataCardButtonType.ButtonDataSet):
                 target = info.Values.FirstOrDefault(x => x.Type == EDataCategory.Setting);
 
                 value = ushort.Parse(DataSettingField.text);
 
                 Manager.Network.ReserveDateWriteing(target.PointType, (ushort)target.Address, value);
                 break;
-            case nameof(EButtonType.ButtonTimeSet):
+            case nameof(EDataCardButtonType.ButtonTimeSet):
                 break;
 
         }

@@ -24,6 +24,9 @@ public enum EMonitorBtnFunc
     ExperimentNew,
     ScheduleExport,
     ScheduleImport,
+    LoggingStart,
+    LoggingStop,
+    LoggingReset,
     Exit,
 }
 

@@ -29,6 +29,7 @@ public partial class ExperimentManager
     public Dictionary<string, ExperimentWrapper> experimentDefines = new Dictionary<string, ExperimentWrapper>();
     private Dictionary<string, Datas> UpdatedDataForExperiment = new Dictionary<string, Datas>();
 
+    public event Action<EExperimentStateMachine> ExperimentPLCStateChange;
     public event Action<EExperimentStateMachine> ExperimentStateChange;
     public event Action<List<ExperimentWrapper>> ExperimentScheduleChange;
 
@@ -169,25 +170,27 @@ public partial class ExperimentManager
         if (!UpdatedDataForExperiment.TryGetValue("Ex_Reset", out Datas exReset))
             return CurrentState;
 
-        // 실험 진행 중
-        if (exStart.Value == 1)
+        EExperimentStateMachine state = CurrentState;
+
+        if (exStart.Value > 0)
         {
-            return EExperimentStateMachine.Running;
+            state = EExperimentStateMachine.Running;
+        }
+        else if (exReset.Value > 0)
+        {
+            state = EExperimentStateMachine.Resetting;
+        }
+        else
+        {
+            state = EExperimentStateMachine.Idle;
         }
 
-        // 본 실험 완료 후 End 절차 대기
-        if (exStart.Value == 0 && exReset.Value == 1)
+        if (state != CurrentState)
         {
-            return EExperimentStateMachine.Resetting;
+            CurrentState = state;
+            ExperimentPLCStateChange?.Invoke(state);
         }
 
-        // End 절차까지 완료
-        if (exStart.Value == 0 && exReset.Value == 0)
-        {
-            return EExperimentStateMachine.Idle;
-        }
-
-        // 알 수 없는 상태면 이전 상태 유지
         return CurrentState;
     }
 

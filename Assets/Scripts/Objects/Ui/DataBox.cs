@@ -10,7 +10,8 @@ public enum EDataBoxType
 {
     Monitoring,
     Control,
-    Experiment
+    Experiment,
+    Logging
 } 
 public enum EInsturmentType
 {
@@ -190,6 +191,11 @@ public class DataBox : UiObjectBase
         Debug.Log($"[DataBox] {dataBoxType} Box가 클릭되었습니다. 현재 상태: {(isSherinkged ? "최소화" : "최대화")}");
 
         Manager.Ui.OnDataBoxExpanded(this);
+    }
+
+    public void OnClickButton(EMonitorBtnFunc button)
+    {
+
     }
 
     /// <summary>

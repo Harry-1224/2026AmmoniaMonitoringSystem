@@ -2,7 +2,15 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.Rendering;
 
+public enum ELoggingState
+{
+    Start,
+    Logging,
+    Stop,
+    Error,
+}
 public class LoggingManager : ManagerBase
 {
     protected override void Intialize()
@@ -62,6 +70,9 @@ public class LoggingManager : ManagerBase
     public event Action<DateTime> OnLoggingTimingActed;
     public event Action<Exception> OnLoggingTimingFailed;
     public event Action OnLoggingStopped;
+    public event Action<ELoggingState> OnChangeLoggingState;
+
+    public ELoggingState loggingState = ELoggingState.Stop;
 
     public void SetLoggingIntervalMs(int intervalMs)
     {
@@ -75,11 +86,15 @@ public class LoggingManager : ManagerBase
     {
         if (timerCTS != null) return;
 
+        loggingState = ELoggingState.Start;
+
+        OnLoggingStarted?.Invoke();
+        OnChangeLoggingState.Invoke(loggingState);
+
         timerCTS = new CancellationTokenSource();
 
         _ = RunTimer(LoggingIntervalMs, timerCTS.Token);
 
-        OnLoggingStarted?.Invoke();
     }
     public void OnStopLogging()
     {
@@ -90,12 +105,22 @@ public class LoggingManager : ManagerBase
         timerCTS.Dispose();
         timerCTS = null;
 
+
+        loggingState = ELoggingState.Stop;
+
         OnLoggingStopped?.Invoke();
+        OnChangeLoggingState.Invoke(loggingState);
     }
+
+    public ELoggingState CheckLoggingState() => loggingState;
+
     private async Task RunTimer(int intervalMs, CancellationToken token)
     {
         try
         {
+            loggingState = ELoggingState.Logging;
+            OnChangeLoggingState.Invoke(loggingState);
+
             while (!token.IsCancellationRequested)
             {
                 await Task.Delay(intervalMs, token);
@@ -110,6 +135,9 @@ public class LoggingManager : ManagerBase
         catch (Exception ex) 
         {
             OnErrorLogged(nameof(LoggingManager),nameof(RunTimer), ex.Message);
+
+            loggingState = ELoggingState.Error;
+            OnChangeLoggingState.Invoke(loggingState);
             OnLoggingTimingFailed?.Invoke(ex);
         }
     }
