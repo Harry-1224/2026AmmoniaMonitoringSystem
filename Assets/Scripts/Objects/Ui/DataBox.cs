@@ -193,9 +193,23 @@ public class DataBox : UiObjectBase
         Manager.Ui.OnDataBoxExpanded(this);
     }
 
-    public void OnClickButton(EMonitorBtnFunc button)
+    public void OnClickButton(string button)
     {
+        if (dataBoxType == EDataBoxType.Logging && Manager.Experiment.CurrentState != EExperimentStateMachine.Idle) return;
 
+        switch (button)
+        {
+            case nameof(EMonitorBtnFunc.LoggingStart):
+                Manager.Logging.OnStartLogging();
+                break;
+            case nameof(EMonitorBtnFunc.LoggingStop):
+                Manager.Logging.OnStopLogging();
+                break;
+            case nameof(EMonitorBtnFunc.LoggingReset):
+                Manager.Logging.OnStopLogging();
+                Manager.Data.ClearLoggedData();
+                break;
+        }
     }
 
     /// <summary>

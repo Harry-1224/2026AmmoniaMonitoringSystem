@@ -103,7 +103,7 @@ public class DataManager : ManagerBase
         Debug.Log($"[DataManager] DataDictionary 초기화 완료 : {DataDictionary.Count}");
     }
 
-    private void ClearLoggedData()
+    public void ClearLoggedData()
     {
         foreach (var item in DataDictionary)
         {
