@@ -2234,6 +2234,7 @@ RectTransform:
   - {fileID: 1476787747}
   - {fileID: 1803714456}
   - {fileID: 312450853}
+  - {fileID: 932115377}
   m_Father: {fileID: 746029231}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -13024,7 +13025,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 699613422}
-  - component: {fileID: 699613423}
   m_Layer: 5
   m_Name: Content
   m_TagString: Untagged
@@ -13051,32 +13051,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: -0.00091406127}
   m_SizeDelta: {x: 0, y: 300}
   m_Pivot: {x: 0, y: 1}
---- !u!114 &699613423
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 699613421}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 59f8146938fff824cb5fd77236b75775, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.VerticalLayoutGroup
-  m_Padding:
-    m_Left: 0
-    m_Right: 0
-    m_Top: 0
-    m_Bottom: 0
-  m_ChildAlignment: 0
-  m_Spacing: 10
-  m_ChildForceExpandWidth: 1
-  m_ChildForceExpandHeight: 1
-  m_ChildControlWidth: 0
-  m_ChildControlHeight: 0
-  m_ChildScaleWidth: 0
-  m_ChildScaleHeight: 0
-  m_ReverseArrangement: 0
 --- !u!1 &700352034
 GameObject:
   m_ObjectHideFlags: 0
@@ -13774,12 +13748,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DataBox
   ObjectID: ExperimentBox
-  isManagable: 1
+  isManagable: 0
   dataBoxType: 2
   Container: {fileID: 699613422}
   isSherinkged: 1
-  expandedHeight: 1640
-  shrinkHeight: 130
+  expandedHeight: 600
+  shrinkHeight: 80
   ExpandContent: {fileID: 157992507}
   ShrinkContent: {fileID: 1353776860}
 --- !u!114 &746029235
@@ -15966,6 +15940,105 @@ MonoBehaviour:
   hoverColor: {r: 1, g: 0.55, b: 0, a: 1}
   clickColor: {r: 0.1, g: 0.35, b: 1, a: 1}
   clickColorDuration: 0.12
+--- !u!1 &932115376
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 932115377}
+  - component: {fileID: 932115380}
+  - component: {fileID: 932115379}
+  - component: {fileID: 932115378}
+  m_Layer: 5
+  m_Name: DataCard_Ex
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &932115377
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 932115376}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 157992508}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: -20, y: 0}
+  m_SizeDelta: {x: 430, y: 50}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &932115378
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 932115376}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e93fb42b82d28b442b1f6da907e9cd69, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DataCard
+  ObjectID: 
+  isManagable: 0
+  cardType: 0
+  tagText: {fileID: 0}
+  valueText: {fileID: 0}
+  DataSettingField: {fileID: 0}
+  StateButton: {fileID: 0}
+  scheduleNameText: {fileID: 0}
+  scheduleDescriptionText: {fileID: 0}
+  scheduleValue: {fileID: 0}
+  cardImage: {fileID: 0}
+--- !u!114 &932115379
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 932115376}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
+  m_Material: {fileID: 0}
+  m_Color: {r: 0.7264151, g: 0.7264151, b: 0.7264151, a: 1}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
+  m_Type: 1
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
+--- !u!222 &932115380
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 932115376}
+  m_CullTransparentMesh: 1
 --- !u!64 &943277640
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -26760,8 +26833,8 @@ MonoBehaviour:
   dataBoxType: 0
   Container: {fileID: 492974165}
   isSherinkged: 0
-  expandedHeight: 1640
-  shrinkHeight: 130
+  expandedHeight: 600
+  shrinkHeight: 80
   ExpandContent: {fileID: 1243585049}
   ShrinkContent: {fileID: 1320923317}
 --- !u!114 &1816341564

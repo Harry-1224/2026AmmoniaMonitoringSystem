@@ -59,7 +59,7 @@ public partial class UiManager
         }
         if (!uiObjects.TryGetValue("ExperimentBox", out UiObjectBase experimentObj))
         {
-            Debug.LogWarning("[UiManager] ControlBox UI 없음");
+            Debug.LogWarning("[UiManager] ExperimentBox UI 없음");
             return;
         }
 

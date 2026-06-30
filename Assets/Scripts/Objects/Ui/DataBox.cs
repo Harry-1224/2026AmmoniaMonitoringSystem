@@ -147,7 +147,7 @@ public class DataBox : UiObjectBase
         return;
     }
 
-    protected override void                                                                                                                                                                                                                                                                                                                                                          EventSubscriber()
+    protected override void EventSubscriber()
     {
         if (dataBoxType == EDataBoxType.Experiment) Manager.Experiment.ExperimentScheduleChange += OnExperimentScheduleChanged;
         Manager.Data.OnDataChanged += OnDataChanged;

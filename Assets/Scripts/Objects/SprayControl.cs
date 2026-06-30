@@ -5,20 +5,25 @@ using UnityEngine;
 public class SprayControl : UiObjectBase
 {
     [Header("Spray Object")]
-    [SerializeField] private GameObject sprayObject;
+    [SerializeField] public GameObject sprayObject;
 
     
     protected override void EventSubscriber()
     {
-       Manager.Data .OnDataChanged += Test; 
+        base.EventSubscriber();
+        Manager.Data.OnDataChanged += DataChange; 
     }
-    public void Test(Dictionary<string, Datas> datas)
+    protected override void EventUnsubscriber()
+    {
+        base.EventUnsubscriber();
+        Manager.Data.OnDataChanged -= DataChange;
+    }
+    public void DataChange(Dictionary<string, Datas> datas)
     {
         if (datas.ContainsKey(ObjectID))
         {
             sprayObject.SetActive(Convert.ToBoolean(datas[ObjectID].Value));
         }
-            
     }
 
 
