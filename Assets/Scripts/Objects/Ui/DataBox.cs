@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using TMPro;
 using UnityEditor.UIElements;
 using UnityEngine;
 
@@ -50,6 +51,7 @@ public class DataBox : UiObjectBase
 
     public GameObject ExpandContent;
     public GameObject ShrinkContent;
+    private Dictionary<string, GameObject> ShrinkObjects = new Dictionary<string, GameObject>();
 
     private RectTransform rectTransform;
 
@@ -64,6 +66,9 @@ public class DataBox : UiObjectBase
 
         rectTransform = GetComponent<RectTransform>();
 
+        // Shrink Object 등록
+        RegisterShrinkObjects();
+
         //if (scrollViewObject == null)  scrollViewObject = transform.Find("Scroll View").gameObject;
 
         if (Container == null)
@@ -73,7 +78,7 @@ public class DataBox : UiObjectBase
 
         if (Container == null)
         {
-            Debug.LogError("[DataBox] Container를 찾을 수 없습니다. Inspector에 직접 할당하세요.");
+            Debug.LogError($"[DataBox] Container {dataBoxType} 를 찾을 수 없습니다. Inspector에 직접 할당하세요.");
             return;
         }
 
@@ -142,6 +147,9 @@ public class DataBox : UiObjectBase
                 schedules = Manager.Experiment.CallCurrentSchedules(); //실험 Schedule을 받아오는 함수 호출
                 OnExperimentDataCardGenerated(schedules);
 
+                SetCurrentExperiment(Manager.Experiment.CallCurrentSchedule());
+                break;
+            case EDataBoxType.Logging:
                 break;
         }
 
@@ -150,13 +158,13 @@ public class DataBox : UiObjectBase
 
     protected override void EventSubscriber()
     {
-        if (dataBoxType == EDataBoxType.Experiment) Manager.Experiment.ExperimentScheduleChange += OnExperimentScheduleChanged;
+        if (dataBoxType == EDataBoxType.Experiment || dataBoxType == EDataBoxType.Logging) Manager.Experiment.ExperimentScheduleChange += OnExperimentScheduleChanged;
         Manager.Data.OnDataChanged += OnDataChanged;
     }
 
     protected override void EventUnsubscriber()
     {
-        if (dataBoxType == EDataBoxType.Experiment) Manager.Experiment.ExperimentScheduleChange -= OnExperimentScheduleChanged; 
+        if (dataBoxType == EDataBoxType.Experiment || dataBoxType == EDataBoxType.Logging) Manager.Experiment.ExperimentScheduleChange -= OnExperimentScheduleChanged; 
         Manager.Data.OnDataChanged -= OnDataChanged;
     }
 
@@ -172,7 +180,7 @@ public class DataBox : UiObjectBase
                 {
                     Datas data = datas[key];
                     if (dataBoxType != EDataBoxType.Experiment) dataCards[item.Value.Group].OnFunctionCalled(data);
-                    Debug.Log($"[DataBox] Finish to Update DataCards - {item.Value.Group} / {data.Name}");
+                    //Debug.Log($"[DataBox] Finish to Update DataCards - {item.Value.Group} / {data.Name}");
                 }
             }
         }
@@ -199,15 +207,30 @@ public class DataBox : UiObjectBase
 
         switch (button)
         {
-            case nameof(EMonitorBtnFunc.LoggingStart):
+            //Logging 관련 버튼 클릭 시
+            case nameof(EUiBtnFunc.LoggingStart):
                 Manager.Logging.OnStartLogging();
                 break;
-            case nameof(EMonitorBtnFunc.LoggingStop):
+            case nameof(EUiBtnFunc.LoggingStop):
                 Manager.Logging.OnStopLogging();
                 break;
-            case nameof(EMonitorBtnFunc.LoggingReset):
+            case nameof(EUiBtnFunc.LoggingReset):
                 Manager.Logging.OnStopLogging();
                 Manager.Data.ClearLoggedData();
+                break;
+
+            // Experiment 관련 버튼 클릭 시
+            case nameof(EUiBtnFunc.ExperimentStart):
+                Manager.Experiment.StartExperiment();
+                break;
+            case nameof(EUiBtnFunc.ExperimentStop):
+                Manager.Experiment.Pause();
+                break;
+            case nameof(EUiBtnFunc.ExperimentESD):
+                Manager.Experiment.ESD();
+                break;
+            case nameof(EUiBtnFunc.ExperimentReset):
+                Manager.Experiment.ResetExperiment();
                 break;
         }
     }
@@ -403,7 +426,54 @@ public class DataBox : UiObjectBase
 
         rectTransform.sizeDelta = size;
     }
+    /*
+    private void RegisterShrinkObjects()
+    {
+        ShrinkObjects.Clear();
 
+        if (ShrinkContent == null)
+        {
+            Debug.LogWarning($"[DataBox/{dataBoxType}] ShrinkContent가 없습니다.");
+            return;
+        }
+
+        // true : 비활성화된 자식도 검색
+        Transform[] children = ShrinkContent.GetComponentsInChildren<Transform>(true);
+
+        foreach (Transform child in children)
+        {
+            // 자기 자신 제외
+            if (child == ShrinkContent.transform)
+                continue;
+
+            string key = child.name;
+
+            if (ShrinkObjects.ContainsKey(key))
+            {
+                Debug.LogWarning($"[DataBox/{dataBoxType}] 중복된 이름 발견 : {key}");
+                continue;
+            }
+
+            ShrinkObjects.Add(key, child.gameObject);
+
+            Debug.Log($"[DataBox/{dataBoxType}] ShrinkObject 등록 : {key}");
+        }
+    }*/
+    private void RegisterShrinkObjects()
+    {
+        ShrinkObjects.Clear();
+
+        if (ShrinkContent == null)
+            return;
+
+        foreach (Transform child in ShrinkContent.transform)
+        {
+            string key = child.name;
+
+            if (!ShrinkObjects.ContainsKey(key))
+                ShrinkObjects.Add(key, child.gameObject);
+        }
+    }
 
     #endregion
 
@@ -513,7 +583,22 @@ public class DataBox : UiObjectBase
             // card.OnExperimentScheduleUpdated(schedule);
             card.ExperimentScheduleSetting(schedule);
         }
+        SetCurrentExperiment(Manager.Experiment.CallCurrentSchedule());
     }
+
+    private void SetCurrentExperiment(ExperimentWrapper experiment)
+    {
+        // 현재 실험 설정
+        // 1. Expend Content에 현재 실험 정보 표시
+        // 2. Shrink Content에 현재 실험 정보 표시
+        ShrinkObjects["Name"].GetComponent<TextMeshProUGUI>().text = experiment.Name;
+        ShrinkObjects["State"].GetComponent<TextMeshProUGUI>().text = experiment.ReservedState.ToString();
+
+    }
+
+    #endregion
+
+    #region LoggingBox 관련
 
     #endregion
 }

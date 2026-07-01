@@ -245,7 +245,9 @@ public partial class ExperimentManager : ManagerBase
     public void ResetExperiment() => resetRequested = true;
 
     public List<ExperimentWrapper> CallCurrentSchedules() => experimentSchedules;
-    public ExperimentWrapper CallCurrentSchedule(int num) => experimentSchedules[num];
+    public ExperimentWrapper CallSchedule(int num) => experimentSchedules[num];
+    public ExperimentWrapper CallCurrentSchedule() => experimentSchedules[CurrentScheduleIndex];
+    public int CallCurrentScheduleIndex() => CurrentScheduleIndex;
     public bool SaveSchedule(ExperimentWrapper schedule)
     {
         if (schedule == null)

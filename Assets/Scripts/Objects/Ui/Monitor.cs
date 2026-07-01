@@ -13,7 +13,7 @@ public enum EMonitorType
     Setting
 }
 
-public enum EMonitorBtnFunc
+public enum EUiBtnFunc
 {
     ExperimentStart,
     ExperimentStop,
@@ -226,36 +226,36 @@ public class Monitor : UiObjectBase
     {
         switch (func)
         {
-            case nameof(EMonitorBtnFunc.ExperimentStart):
+            case nameof(EUiBtnFunc.ExperimentStart):
                 Manager.Experiment.StartExperiment();
                 break;
-            case nameof(EMonitorBtnFunc.ExperimentStop):
+            case nameof(EUiBtnFunc.ExperimentStop):
                 Manager.Experiment.Pause();
                 break;
-            case nameof(EMonitorBtnFunc.ExperimentESD):
+            case nameof(EUiBtnFunc.ExperimentESD):
                 Manager.Experiment.ESD();
                 break;
-            case nameof(EMonitorBtnFunc.ExperimentSave):
+            case nameof(EUiBtnFunc.ExperimentSave):
                 Manager.Experiment.SaveSchedule(WrappingCurrentExperiment());
                 break;
-            case nameof(EMonitorBtnFunc.ExperimentReset):
+            case nameof(EUiBtnFunc.ExperimentReset):
                 Manager.Experiment.ResetExperiment();
                 break;
-            case nameof(EMonitorBtnFunc.ExperimentDelete):
+            case nameof(EUiBtnFunc.ExperimentDelete):
                 Manager.Experiment.RemoveSchedule();
                 break;
-            case nameof(EMonitorBtnFunc.ExperimentNew):
+            case nameof(EUiBtnFunc.ExperimentNew):
                 ClearExperimentMonitor();
                 break;
-            case nameof(EMonitorBtnFunc.ScheduleExport):
+            case nameof(EUiBtnFunc.ScheduleExport):
                 // TODO: Implement schedule export functionality
                 Manager.Experiment.SaveCurrentSchedules();
                 break;
-            case nameof(EMonitorBtnFunc.ScheduleImport):
+            case nameof(EUiBtnFunc.ScheduleImport):
                 // TODO: Implement schedule import functionality
                 Manager.Experiment.LoadSchedules("");
                 break;
-            case nameof(EMonitorBtnFunc.Exit):
+            case nameof(EUiBtnFunc.Exit):
                 // TODO : Monitor창을 닫을 때 문제가 있을 때 문제를 알리기 위해 UiMnaager에 관련 데이터를 보내고 코루틴으로 대기하다 값을 받아와서 종료할지 말지 결정하는 로직을 작성할 것.
                 break;
         }
@@ -462,7 +462,7 @@ public class Monitor : UiObjectBase
         }
 
         // 현재 선택된 Schedule이 있으면 선택된 Schedule 기준으로 카드 갱신
-        ExperimentWrapper currentSchedule = Manager.Experiment.CallCurrentSchedule(ScheduleNo.value - 1);
+        ExperimentWrapper currentSchedule = Manager.Experiment.CallSchedule(ScheduleNo.value - 1);
 
         if (currentSchedule == null)
         {
@@ -500,7 +500,7 @@ public class Monitor : UiObjectBase
         int scheduleIndex = scheduleNo - 1;
 
         ExperimentWrapper schedule =
-            Manager.Experiment.CallCurrentSchedule(scheduleIndex);
+            Manager.Experiment.CallSchedule(scheduleIndex);
 
         if (schedule == null)
         {

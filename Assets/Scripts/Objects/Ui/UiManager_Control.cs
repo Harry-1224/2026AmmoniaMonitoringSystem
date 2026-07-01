@@ -25,7 +25,7 @@ public partial class UiManager
                 background.gameObject.SetActive(false);
                 break;
             case "MonitorPNID":
-                OnMonitorChanged(EUiScreen.PNID);
+                OnMonitorChanged(EUiScreen.Monitoring);
                 background.gameObject.SetActive(true);
                 break;
             case "MonitorGraph":
@@ -126,7 +126,7 @@ public partial class UiManager
     /// ExperimentBox에서 어떤 실험 스케줄을 선택했는지 Monitor에 전달하는 메서드
     /// </summary>
     /// <param name="num">예약된 Schedule 순서</param>
-    public void SetExperimentMonitor(int num) => HUDScreen[EUiScreen.Experiment.ToString()].GetComponent<Monitor>().SetExperimentMonitor(Manager.Experiment.CallCurrentSchedule(num));
+    public void SetExperimentMonitor(int num) => HUDScreen[EUiScreen.Experiment.ToString()].GetComponent<Monitor>().SetExperimentMonitor(Manager.Experiment.CallSchedule(num));
     /// <summary>
     ///  ExperimentBox에서 어떤 실험 스케줄을 선택했는지 Monitor에 전달하는 메서드
     /// </summary>

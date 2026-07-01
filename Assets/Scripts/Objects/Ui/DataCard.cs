@@ -56,6 +56,19 @@ public class DataCard : UiObjectBase
 
     public Button StateButton;
 
+    [Header("MultiSlot")]
+
+    // MultiSlot TextMeshProUGUI를 관리하기 위한 규칙
+    public string MultiSlotTextRule = "MultiText_";
+    public string MultiSlotValueRule = "MultiValueText_";
+    public List<string> MultiSlotNames = new List<string>();
+
+
+    // Main Value 외에도 여러 개의 TextMeshProUGUI를 관리하기 위한 리스트
+    private List<TextMeshProUGUI> MultiSlotTexts = new List<TextMeshProUGUI>();
+    private List<TextMeshProUGUI> MultiSlotValueTexts = new List<TextMeshProUGUI>();
+
+
     [Header("Experiment Schedule")]
     public TextMeshProUGUI scheduleNameText;
     public TextMeshProUGUI scheduleDescriptionText;
@@ -79,6 +92,8 @@ public class DataCard : UiObjectBase
     protected override void Initialize()
     {
         base.Initialize();
+
+        InitializeMultiSlots();
 
         if (cardType == EDataCardType.ExperimentSchedule)
         {
@@ -123,7 +138,53 @@ public class DataCard : UiObjectBase
                 .ToList();
         }
     }
+    private void InitializeMultiSlots()
+    {
+        MultiSlotTexts.Clear();
+        MultiSlotValueTexts.Clear();
 
+        TextMeshProUGUI[] texts =
+            GetComponentsInChildren<TextMeshProUGUI>(true);
+
+        MultiSlotTexts = GetTextsByRule(texts, MultiSlotTextRule);
+        MultiSlotValueTexts = GetTextsByRule(texts, MultiSlotValueRule);
+
+        // MultiSlotNames -> MultiText에 적용
+        for (int i = 0; i < MultiSlotTexts.Count; i++)
+        {
+            if (i >= MultiSlotNames.Count)
+                break;
+
+            if (MultiSlotTexts[i] == null)
+                continue;
+
+            MultiSlotTexts[i].text = $"{MultiSlotNames[i]} :";
+
+        }
+
+
+        Debug.Log(
+            $"[{name}] MultiText : {MultiSlotTexts.Count}, " +
+            $"MultiValue : {MultiSlotValueTexts.Count}");
+    }
+
+    private List<TextMeshProUGUI> GetTextsByRule(
+        TextMeshProUGUI[] texts,
+        string rule)
+    {
+        return texts
+            .Where(t => t.name.StartsWith(rule))
+            .OrderBy(t =>
+            {
+                string numberText = t.name.Replace(rule, "");
+
+                if (int.TryParse(numberText, out int number))
+                    return number;
+
+                return int.MaxValue;
+            })
+            .ToList();
+    }
     protected override void EventSubscriber()
     {
         base.EventSubscriber();
@@ -238,11 +299,30 @@ public class DataCard : UiObjectBase
 
     private void UpdateValueText(Datas data)
     {
-        if (valueText != null)
+        if (valueText == null)
+        {
+            Debug.LogWarning($"[DataCard] Value Text is null : {ObjectID}");
+            return;
+        }
+
+        if (cardType == EDataCardType.InputDataB)
+        {
+            valueText.text = (int)data.Value switch
+            {
+                0 => "Normal",
+                1 => "High",
+                2 => "Low",
+                _ => data.Value.ToString()
+            };
+        }
+        else if (cardType == EDataCardType.OutputDataA)
+        {
+            valueText.text = data.Value > 0 ? "Open" : "Close";
+        }
+        else
         {
             valueText.text = data.Value.ToString();
         }
-        Debug.Log($"[DataCard] Value Update : {ObjectID}");
     }
 
     private void UpdateCustomText(Datas data)
@@ -261,7 +341,13 @@ public class DataCard : UiObjectBase
                 StateButton.image.color = Color.red;
         }
     }
+    public void SetMultiValue(int index, string value)
+    {
+        if (index < 0 || index >= MultiSlotValueTexts.Count)
+            return;
 
+        MultiSlotValueTexts[index].text = value;
+    }
     #region ExperimentScheduleCard
 
     [SerializeField] private Image cardImage;
@@ -295,8 +381,6 @@ public class DataCard : UiObjectBase
         }
     }
     #endregion
-
-
 
     #region ExperimentInfomationCard
     public void ExperimentdataSetting(ExperimentInfo info)

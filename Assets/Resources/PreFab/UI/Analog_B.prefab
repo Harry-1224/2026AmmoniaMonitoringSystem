@@ -366,13 +366,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DataCard
   ObjectID: 
-  cardType: 1
+  isManagable: 0
+  cardType: 0
   tagText: {fileID: 309354840384606546}
   valueText: {fileID: 3068558482010092560}
+  DataSettingField: {fileID: 0}
   StateButton: {fileID: 0}
+  MultiSlotTextRule: MultiText_
+  MultiSlotValueRule: MultiValueText_
+  MultiSlotNames: []
   scheduleNameText: {fileID: 0}
   scheduleDescriptionText: {fileID: 0}
   scheduleValue: {fileID: 0}
+  cardImage: {fileID: 0}
 --- !u!114 &3817846513582877641
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -386,6 +392,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UIButtonColorInteraction
   ObjectID: 
+  isManagable: 0
   targetImage: {fileID: 0}
   hoverColor: {r: 1, g: 0.9254902, b: 0.8352941, a: 1}
   clickColor: {r: 1, g: 1, b: 1, a: 1}

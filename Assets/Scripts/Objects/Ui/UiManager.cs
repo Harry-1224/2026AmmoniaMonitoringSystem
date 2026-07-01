@@ -13,7 +13,7 @@ public enum EUi
 public enum EUiScreen
 {
     Basic,
-    PNID,
+    Monitoring,
     Graph,
     Setting,
     Experiment,

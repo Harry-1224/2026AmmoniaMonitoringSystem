@@ -718,7 +718,7 @@ GameObject:
   - component: {fileID: 3544832452839242849}
   - component: {fileID: 1407677509837621425}
   m_Layer: 5
-  m_Name: Text_TagValue2
+  m_Name: MultiValueText_2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1263,6 +1263,11 @@ MonoBehaviour:
   valueText: {fileID: 3068558482010092560}
   DataSettingField: {fileID: 5324782873947430834}
   StateButton: {fileID: 0}
+  MultiSlotTextRule: MultiText_
+  MultiSlotValueRule: MultiValueText_
+  MultiSlotNames:
+  - Flow
+  - Intergation
   scheduleNameText: {fileID: 0}
   scheduleDescriptionText: {fileID: 0}
   scheduleValue: {fileID: 0}
@@ -1331,7 +1336,7 @@ GameObject:
   - component: {fileID: 243510569336733716}
   - component: {fileID: 2665058444869388399}
   m_Layer: 5
-  m_Name: Text_TagValue3
+  m_Name: MultiValueText_2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1543,7 +1548,7 @@ GameObject:
   - component: {fileID: 423962746926800115}
   - component: {fileID: 2486422231457387953}
   m_Layer: 5
-  m_Name: Text_TagName2
+  m_Name: MultiText_1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1680,7 +1685,7 @@ GameObject:
   - component: {fileID: 1692388855384501339}
   - component: {fileID: 2719487197898016253}
   m_Layer: 5
-  m_Name: Text_TagName3
+  m_Name: MultiText_2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

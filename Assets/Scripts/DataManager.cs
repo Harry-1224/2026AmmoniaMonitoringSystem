@@ -30,6 +30,7 @@ public class DataManager : ManagerBase
     private Dictionary<string, Datas> dataBuffer = new();
 
     private DocumentController documentController = new DocumentController();
+
     protected override void Update()
     {
         while (true)
