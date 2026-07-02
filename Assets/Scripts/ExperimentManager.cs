@@ -180,7 +180,8 @@ public partial class ExperimentManager : ManagerBase
             x.Key.StartsWith("Experiment_Process_") ||
             x.Key == "Ex_Start" ||
             x.Key == "Ex_Stop" ||
-            x.Key == "Ex_Reset")
+            x.Key == "Ex_Reset" ||
+            x.Key == "Ex_ESD")
             .ToDictionary(x => x.Key, x => x.Value);
 
         Debug.Log($"[Experiment] Process 데이터 초기화 : {UpdatedDataForExperiment.Count}");

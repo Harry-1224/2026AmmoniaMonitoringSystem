@@ -509,6 +509,13 @@ public class DataBox : UiObjectBase
     }
     private void OnExperimentScheduleChanged(List<ExperimentWrapper> newSchedules)
     {
+        if (dataBoxType == EDataBoxType.Logging)
+        {
+            // Logging Box에서 실험 Schedule이 변경되었을 때 처리할 로직 추가
+            // 예: Logging Box의 DataCard를 업데이트하거나, Logging 관련 UI를 갱신하는 등의 작업
+            return;
+        }
+
         if (dataBoxType != EDataBoxType.Experiment) return;
 
         if (Container == null)
@@ -585,7 +592,6 @@ public class DataBox : UiObjectBase
         }
         SetCurrentExperiment(Manager.Experiment.CallCurrentSchedule());
     }
-
     private void SetCurrentExperiment(ExperimentWrapper experiment)
     {
         // 현재 실험 설정
@@ -600,5 +606,9 @@ public class DataBox : UiObjectBase
 
     #region LoggingBox 관련
 
+    private void SetCurrentLogging()
+    {
+        ShrinkObjects["Time"].GetComponent<TextMeshProUGUI>().text = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+    }
     #endregion
 }

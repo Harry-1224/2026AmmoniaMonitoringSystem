@@ -128,6 +128,47 @@ public partial class ExperimentManager
                 case EExperimentStateMachine.Shutdown:
                     // NOTE : 즉시 시스템 종료(FAN, Water Supply, MFC 정지)
 
+                    // 즉시 자동 실험 중지
+                    isProcessing = false;
+                    waitPLCResponse = false;
+                    timeoutRunning = false;
+
+                    // 현재 진행중인 실험 상태 변경
+                    if (CurrentScheduleIndex >= 0 &&
+                        CurrentScheduleIndex < experimentSchedules.Count)
+                    {
+                        var shutdownSchedule = experimentSchedules[CurrentScheduleIndex];
+
+                        if (shutdownSchedule.ReservedState ==
+                            EReservedExperimentState.Processing)
+                        {
+                            SettingExperimentState(
+                                shutdownSchedule,
+                                EReservedExperimentState.Failed);
+                        }
+                    }
+
+                    // Ex_ESD = 1 전송
+                    var esdData = Manager.Data.CallData<InstrumentInfo>("Ex_ESD");
+
+                    if (esdData == null)
+                    {
+                        Debug.LogError("[Shutdown] Ex_ESD Instrument 없음");
+                        break;
+                    }
+
+                    Manager.Network.ReserveDateWriteing(
+                        esdData.PointType,
+                        (ushort)esdData.Address,
+                        1
+                    );
+
+                    Debug.Log("[Shutdown] Ex_ESD = 1 전송");
+
+
+
+                    /*
+
                     // 1. isProcessing 거짓(CheckMachineState()함수 중 명령에 의해 작동될 때로 수정)
 
                     // 2. 다음 실험 절차 검색/현재 실험 index 최신화(진행했던 실험의 State는 Failed로 설정)
@@ -147,7 +188,7 @@ public partial class ExperimentManager
                     {
                         Debug.LogError("[Shutdown] Type_ESD SettingValue 실패");
                         break;
-                    }
+                    }*/
                     break;
             }
 
