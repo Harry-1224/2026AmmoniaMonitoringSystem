@@ -634,6 +634,7 @@ GameObject:
   - component: {fileID: 8950418181554302627}
   - component: {fileID: 3886245830381295348}
   - component: {fileID: 6588582344786345348}
+  - component: {fileID: 4755395113165362131}
   m_Layer: 5
   m_Name: MonitoringCardA
   m_TagString: Untagged
@@ -703,3 +704,29 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &4755395113165362131
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8965792329159909670}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e93fb42b82d28b442b1f6da907e9cd69, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DataCard
+  ObjectID: 
+  isManagable: 0
+  cardType: 8
+  tagText: {fileID: 2106872065618019806}
+  valueText: {fileID: 9145502417628832231}
+  DataSettingField: {fileID: 0}
+  StateButton: {fileID: 0}
+  MultiSlotTextRule: MultiSlot_
+  MultiSlotValueRule: MultiValue_
+  MultiSlotNames: []
+  scheduleNameText: {fileID: 0}
+  scheduleDescriptionText: {fileID: 0}
+  scheduleValue: {fileID: 0}
+  cardImage: {fileID: 0}

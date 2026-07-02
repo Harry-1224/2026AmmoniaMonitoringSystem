@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using TMPro;
@@ -214,9 +215,14 @@ public class DataBox : UiObjectBase
             case nameof(EUiBtnFunc.LoggingStop):
                 Manager.Logging.OnStopLogging();
                 break;
+            case nameof(EUiBtnFunc.LoggingSave):
+                Manager.Logging.OnStopLogging();
+                Manager.Data.ExportLoggedData();
+                break;
             case nameof(EUiBtnFunc.LoggingReset):
                 Manager.Logging.OnStopLogging();
                 Manager.Data.ClearLoggedData();
+                Manager.Logging.OnStopLogging();
                 break;
 
             // Experiment 관련 버튼 클릭 시

@@ -57,7 +57,6 @@ public class DataCard : UiObjectBase
     public Button StateButton;
 
     [Header("MultiSlot")]
-
     // MultiSlot TextMeshProUGUI를 관리하기 위한 규칙
     public string MultiSlotTextRule = "MultiText_";
     public string MultiSlotValueRule = "MultiValueText_";
@@ -112,11 +111,13 @@ public class DataCard : UiObjectBase
 
     public void Initialize(InstrumentInfo InstrumentInfo)
     {
-        ObjectID = InstrumentInfo.Group;
+        if(string.IsNullOrEmpty(ObjectID))
+        {
+            ObjectID = InstrumentInfo.Group;
+            UpdateTagText(ObjectID);
+        }
 
         info[InstrumentInfo.Tag] = InstrumentInfo;
-
-        UpdateTagText(ObjectID);
 
     }
     public void Initialize(ExperimentInfo experimentInfo)
@@ -163,9 +164,7 @@ public class DataCard : UiObjectBase
         }
 
 
-        Debug.Log(
-            $"[{name}] MultiText : {MultiSlotTexts.Count}, " +
-            $"MultiValue : {MultiSlotValueTexts.Count}");
+        //Debug.Log($"[{name}] MultiText : {MultiSlotTexts.Count}, " + $"MultiValue : {MultiSlotValueTexts.Count}");
     }
 
     private List<TextMeshProUGUI> GetTextsByRule(
@@ -294,7 +293,8 @@ public class DataCard : UiObjectBase
     private void UpdateTagText(string tag)
     {
         if (tagText != null)
-            tagText.text = tag + " : ";
+            //tagText.text = tag + " : ";
+            tagText.text = tag;
     }
 
     private void UpdateValueText(Datas data)

@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 using UnityEditor;
+using UnityEditor.Timeline.Actions;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
@@ -27,6 +28,8 @@ public enum EUiBtnFunc
     LoggingStart,
     LoggingStop,
     LoggingReset,
+    LoggingSave,
+    SettingApply,
     Exit,
 }
 
@@ -176,6 +179,23 @@ public class Monitor : UiObjectBase
         switch (MonitorType)
         {
             case EMonitorType.Monitoring:
+                try
+                {
+                    // DataManager에서 Data가 변경될 때마다 DataBox는 DataManager에서 Data를 받아와서 DataCard를 업데이트한다.
+                    foreach (var item in instruments)
+                    {
+                        string infoKey = item.Key;
+                        if (obj.ContainsKey(infoKey))
+                        {
+                            Datas data = obj[infoKey];
+                            monitoringCards[item.Value.Group].OnFunctionCalled(data);
+                        }
+                    }
+                }
+                catch (System.Exception ex)
+                {
+                    Debug.LogError($"[Monitor/{MonitorType.ToString()}] Data 변경 처리 중 오류 발생: {ex.Message}");
+                }
 
                 break;
             case EMonitorType.Experiment:
@@ -258,6 +278,9 @@ public class Monitor : UiObjectBase
             case nameof(EUiBtnFunc.Exit):
                 // TODO : Monitor창을 닫을 때 문제가 있을 때 문제를 알리기 위해 UiMnaager에 관련 데이터를 보내고 코루틴으로 대기하다 값을 받아와서 종료할지 말지 결정하는 로직을 작성할 것.
                 break;
+            default :
+
+                break;
         }
 
     }
@@ -280,6 +303,9 @@ public class Monitor : UiObjectBase
     #region Data Monitoring
     private Dictionary<string, TextMeshProUGUI> monitoringTexts = new Dictionary<string, TextMeshProUGUI>();
     private Dictionary<string, DataCard> monitoringCards = new Dictionary<string, DataCard>();
+    private Dictionary<string, Image> monitoringButtons = new Dictionary<string, Image>();
+    private Dictionary<string, InstrumentInfo> instruments = new Dictionary<string, InstrumentInfo>();
+
 
     // monitoringTexts에 TextMeshProUGUI 컴포넌트를 등록하는 로직, Key는 Instrument의 Tag과 일치해야 함
     public void RegistText(TextMeshProUGUI text, string key) => monitoringTexts[key] = text;
@@ -304,20 +330,29 @@ public class Monitor : UiObjectBase
 
         DataCard[] cards = cardRoot.GetComponentsInChildren<DataCard>(true);
 
+       instruments = Manager.Data.CallData<Dictionary<string, InstrumentInfo>>("Monitoring");
+
         foreach (DataCard card in cards)
         {
-            string tagNo = card.gameObject.name.Trim();
+            string tag = card.gameObject.name.Trim();
 
-            if (string.IsNullOrEmpty(tagNo))
+            if (string.IsNullOrEmpty(tag))
                 continue;
 
-            if (monitoringCards.ContainsKey(tagNo))
+            if (monitoringCards.ContainsKey(tag))
             {
-                Debug.LogWarning($"[Monitor] 중복 DataCard 이름 발견: {tagNo}");
+                //Debug.LogWarning($"[Monitor] 중복 DataCard 이름 발견: {tag}");
                 continue;
             }
 
-            monitoringCards.Add(tagNo, card);
+            var infos = instruments.Values.Where(x => x.Group == tag);
+
+            foreach (var info in infos)
+            {
+                card.Initialize(info);
+                card.OnFunctionCalled(Manager.Data.CallData<Datas>(info.Tag));
+            }
+            monitoringCards.Add(tag, card);
         }
 
         Debug.Log($"[Monitor] Monitoring DataCard 등록 완료: {monitoringCards.Count}개");
@@ -332,7 +367,7 @@ public class Monitor : UiObjectBase
             return;
         }
 
-        //card.UpdateCard(info);
+        //card.UpdateCard(  );
     }
 
 
@@ -355,7 +390,7 @@ public class Monitor : UiObjectBase
     private int totalProcess;
 
 
-    private string DefaultTimeout = "100";
+    private string DefaultTimeout = "100000";
     private int currentScheduleIndex = -1;
     private bool isProcessing = false;
     private ExperimentWrapper MonitorSchedule;
@@ -864,6 +899,8 @@ public class Monitor : UiObjectBase
     #region Setting
     // 1. Network 변수
     // 2. InstrumentInfo 변수
+
+
 
     #endregion
 }

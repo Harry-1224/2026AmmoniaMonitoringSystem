@@ -99,14 +99,18 @@ public class LoggingManager : ManagerBase
     public void OnStopLogging()
     {
         if (timerCTS == null)
+        {
+            OnChangeLoggingState.Invoke(loggingState);
             return;
+        }
+
 
         timerCTS.Cancel();
         timerCTS.Dispose();
         timerCTS = null;
 
-
         loggingState = ELoggingState.Stop;
+
 
         OnLoggingStopped?.Invoke();
         OnChangeLoggingState.Invoke(loggingState);

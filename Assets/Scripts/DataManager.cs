@@ -12,6 +12,7 @@ public class Datas
 {
     public string Name;
     public float Value;
+    public string Group;
     public List<string> LoggedData = new List<string>();
 }
 
@@ -22,6 +23,8 @@ public class DataManager : ManagerBase
     //  - 데이터 관리 시스템 구현, NetworkManager로부터 데이터를 수신하여 저장 및 관리
 
     public string SavePath = "";
+
+    public bool isDataLogged = false;
 
     private Dictionary<string , ExperimentWrapper> experimentDefine = new Dictionary<string, ExperimentWrapper>();
     private List<ExperimentInfo> experimentInfos = new List<ExperimentInfo>();
@@ -106,6 +109,8 @@ public class DataManager : ManagerBase
 
     public void ClearLoggedData()
     {
+        isDataLogged = false;
+
         foreach (var item in DataDictionary)
         {
             item.Value.LoggedData.Clear();
@@ -192,13 +197,29 @@ public class DataManager : ManagerBase
 
             return (T)(object)result;
         }
-        else if (typeof(T) == typeof(Dictionary<string, Datas>)) 
-        { 
-            if(dataName == null ) return (T)(object)DataDictionary;
+        else if (typeof(T) == typeof(Dictionary<string, Datas>))
+        {
+            if (dataName == null) return (T)(object)DataDictionary;
+
+            var result = InstrumentInfos.Values
+                .Where(x => x.Group == dataName)
+                .Where(x => DataDictionary.ContainsKey(x.Tag))
+                .ToDictionary(
+                    x => x.Tag,
+                    x => DataDictionary[x.Tag]);
+
+            return (T)(object)result;
+        }
+
+        else if (typeof(T) == typeof(Datas))
+        {
+            DataDictionary.TryGetValue(dataName, out Datas data);
+
+            if (data != null) return (T)(object)data;
             else
             {
-                // TODO : dataName이 null이 아닐 때, 해당 dataName에 해당하는 데이터만 반환하도록 구현
-                return (T)(object)DataDictionary;
+                Debug.LogError($"[CallData] Data not found : {dataName}");
+                return default(T);
             }
         }
         else if (typeof(T) == typeof(List<string>))
@@ -256,6 +277,8 @@ public class DataManager : ManagerBase
     #region LoggingSystem
     private void LoggingTimingActedHandler(DateTime loggingTime)
     {
+        isDataLogged = true;
+
         foreach (var item in DataDictionary)
         {
             Datas data = item.Value;

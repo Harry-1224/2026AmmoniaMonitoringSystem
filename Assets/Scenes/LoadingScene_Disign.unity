@@ -9135,7 +9135,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.ScrollRect
   m_Content: {fileID: 699613422}
-  m_Horizontal: 1
+  m_Horizontal: 0
   m_Vertical: 1
   m_MovementType: 1
   m_Elasticity: 0.1
@@ -9146,7 +9146,7 @@ MonoBehaviour:
   m_HorizontalScrollbar: {fileID: 0}
   m_VerticalScrollbar: {fileID: 1079453304}
   m_HorizontalScrollbarVisibility: 2
-  m_VerticalScrollbarVisibility: 2
+  m_VerticalScrollbarVisibility: 0
   m_HorizontalScrollbarSpacing: -3
   m_VerticalScrollbarSpacing: -3
   m_OnValueChanged:
@@ -11401,6 +11401,7 @@ GameObject:
   m_Component:
   - component: {fileID: 492974165}
   - component: {fileID: 492974166}
+  - component: {fileID: 492974167}
   m_Layer: 5
   m_Name: Content
   m_TagString: Untagged
@@ -11425,7 +11426,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0.0009765625}
-  m_SizeDelta: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: -1380}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &492974166
 MonoBehaviour:
@@ -11440,19 +11441,33 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.VerticalLayoutGroup
   m_Padding:
-    m_Left: 0
-    m_Right: 0
-    m_Top: 0
-    m_Bottom: 0
+    m_Left: 5
+    m_Right: 5
+    m_Top: 5
+    m_Bottom: 5
   m_ChildAlignment: 0
   m_Spacing: 10
-  m_ChildForceExpandWidth: 0
+  m_ChildForceExpandWidth: 1
   m_ChildForceExpandHeight: 0
-  m_ChildControlWidth: 0
+  m_ChildControlWidth: 1
   m_ChildControlHeight: 0
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
+--- !u!114 &492974167
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 492974164}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3245ec927659c4140ac4f8d17403cc18, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.ContentSizeFitter
+  m_HorizontalFit: 0
+  m_VerticalFit: 2
 --- !u!1 &508010246
 GameObject:
   m_ObjectHideFlags: 0
@@ -11542,7 +11557,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.ScrollRect
   m_Content: {fileID: 959486231}
-  m_Horizontal: 1
+  m_Horizontal: 0
   m_Vertical: 1
   m_MovementType: 1
   m_Elasticity: 0.1
@@ -14049,6 +14064,7 @@ GameObject:
   m_Component:
   - component: {fileID: 699613422}
   - component: {fileID: 699613423}
+  - component: {fileID: 699613424}
   m_Layer: 5
   m_Name: Content
   m_TagString: Untagged
@@ -14088,19 +14104,33 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.VerticalLayoutGroup
   m_Padding:
-    m_Left: 0
-    m_Right: 0
-    m_Top: 0
-    m_Bottom: 0
+    m_Left: 5
+    m_Right: 5
+    m_Top: 5
+    m_Bottom: 5
   m_ChildAlignment: 0
   m_Spacing: 10
-  m_ChildForceExpandWidth: 0
+  m_ChildForceExpandWidth: 1
   m_ChildForceExpandHeight: 0
-  m_ChildControlWidth: 0
+  m_ChildControlWidth: 1
   m_ChildControlHeight: 0
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
+--- !u!114 &699613424
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 699613421}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3245ec927659c4140ac4f8d17403cc18, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.ContentSizeFitter
+  m_HorizontalFit: 0
+  m_VerticalFit: 2
 --- !u!1 &700352034
 GameObject:
   m_ObjectHideFlags: 0
@@ -16911,7 +16941,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 881261393}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 112824564}
+        m_TargetAssemblyTypeName: Monitor, Assembly-CSharp
+        m_MethodName: OnBtnClicked
+        m_Mode: 5
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &881261393
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -17003,7 +17045,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.ScrollRect
   m_Content: {fileID: 492974165}
-  m_Horizontal: 1
+  m_Horizontal: 0
   m_Vertical: 1
   m_MovementType: 1
   m_Elasticity: 0.1
@@ -17068,6 +17110,7 @@ GameObject:
   m_Component:
   - component: {fileID: 898281994}
   - component: {fileID: 898281995}
+  - component: {fileID: 898281996}
   m_Layer: 5
   m_Name: Content
   m_TagString: Untagged
@@ -17092,7 +17135,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: -1617.0978}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &898281995
 MonoBehaviour:
@@ -17107,19 +17150,33 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.VerticalLayoutGroup
   m_Padding:
-    m_Left: 0
-    m_Right: 0
-    m_Top: 0
-    m_Bottom: 0
+    m_Left: 5
+    m_Right: 5
+    m_Top: 5
+    m_Bottom: 5
   m_ChildAlignment: 0
   m_Spacing: 10
-  m_ChildForceExpandWidth: 0
+  m_ChildForceExpandWidth: 1
   m_ChildForceExpandHeight: 0
-  m_ChildControlWidth: 0
+  m_ChildControlWidth: 1
   m_ChildControlHeight: 0
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
+--- !u!114 &898281996
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 898281993}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3245ec927659c4140ac4f8d17403cc18, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.ContentSizeFitter
+  m_HorizontalFit: 0
+  m_VerticalFit: 2
 --- !u!1 &910407316
 GameObject:
   m_ObjectHideFlags: 0
@@ -18018,6 +18075,7 @@ GameObject:
   m_Component:
   - component: {fileID: 959486231}
   - component: {fileID: 959486232}
+  - component: {fileID: 959486233}
   m_Layer: 5
   m_Name: Content
   m_TagString: Untagged
@@ -18057,19 +18115,33 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.VerticalLayoutGroup
   m_Padding:
-    m_Left: 0
-    m_Right: 0
-    m_Top: 0
-    m_Bottom: 0
+    m_Left: 5
+    m_Right: 5
+    m_Top: 5
+    m_Bottom: 5
   m_ChildAlignment: 0
   m_Spacing: 10
   m_ChildForceExpandWidth: 1
-  m_ChildForceExpandHeight: 1
-  m_ChildControlWidth: 0
+  m_ChildForceExpandHeight: 0
+  m_ChildControlWidth: 1
   m_ChildControlHeight: 0
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
+--- !u!114 &959486233
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 959486230}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3245ec927659c4140ac4f8d17403cc18, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.ContentSizeFitter
+  m_HorizontalFit: 0
+  m_VerticalFit: 2
 --- !u!1 &985140473
 GameObject:
   m_ObjectHideFlags: 0
@@ -18757,7 +18829,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.ScrollRect
   m_Content: {fileID: 898281994}
-  m_Horizontal: 1
+  m_Horizontal: 0
   m_Vertical: 1
   m_MovementType: 1
   m_Elasticity: 0.1
@@ -20332,7 +20404,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1108183941}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 112824564}
+        m_TargetAssemblyTypeName: Monitor, Assembly-CSharp
+        m_MethodName: OnBtnClicked
+        m_Mode: 5
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &1108183941
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -27466,7 +27550,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1584053099}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 112824564}
+        m_TargetAssemblyTypeName: Monitor, Assembly-CSharp
+        m_MethodName: OnBtnClicked
+        m_Mode: 5
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &1584053099
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -47156,76 +47252,16 @@ PrefabInstance:
       propertyPath: m_Name
       value: FT303
       objectReference: {fileID: 0}
-    - target: {fileID: 8965792329159909670, guid: 9e3a96d03247aa34499f0c0ac1c1a9ee, type: 3}
-      propertyPath: m_IsActive
-      value: 1
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 8965792329159909670, guid: 9e3a96d03247aa34499f0c0ac1c1a9ee, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 4347019778309025207}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 9e3a96d03247aa34499f0c0ac1c1a9ee, type: 3}
 --- !u!224 &4347019778309025203 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 8950418181554302627, guid: 9e3a96d03247aa34499f0c0ac1c1a9ee, type: 3}
   m_PrefabInstance: {fileID: 4347019778309025202}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &4347019778309025204 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 2821983717006259169, guid: 9e3a96d03247aa34499f0c0ac1c1a9ee, type: 3}
-  m_PrefabInstance: {fileID: 4347019778309025202}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Unity.TextMeshPro::TMPro.TextMeshProUGUI
---- !u!114 &4347019778309025205 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 2106872065618019806, guid: 9e3a96d03247aa34499f0c0ac1c1a9ee, type: 3}
-  m_PrefabInstance: {fileID: 4347019778309025202}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Unity.TextMeshPro::TMPro.TextMeshProUGUI
---- !u!1 &4347019778309025206 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 8965792329159909670, guid: 9e3a96d03247aa34499f0c0ac1c1a9ee, type: 3}
-  m_PrefabInstance: {fileID: 4347019778309025202}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &4347019778309025207
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4347019778309025206}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e93fb42b82d28b442b1f6da907e9cd69, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::DataCard
-  ObjectID: 
-  isManagable: 0
-  cardType: 8
-  tagText: {fileID: 4347019778309025205}
-  valueText: {fileID: 4347019778309025204}
-  DataSettingField: {fileID: 0}
-  StateButton: {fileID: 0}
-  MultiSlotTextRule: MultiSlot_
-  MultiSlotValueRule: MultiValue_
-  MultiSlotNames: []
-  scheduleNameText: {fileID: 0}
-  scheduleDescriptionText: {fileID: 0}
-  scheduleValue: {fileID: 0}
-  cardImage: {fileID: 0}
 --- !u!4 &4352862832018354745
 Transform:
   m_ObjectHideFlags: 0

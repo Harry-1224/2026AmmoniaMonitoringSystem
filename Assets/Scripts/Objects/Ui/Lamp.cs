@@ -108,13 +108,12 @@ public class Lamp : UiObjectBase
         switch (state)
         {
             case ELoggingState.Start:
-                ChangeLampColor(EUiLampColor.Yellow);
-                break;
             case ELoggingState.Logging:
                 ChangeLampColor(EUiLampColor.Green);
                 break;
             case ELoggingState.Stop:
-                ChangeLampColor(EUiLampColor.Off);
+                if(Manager.Data.isDataLogged)ChangeLampColor(EUiLampColor.Yellow);
+                else ChangeLampColor(EUiLampColor.Off);
                 break;
             case ELoggingState.Error:
                 ChangeLampColor(EUiLampColor.Red);
