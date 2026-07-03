@@ -690,7 +690,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: f64d758dcb94740459bfa4f8c337dbc2, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 86ab4973c472fc44882f98936dfa2f26, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -713,13 +713,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DataCard
   ObjectID: 
+  isManagable: 0
   cardType: 7
   tagText: {fileID: 0}
   valueText: {fileID: 0}
+  DataSettingField: {fileID: 0}
   StateButton: {fileID: 0}
+  MultiSlotTextRule: MultiText_
+  MultiSlotValueRule: MultiValueText_
+  MultiSlotNames: []
   scheduleNameText: {fileID: 309354840384606546}
   scheduleDescriptionText: {fileID: 3068558482010092560}
   scheduleValue: {fileID: 2502990586610236505}
+  cardImage: {fileID: 0}
 --- !u!1 &5113821210950047634
 GameObject:
   m_ObjectHideFlags: 0
