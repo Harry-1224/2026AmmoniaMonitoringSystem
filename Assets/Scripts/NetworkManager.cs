@@ -135,6 +135,14 @@ public class NetworkManager : ManagerBase
     public ENetworkState NetworkState { get; private set; } = ENetworkState.Disconnected;
     public bool isConnected { get; private set; } = false;
 
+    [SerializeField]
+    private int maxFailCount = 3;
+    public int MaxFailCount
+    {
+        get => maxFailCount;
+        private set => maxFailCount = Mathf.Max(1, value);
+    }
+
     private Task networkTask;
     private CancellationTokenSource networkCTS;
 
@@ -334,7 +342,7 @@ public class NetworkManager : ManagerBase
 
                 case ENetworkState.Disconnected:
 
-                    if (Failed >= 3)
+                    if (Failed >= MaxFailCount)
                     {
                         NetworkState = ENetworkState.ConnectFail;
 

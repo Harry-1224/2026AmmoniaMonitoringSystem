@@ -35,7 +35,11 @@ public enum EUiBtnFunc
 
 public class Monitor : UiObjectBase
 {
+
+    [Header("Monitor Setting")]
     public EMonitorType MonitorType;
+    public Transform Container;
+
 
     protected override void Start()
     {
@@ -278,6 +282,9 @@ public class Monitor : UiObjectBase
             case nameof(EUiBtnFunc.Exit):
                 // TODO : Monitor창을 닫을 때 문제가 있을 때 문제를 알리기 위해 UiMnaager에 관련 데이터를 보내고 코루틴으로 대기하다 값을 받아와서 종료할지 말지 결정하는 로직을 작성할 것.
                 break;
+            case nameof(EUiBtnFunc.SettingApply):
+                ApplySetting();
+                break;
             default :
 
                 break;
@@ -301,6 +308,8 @@ public class Monitor : UiObjectBase
     }
 
     #region Data Monitoring
+    //[Header("Monitor Setting")]
+
     private Dictionary<string, TextMeshProUGUI> monitoringTexts = new Dictionary<string, TextMeshProUGUI>();
     private Dictionary<string, DataCard> monitoringCards = new Dictionary<string, DataCard>();
     private Dictionary<string, Image> monitoringButtons = new Dictionary<string, Image>();
@@ -382,7 +391,6 @@ public class Monitor : UiObjectBase
     public TMP_InputField TimeOut;
     public Image experimentLampImage;
 
-    public Transform Container;
 
     private Dictionary<string, DataCard> experimentDataCards = new Dictionary<string, DataCard>();
     private Datas processData;
@@ -900,6 +908,55 @@ public class Monitor : UiObjectBase
     // 1. Network 변수
     // 2. InstrumentInfo 변수
 
+
+    [Header("Network Setting")]
+    public TMP_InputField InputSlaveID;
+    public TMP_InputField InputIP;
+    public TMP_InputField InputPort;
+
+    private void ApplySetting()
+    {
+        if (!byte.TryParse(InputSlaveID.text, out byte slaveID))
+        {
+            Debug.LogWarning("[Setting] SlaveID 입력 오류");
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(InputIP.text))
+        {
+            Debug.LogWarning("[Setting] IP 입력 오류");
+            return;
+        }
+
+        if (!int.TryParse(InputPort.text, out int port))
+        {
+            Debug.LogWarning("[Setting] Port 입력 오류");
+            return;
+        }
+
+        bool reconnect = Manager.Network.isConnected;
+
+        // 현재 연결중이면 종료
+        if (reconnect)
+        {
+            Manager.Network.StopNetwork();
+        }
+
+        // 새로운 설정 적용
+        Manager.Network.SetParameters(
+            slaveID,
+            InputIP.text.Trim(),
+            port
+        );
+
+        Debug.Log($"[Setting] 적용 완료 : {InputIP.text}:{port}");
+
+        // 재연결
+        if (reconnect)
+        {
+            Manager.Network.StartNetworkLoop();
+        }
+    }
 
 
     #endregion
