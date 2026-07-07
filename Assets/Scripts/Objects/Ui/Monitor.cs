@@ -38,7 +38,9 @@ public class Monitor : UiObjectBase
 
     [Header("Monitor Setting")]
     public EMonitorType MonitorType;
+
     public Transform Container;
+    private Dictionary<string, DataCard> dataCards = new Dictionary<string, DataCard>();
 
 
     protected override void Start()
@@ -192,7 +194,7 @@ public class Monitor : UiObjectBase
                         if (obj.ContainsKey(infoKey))
                         {
                             Datas data = obj[infoKey];
-                            monitoringCards[item.Value.Group].OnFunctionCalled(data);
+                            dataCards[item.Value.Group].OnFunctionCalled(data);
                         }
                     }
                 }
@@ -231,7 +233,7 @@ public class Monitor : UiObjectBase
                 // 비트 데이터
                 ushort processBits = (ushort)processData.Value;
 
-                foreach (var card in experimentDataCards.Values)
+                foreach (var card in dataCards.Values)
                 {
                     if (!card.gameObject.activeSelf)
                         continue;
@@ -311,7 +313,6 @@ public class Monitor : UiObjectBase
     //[Header("Monitor Setting")]
 
     private Dictionary<string, TextMeshProUGUI> monitoringTexts = new Dictionary<string, TextMeshProUGUI>();
-    private Dictionary<string, DataCard> monitoringCards = new Dictionary<string, DataCard>();
     private Dictionary<string, Image> monitoringButtons = new Dictionary<string, Image>();
     private Dictionary<string, InstrumentInfo> instruments = new Dictionary<string, InstrumentInfo>();
 
@@ -327,7 +328,7 @@ public class Monitor : UiObjectBase
     }
     private void InitializeMonitoringCards()
     {
-        monitoringCards.Clear();
+        dataCards.Clear();
 
         Transform cardRoot = transform.Find("MonitoringCards");
 
@@ -348,7 +349,7 @@ public class Monitor : UiObjectBase
             if (string.IsNullOrEmpty(tag))
                 continue;
 
-            if (monitoringCards.ContainsKey(tag))
+            if (dataCards.ContainsKey(tag))
             {
                 //Debug.LogWarning($"[Monitor] 중복 DataCard 이름 발견: {tag}");
                 continue;
@@ -361,16 +362,16 @@ public class Monitor : UiObjectBase
                 card.Initialize(info);
                 card.OnFunctionCalled(Manager.Data.CallData<Datas>(info.Tag));
             }
-            monitoringCards.Add(tag, card);
+            dataCards.Add(tag, card);
         }
 
-        Debug.Log($"[Monitor] Monitoring DataCard 등록 완료: {monitoringCards.Count}개");
+        Debug.Log($"[Monitor] Monitoring DataCard 등록 완료: {dataCards.Count}개");
     }
     private void UpdateMonitoringCard(InstrumentInfo info)
     {
         string group = info.Group.Trim();
 
-        if (!monitoringCards.TryGetValue(group, out DataCard card))
+        if (!dataCards.TryGetValue(group, out DataCard card))
         {
             Debug.LogWarning($"[Monitor] Group과 매칭되는 DataCard 없음: {group}");
             return;
@@ -392,7 +393,6 @@ public class Monitor : UiObjectBase
     public Image experimentLampImage;
 
 
-    private Dictionary<string, DataCard> experimentDataCards = new Dictionary<string, DataCard>();
     private Datas processData;
     private int currentProcess;
     private int totalProcess;
@@ -630,7 +630,7 @@ public class Monitor : UiObjectBase
             int.TryParse(selectedScheduleText, out number);
         }
 
-        foreach (var item in experimentDataCards)
+        foreach (var item in dataCards)
         {
             if (!item.Value.gameObject.activeSelf)
                 continue;
@@ -653,7 +653,7 @@ public class Monitor : UiObjectBase
         {
             Debug.LogWarning("[DataBox] 생성할 Experiment Information이 없습니다.");
 
-            foreach (var card in experimentDataCards.Values)
+            foreach (var card in dataCards.Values)
                 card.gameObject.SetActive(false);
 
             RebuildExperimentInfoLayout();
@@ -680,7 +680,7 @@ public class Monitor : UiObjectBase
 
             requiredKeys.Add(key);
 
-            if (!experimentDataCards.TryGetValue(key, out DataCard card))
+            if (!dataCards.TryGetValue(key, out DataCard card))
             {
                 card = CreateExperimentInfoCard(info, key);
 
@@ -697,7 +697,7 @@ public class Monitor : UiObjectBase
             card.ExperimentdataSetting(info);
         }
 
-        foreach (var pair in experimentDataCards)
+        foreach (var pair in dataCards)
         {
             if (!requiredKeys.Contains(pair.Key))
                 pair.Value.gameObject.SetActive(false);
@@ -771,7 +771,7 @@ public class Monitor : UiObjectBase
         card.RegistBox(this);
         card.Initialize(info);
 
-        experimentDataCards[key] = card;
+        dataCards[key] = card;
 
         return card;
     }
@@ -893,7 +893,7 @@ public class Monitor : UiObjectBase
 
         int index = 0;
 
-        foreach (var card in experimentDataCards.Values
+        foreach (var card in dataCards.Values
                      .Where(x => x.gameObject.activeSelf)
                      .OrderBy(x => x.transform.GetSiblingIndex()))
         {
@@ -908,12 +908,141 @@ public class Monitor : UiObjectBase
     // 1. Network 변수
     // 2. InstrumentInfo 변수
 
-
-    [Header("Network Setting")]
+    [Header("Setting")]
     public TMP_InputField InputSlaveID;
-    public TMP_InputField InputIP;
+    public TMP_InputField[] InputIP = new TMP_InputField[4];
     public TMP_InputField InputPort;
+    public TextMeshProUGUI InputFailCount;
+    public TMP_InputField InputTimeout;
+    private void InitializeSetting()
+    {
+        if (Manager.Network == null)
+        {
+            Debug.LogWarning("[Setting] NetworkManager가 없습니다.");
+            return;
+        }
 
+        if (InputSlaveID != null)
+            InputSlaveID.text = Manager.Network.SlaveID.ToString();
+
+        if (InputPort != null)
+            InputPort.text = Manager.Network.Port.ToString();
+
+        if (InputFailCount != null)
+            InputFailCount.text = Manager.Network.MaxFailCount.ToString();
+
+        if (InputTimeout != null)
+            InputTimeout.text = Manager.Network.Timeout.ToString();
+
+        InitializeIPFields(Manager.Network.IpAddress);
+    }
+
+    private void InitializeIPFields(string ip)
+    {
+        if (InputIP == null || InputIP.Length < 4)
+        {
+            Debug.LogWarning("[Setting] IP InputField 배열이 부족합니다.");
+            return;
+        }
+
+        string[] parts = ip.Split('.');
+
+        if (parts.Length != 4)
+        {
+            Debug.LogWarning($"[Setting] IP 형식 오류: {ip}");
+            return;
+        }
+
+        for (int i = 0; i < 4; i++)
+        {
+            if (InputIP[i] != null)
+                InputIP[i].text = parts[i];
+        }
+    }
+
+    private void InitializeSettingCards()
+    {
+        dataCards.Clear();
+
+        if (Container == null)
+        {
+            Debug.LogError("[Setting] Container가 null입니다.");
+            return;
+        }
+
+        var instrumentInfos = Manager.Data.CallData<Dictionary<string, InstrumentInfo>>();
+
+        if (instrumentInfos == null || instrumentInfos.Count == 0)
+        {
+            Debug.LogWarning("[Setting] Setting InstrumentInfo가 없습니다.");
+            return;
+        }
+
+        foreach (var pair in instrumentInfos)
+        {
+            InstrumentInfo info = pair.Value;
+
+            if (info == null)
+                continue;
+
+            string key = info.Tag;
+
+            if (dataCards.ContainsKey(key))
+                continue;
+
+            DataCard card = CreateSettingDataCard(info, key);
+
+            if (card == null)
+                continue;
+
+            dataCards.Add(key, card);
+        }
+
+        RebuildSettingLayout();
+
+        Debug.Log($"[Setting] DataCard 생성 완료 : {dataCards.Count}개");
+    }
+    private DataCard CreateSettingDataCard(InstrumentInfo info, string key)
+    {
+        string path = "PreFab/UI/InstrumentSetting_List";
+
+        GameObject prefab = Resources.Load<GameObject>(path);
+
+        if (prefab == null)
+        {
+            Debug.LogWarning($"[Setting] Prefab Load 실패: {path}");
+            return null;
+        }
+
+        GameObject obj = Instantiate(prefab, Container, false);
+        obj.name = key;
+
+        DataCard card = obj.GetComponent<DataCard>();
+
+        if (card == null)
+        {
+            Debug.LogWarning($"[Setting] {key}에 DataCard 스크립트가 없습니다.");
+            Destroy(obj);
+            return null;
+        }
+
+        card.ObjectID = key;
+        card.cardType = EDataCardType.SettingCard;
+        card.RegistBox(this);
+        card.Initialize(info);
+
+        return card;
+    }
+    private void RebuildSettingLayout()
+    {
+        if (Container == null)
+            return;
+
+        RectTransform rect = Container.GetComponent<RectTransform>();
+
+        if (rect != null)
+            LayoutRebuilder.ForceRebuildLayoutImmediate(rect);
+    }
     private void ApplySetting()
     {
         if (!byte.TryParse(InputSlaveID.text, out byte slaveID))
@@ -922,7 +1051,9 @@ public class Monitor : UiObjectBase
             return;
         }
 
-        if (string.IsNullOrWhiteSpace(InputIP.text))
+        string ip = InputIP[0].text.Trim();
+
+        if (string.IsNullOrWhiteSpace(ip))
         {
             Debug.LogWarning("[Setting] IP 입력 오류");
             return;
@@ -934,24 +1065,38 @@ public class Monitor : UiObjectBase
             return;
         }
 
+        if (!int.TryParse(InputFailCount.text, out int failCount))
+        {
+            Debug.LogWarning("[Setting] Fail Count 입력 오류");
+            return;
+        }
+
+        if (!int.TryParse(InputTimeout.text, out int timeout))
+        {
+            Debug.LogWarning("[Setting] Timeout 입력 오류");
+            return;
+        }
+
+        failCount = Mathf.Max(1, failCount);
+        timeout = Mathf.Max(100, timeout);
+
         bool reconnect = Manager.Network.isConnected;
 
-        // 현재 연결중이면 종료
         if (reconnect)
         {
             Manager.Network.StopNetwork();
         }
 
-        // 새로운 설정 적용
         Manager.Network.SetParameters(
             slaveID,
-            InputIP.text.Trim(),
-            port
+            ip,
+            port,
+            failCount,
+            timeout
         );
 
-        Debug.Log($"[Setting] 적용 완료 : {InputIP.text}:{port}");
+        Debug.Log($"[Setting] 적용 완료 : IP={ip}, Port={port}, SlaveID={slaveID}, FailCount={failCount}, Timeout={timeout}");
 
-        // 재연결
         if (reconnect)
         {
             Manager.Network.StartNetworkLoop();

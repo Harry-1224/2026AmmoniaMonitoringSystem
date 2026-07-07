@@ -35,10 +35,10 @@ public partial class ExperimentManager
 
     #region State Machine
 
-    //1. 현재 State상태 파악
+    //1. 현재 State상태 파악( 로깅 시작 )
     //2. PLC의 값에 따른 상태 파악
     //3. 현재 적용해야할 State 상태 파악
-    //4. switch입장
+    //4. switch입장( 로깅 종료 )
     //5. 상태별 로직 실행
     private IEnumerator RunStateMachine()
     {
@@ -49,8 +49,12 @@ public partial class ExperimentManager
             // 1. PLC 값을 보고 외부 공개용 CurrentState 갱신
             CurrentState = CheckPLCState();
 
+            // 1-1. 현재 PLC상태가 idle로 바꼈을 때, 현재 진행중인 실험의 상태가 Processing이며, witePLCResponse가 False일 경우 로깅 종료
+            //CheckAndFinishMainLogging();
+
             // 2. 버튼 요청 / PLC 상태 / Timeout 보고 controlState 결정
             commandState = CheckMachineState();
+
 
             if (commandState != EExperimentStateMachine.Idle) Debug.Log($"Experiment State Machine 명령 변경 - {commandState}");
 
@@ -63,9 +67,12 @@ public partial class ExperimentManager
 
                     // 1. 예약된 실험 확인
                     if (CurrentScheduleIndex < 0 || CurrentScheduleIndex >= experimentSchedules.Count)
+                    {
+                        Debug.LogError("[StateMachine] Running - Out of  Schedule Range");
                         break;
-                    var runningSchedule = experimentSchedules[CurrentScheduleIndex];
+                    }
 
+                    var runningSchedule = experimentSchedules[CurrentScheduleIndex];
 
                     // 2. 검색한 실험 절차 Value 입력
                     if (!SettingValue(runningSchedule))
@@ -76,12 +83,16 @@ public partial class ExperimentManager
                     // 3. isProcessing 참 전환 / 다음 실험 절차 검색/ 현재 실험 index 최신화(현재 실험 State를 Processing으로 설정)
                     isProcessing = true;
                     waitPLCResponse = true;
+
                     SettingExperimentState(runningSchedule, EReservedExperimentState.Processing);
 
                     // 4. Timeout 횟수와 시간 입력
                     stateStartTime = Time.time;
                     stateTimeout = runningSchedule.Timer;
                     timeoutRunning = true;
+
+                    // 5. Logging 시작
+                    Manager.Logging.OnStartLogging();
 
                     break;
                 case EExperimentStateMachine.Stopping:
@@ -116,7 +127,16 @@ public partial class ExperimentManager
                         var resetSchedule = experimentSchedules[CurrentScheduleIndex];
 
                         if (resetSchedule.ReservedState == EReservedExperimentState.Processing)
-                            SettingExperimentState(resetSchedule, EReservedExperimentState.Resetting);
+                        {
+
+                            if (CurrentState == EExperimentStateMachine.Idle)
+                                SettingExperimentState(resetSchedule, EReservedExperimentState.Resetting);
+
+                            else if (CurrentState == EExperimentStateMachine.Running)
+                                SettingExperimentState(resetSchedule, EReservedExperimentState.Failed);
+
+                        }
+                        
                     }
 
                     // 5. Timeout 횟수와 시간 입력
@@ -139,12 +159,13 @@ public partial class ExperimentManager
                     {
                         var shutdownSchedule = experimentSchedules[CurrentScheduleIndex];
 
-                        if (shutdownSchedule.ReservedState ==
-                            EReservedExperimentState.Processing)
+                        if (shutdownSchedule.ReservedState != EReservedExperimentState.Reserved)
                         {
-                            SettingExperimentState(
-                                shutdownSchedule,
-                                EReservedExperimentState.Failed);
+                            //현재 실험 실패로 설정
+                            SettingExperimentState(shutdownSchedule, EReservedExperimentState.Failed);
+
+                            // 현재 실험 다음으로 설정
+                            CurrentScheduleIndex++;
                         }
                     }
 
@@ -163,7 +184,8 @@ public partial class ExperimentManager
                         1
                     );
 
-                    Debug.Log("[Shutdown] Ex_ESD = 1 전송");
+
+                    //Debug.Log("[Shutdown] Ex_ESD = 1 전송");
 
 
 
@@ -226,6 +248,11 @@ public partial class ExperimentManager
             state = EExperimentStateMachine.Idle;
         }
 
+
+        // 무슨 경우에도 일단 Running이 아닌데 로깅 중이면 로깅 종료
+        if (state != EExperimentStateMachine.Running && Manager.Logging.CheckLoggingState() == ELoggingState.Logging)
+            StopAndSaveLogging(experimentSchedules[CurrentScheduleIndex]); 
+
         if (state != CurrentState)
         {
             CurrentState = state;
@@ -271,6 +298,13 @@ public partial class ExperimentManager
         if (startRequested && CurrentState == EExperimentStateMachine.Idle)
         {
             ClearRequests();
+
+            if (CurrentScheduleIndex < 0 || CurrentScheduleIndex >= experimentSchedules.Count)
+            {
+                Debug.LogError("[StateMachine] Running - Out of  Schedule Range : Reset Index");
+                CurrentScheduleIndex = 0;
+            }
+
             return EExperimentStateMachine.Running;
         }
         ClearRequests();
@@ -298,7 +332,11 @@ public partial class ExperimentManager
         {
             currentEx = experimentSchedules[CurrentScheduleIndex];
         }
-        else 
+        else if( CurrentScheduleIndex == -1)
+        {
+            return EExperimentStateMachine.Idle;
+        }
+        else
         {
             Debug.LogWarning("[ExperimentManger] Error - CheckMachineState : Out of Experiment Index Range");
             CurrentState = EExperimentStateMachine.Error;
@@ -316,12 +354,23 @@ public partial class ExperimentManager
         // 6. 명령 없고 Timeout도 없을 때, CurrentState가 Idle이면(Running, Resetting, Idle밖에 없음), isProcessing을 확인할 것.
         //      - isProcessing이 참이면, 현재 실험 진행 중이므로, CurrentScheduleIndex++ 후 Running 반환
         //      - isProcessing이 거짓이면, 현재 실험 진행 중이 아니므로, Idle 반환
-        if (isProcessing && !waitPLCResponse && CurrentState == EExperimentStateMachine.Idle)
+
+        if (waitPLCResponse || CurrentState != EExperimentStateMachine.Idle) //지금 과연 PLC가 아무 실험 동작을 안하는가?
+            return EExperimentStateMachine.Idle;
+
+        if (isProcessing) // 지금 실험 자동 진행중인가?
         {
-            if (currentEx.ReservedState == EReservedExperimentState.Processing) return EExperimentStateMachine.Resetting;
+            // 실험이 진행 중이라면 Reset반환
+            if (currentEx.ReservedState == EReservedExperimentState.Processing)
+                return EExperimentStateMachine.Resetting;
+
+            // 실험이 Reset 중 이였다면, 다음 실험을 위한 Running반환 / 만약 다음 실험이 없는경우 Idle반환
             else if (currentEx.ReservedState == EReservedExperimentState.Resetting)
             {
                 timeoutRunning = false;
+
+                SettingExperimentState(currentEx, EReservedExperimentState.Finished);
+
                 CurrentScheduleIndex++;
 
                 // 다음 예약된 실험이 있는경우
@@ -332,15 +381,94 @@ public partial class ExperimentManager
 
                 // 다음 예약된 실험이 없는경우
                 isProcessing = false;
-                CurrentScheduleIndex = 0;
+                CurrentScheduleIndex = -1;
                 return EExperimentStateMachine.Idle;
+                /*
+                timeoutRunning = false;
+                if (CurrentScheduleIndex < experimentSchedules.Count - 1) return EExperimentStateMachine.Running;
+                else return EExperimentStateMachine.Idle;
+                */
 
+            }
+            // 만약 currentEx.ReservedState에서 오류 상황 (Finish or Failed)
+            else
+            {
+                // 여기선 무조건 로깅이 정지 및 리셋 되어야함.
+                //StopAndSaveLogging(currentEx, false);
+
+                timeoutRunning = false;
+                CurrentScheduleIndex++;
+            }
+        }
+        else // 실험이 자동진행 중이 아닌가?
+        {
+            if (currentEx.ReservedState == EReservedExperimentState.Processing)
+                return EExperimentStateMachine.Resetting;
+            else if (currentEx.ReservedState == EReservedExperimentState.Resetting)
+            {
+                timeoutRunning = false;
+
+                SettingExperimentState(currentEx, EReservedExperimentState.Finished);
+
+                if (CurrentScheduleIndex <= experimentSchedules.Count - 1)
+                {
+                    CurrentScheduleIndex++;
+                }
+                else CurrentScheduleIndex = -1;
+
+                return EExperimentStateMachine.Idle;
+            }
+            else if (currentEx.ReservedState == EReservedExperimentState.Reserved)
+            {
+                timeoutRunning = false;
+            }
+            else 
+            {
+                timeoutRunning = false;
+                CurrentScheduleIndex++;
             }
         }
 
         return EExperimentStateMachine.Idle;
     }
+    private void CheckAndFinishMainLogging()
+    {
+        if (CurrentState != EExperimentStateMachine.Idle)
+            return;
 
+        if (waitPLCResponse)
+            return;
+
+        if (CurrentScheduleIndex < 0 || CurrentScheduleIndex >= experimentSchedules.Count)
+            return;
+
+        var currentExperiment = experimentSchedules[CurrentScheduleIndex];
+
+        if (currentExperiment.ReservedState != EReservedExperimentState.Processing)
+            return;
+
+        Manager.Logging.OnStopLogging();
+
+        Manager.Data.ExportLoggedData(currentExperiment.Name);
+        Manager.Data.ClearLoggedData();
+
+        SettingExperimentState(currentExperiment, EReservedExperimentState.Finished);
+    }
+    private void StopAndSaveLogging(ExperimentWrapper experiment, bool saveData = true)
+    {
+        if (experiment == null)
+            return;
+
+        if (Manager.Logging.CheckLoggingState() == ELoggingState.Stop)
+            return;
+
+
+        if (saveData) Manager.Data.ExportLoggedData(experiment.Name);
+
+        Manager.Logging.OnStopLogging();
+        Manager.Data.ClearLoggedData();
+        Manager.Logging.OnStopLogging();
+    }
     // 모든 요청 reset
     private void ClearRequests()
     {
@@ -1081,7 +1209,7 @@ public partial class ExperimentManager
 
         if (solList.Count == 0)
         {
-            Debug.LogError($"[SolSet Error] Sol 태그 없음: {step.Tag}_1, {step.Tag}_2 ...");
+            //Debug.LogError($"[SolSet Error] Sol 태그 없음: {step.Tag}_1, {step.Tag}_2 ...");
             SetState(EExperimentStateMachine.Error);
             return;
         }
@@ -1098,7 +1226,7 @@ public partial class ExperimentManager
                 (ushort)(isOn ? 1 : 0)
             );
 
-            Debug.Log($"[Sol_Set] {sol.Key} = {(isOn ? 1 : 0)}");
+            //Debug.Log($"[Sol_Set] {sol.Key} = {(isOn ? 1 : 0)}");
         }
     }
 

@@ -91,8 +91,12 @@ public class DocumentController
             {
                 fileName = $"Log_{DateTime.Now:yyyyMMdd_HHmmss}.csv";
             }
+            else
+            {
+                fileName = $"{fileName}_{DateTime.Now:yyyyMMdd_HHmmss}.csv";
+            }
 
-            string folderPath = Path.Combine(Application.streamingAssetsPath, "Logs");
+                string folderPath = Path.Combine(Application.streamingAssetsPath, "Logs");
 
             if (!Directory.Exists(folderPath))
             {

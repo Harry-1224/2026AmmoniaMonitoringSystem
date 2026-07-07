@@ -59,7 +59,6 @@ public class NetworkManager : ManagerBase
 
     protected override void Update()
     {
-
         lock (NetworkEventActions)
         {
             while (NetworkEventActions.Count > 0)
@@ -129,19 +128,20 @@ public class NetworkManager : ManagerBase
 
     private ModbusService modbusService;
 
-    private byte SlaveID  = 0;
-    public string IpAddress = "192.168.1.2";
-    private int Port = 502;
+    [SerializeField] private byte slaveID = 0;
+    [SerializeField] private string ipAddress = "192.168.1.2";
+    [SerializeField] private int port = 502;
+    [SerializeField] private int maxFailCount = 3;
+    [SerializeField] private int timeout = 1000;
+
     public ENetworkState NetworkState { get; private set; } = ENetworkState.Disconnected;
     public bool isConnected { get; private set; } = false;
 
-    [SerializeField]
-    private int maxFailCount = 3;
-    public int MaxFailCount
-    {
-        get => maxFailCount;
-        private set => maxFailCount = Mathf.Max(1, value);
-    }
+    public byte SlaveID => slaveID;
+    public string IpAddress => ipAddress;
+    public int Port => port;
+    public int MaxFailCount => maxFailCount;
+    public int Timeout => timeout;
 
     private Task networkTask;
     private CancellationTokenSource networkCTS;
@@ -152,9 +152,25 @@ public class NetworkManager : ManagerBase
 
     public void SetParameters(byte slaveID, string ipAddress, int port)
     {
-        SlaveID = slaveID;
-        IpAddress = ipAddress;
-        Port = port;
+        this.slaveID = slaveID;
+        this.ipAddress = ipAddress;
+        this.port = port;
+    }
+    public void SetParameters(byte slaveID, string ipAddress, int port, int maxFailCount, int timeout)
+    {
+        this.slaveID = slaveID;
+        this.ipAddress = ipAddress;
+        this.port = port;
+        this.maxFailCount = Mathf.Max(1, maxFailCount);
+        this.timeout = Mathf.Max(100, timeout);
+
+        modbusService = new ModbusService(
+            this.slaveID,
+            this.ipAddress,
+            this.port
+        );
+
+        Debug.Log($"[NetworkManager] 설정 변경 완료 : {this.ipAddress}:{this.port}, SlaveID={this.slaveID}, FailCount={this.maxFailCount}, Timeout={this.timeout}");
     }
 
     public bool StartNetworkLoop()
@@ -468,7 +484,7 @@ public class NetworkManager : ManagerBase
 
                 if (wordIndex >= data.Length) continue;
 
-                // float → int 변환
+                // float -> int 변환
                int value = data[wordIndex];
 
                 // 비트 ON/OFF
@@ -497,6 +513,7 @@ public class NetworkManager : ManagerBase
 
         return data;
     }
+
     private void HandleTryNetworkConnect(string msg)
     {
         EnqueueMainThreadAction(() =>

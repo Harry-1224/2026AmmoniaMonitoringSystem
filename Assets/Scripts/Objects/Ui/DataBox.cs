@@ -224,7 +224,7 @@ public class DataBox : UiObjectBase
                 Manager.Data.ClearLoggedData();
                 Manager.Logging.OnStopLogging();
                 break;
-
+                
             // Experiment 관련 버튼 클릭 시
             case nameof(EUiBtnFunc.ExperimentStart):
                 Manager.Experiment.StartExperiment();

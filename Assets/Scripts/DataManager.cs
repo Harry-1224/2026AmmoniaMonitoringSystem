@@ -83,9 +83,10 @@ public class DataManager : ManagerBase
     {
         base.SetSceneControlManager(sceneManager);
     }
-    public bool ExportLoggedData()
+    public bool ExportLoggedData(string Name = null)
     {
-        return documentController.ExportLoggedDataToCsv(DataDictionary);
+        if(Name == null)    return documentController.ExportLoggedDataToCsv(DataDictionary);
+        else return documentController.ExportLoggedDataToCsv(DataDictionary, Name);
     }
 
     private void InitializeDataDictionary()
@@ -160,12 +161,14 @@ public class DataManager : ManagerBase
         }
         else if (typeof(T) == typeof(Dictionary<string, InstrumentInfo>))
         {
-            var result = new Dictionary<string, InstrumentInfo>();
-            foreach (var info in InstrumentInfos)
+            if (string.IsNullOrEmpty(dataName))
             {
-                if (info.Value.Function == dataName) result[info.Key] = info.Value;
+                return (T)(object)new Dictionary<string, InstrumentInfo>(InstrumentInfos);
             }
-            return (T)(object)result;
+
+            return (T)(object)InstrumentInfos
+                .Where(x => x.Value.Function == dataName)
+                .ToDictionary(x => x.Key, x => x.Value);
         }
         else if (typeof(T) == typeof(Dictionary<string, ExperimentWrapper>))
         {

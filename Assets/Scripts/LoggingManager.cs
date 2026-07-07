@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Rendering;
+using System.Collections;
 
 public enum ELoggingState
 {
@@ -62,6 +63,92 @@ public class LoggingManager : ManagerBase
 
     #region Logging System
 
+    public int LoggingIntervalMs { get; private set; } = 1000;
+
+    private Coroutine loggingCoroutine;
+
+    public event Action OnLoggingStarted;
+    public event Action<DateTime> OnLoggingTimingActed;
+    public event Action<Exception> OnLoggingTimingFailed;
+    public event Action OnLoggingStopped;
+    public event Action<ELoggingState> OnChangeLoggingState;
+
+    public ELoggingState loggingState = ELoggingState.Stop;
+
+    public void SetLoggingIntervalMs(int intervalMs)
+    {
+        LoggingIntervalMs = Mathf.Max(100, intervalMs);
+    }
+
+
+    public void OnStartLogging()
+    {
+        if (loggingCoroutine != null)
+            return;
+
+        loggingState = ELoggingState.Start;
+
+        OnLoggingStarted?.Invoke();
+        OnChangeLoggingState?.Invoke(loggingState);
+
+        loggingCoroutine = StartCoroutine(LoggingRoutine());
+    }
+
+    public void OnStopLogging()
+    {
+        if (loggingCoroutine == null)
+        {
+            if (loggingState != ELoggingState.Stop)
+            {
+                loggingState = ELoggingState.Stop;
+            }
+
+            OnChangeLoggingState?.Invoke(loggingState);
+            return;
+        }
+
+        StopCoroutine(loggingCoroutine);
+        loggingCoroutine = null;
+
+        loggingState = ELoggingState.Stop;
+
+        OnLoggingStopped?.Invoke();
+        OnChangeLoggingState?.Invoke(loggingState);
+    }
+
+    public ELoggingState CheckLoggingState()
+    {
+        return loggingState;
+    }
+
+    private IEnumerator LoggingRoutine()
+    {
+        loggingState = ELoggingState.Logging;
+        OnChangeLoggingState?.Invoke(loggingState);
+
+        while (true)
+        {
+            yield return new WaitForSecondsRealtime(LoggingIntervalMs / 1000f);
+
+            try
+            {
+                OnLoggingTimingActed?.Invoke(DateTime.Now);
+            }
+            catch (Exception ex)
+            {
+                OnErrorLogged(nameof(LoggingManager), nameof(LoggingRoutine), ex.Message);
+
+                loggingState = ELoggingState.Error;
+                OnChangeLoggingState?.Invoke(loggingState);
+                OnLoggingTimingFailed?.Invoke(ex);
+
+                loggingCoroutine = null;
+                yield break;
+            }
+        }
+    }
+
+    /*
     public int LoggingIntervalMs { get; private set; } = 1000;
 
     private CancellationTokenSource timerCTS;
@@ -144,8 +231,8 @@ public class LoggingManager : ManagerBase
             OnChangeLoggingState.Invoke(loggingState);
             OnLoggingTimingFailed?.Invoke(ex);
         }
-    }
+    
+    }*/
 
-
-    #endregion  
+    #endregion
 }

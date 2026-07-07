@@ -207,8 +207,6 @@ public partial class ExperimentManager : ManagerBase
     #region Monitoring System
     private void DataChangeHandler(Dictionary<string, Datas> data)
     {
-        if (!isProcessing)
-            return;
 
         if (data == null)
             return;
@@ -235,6 +233,9 @@ public partial class ExperimentManager : ManagerBase
             Debug.LogWarning("[Experiment] 실행할 Schedule이 없습니다.");
             return;
         }
+        // TODO : CurrentExperimentIndex를 보고 현재까지 진행한 실험 판단 후 Index를 재설정할 것.
+        //      1. 모든 예약된 실험을 보고 State가 Reserved인 것 부터 실험 시작.
+        //      2. 만약 모든 실험이 끝나거나 실험이 종료 되어있다면, 오류 절차 실행
 
         startRequested = true;
     }

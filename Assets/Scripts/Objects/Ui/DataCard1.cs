@@ -1,3 +1,4 @@
+/*
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -67,6 +68,7 @@ public class DataCard : UiObjectBase
     // Main Value 외에도 여러 개의 TextMeshProUGUI를 관리하기 위한 리스트
     private List<TextMeshProUGUI> MultiSlotTexts = new List<TextMeshProUGUI>();
     private List<TextMeshProUGUI> MultiSlotValueTexts = new List<TextMeshProUGUI>();
+    private List<TMP_InputField> MultiSlotInputFields = new List<TMP_InputField>();
 
 
     [Header("Experiment Schedule")]
@@ -145,8 +147,7 @@ public class DataCard : UiObjectBase
         MultiSlotTexts.Clear();
         MultiSlotValueTexts.Clear();
 
-        TextMeshProUGUI[] texts =
-            GetComponentsInChildren<TextMeshProUGUI>(true);
+        TextMeshProUGUI[] texts = GetComponentsInChildren<TextMeshProUGUI>(true);
 
         MultiSlotTexts = GetTextsByRule(texts, MultiSlotTextRule);
         MultiSlotValueTexts = GetTextsByRule(texts, MultiSlotValueRule);
@@ -164,13 +165,10 @@ public class DataCard : UiObjectBase
 
         }
 
-
         //Debug.Log($"[{name}] MultiText : {MultiSlotTexts.Count}, " + $"MultiValue : {MultiSlotValueTexts.Count}");
     }
 
-    private List<TextMeshProUGUI> GetTextsByRule(
-        TextMeshProUGUI[] texts,
-        string rule)
+    private List<TextMeshProUGUI> GetTextsByRule(TextMeshProUGUI[] texts, string rule)
     {
         return texts
             .Where(t => t.name.StartsWith(rule))
@@ -352,10 +350,6 @@ public class DataCard : UiObjectBase
     #region ExperimentScheduleCard
 
     [SerializeField] private Image cardImage;
-    [SerializeField] private Image LeftNumberimage;
-    [SerializeField] Image RightTextImage;
-    [SerializeField] private List<TextMeshProUGUI> scheduleTexts;
-    
 
     public void UpdateExperimentStateColor()
     {
@@ -366,58 +360,22 @@ public class DataCard : UiObjectBase
         {
             case EReservedExperimentState.Reserved:
                 cardImage.color = Color.white;
-                LeftNumberimage.color = Color.white;
-                RightTextImage.color = Color.white;
-                foreach (var text in scheduleTexts)
-                {
-                    text.color = Color.black;
-                }
                 break;
 
             case EReservedExperimentState.Processing:
-                if(cardImage != null)
-                    cardImage.color = new Color(187f/255f,226f/255f,214f/255f);
-                if(LeftNumberimage != null)
-                    LeftNumberimage.color = new Color(27f/255f, 175f/255f, 130f/255f);
-                if(RightTextImage != null)
-                    RightTextImage.color = new Color(27f/255f, 175f/255f, 130f/255f);
-              
-                if (scheduleTexts != null)
-                foreach (var text in scheduleTexts)
-                {
-                    text.color = Color.white;
-                }
-
+                cardImage.color = Color.green;
                 break;
 
             case EReservedExperimentState.Resetting:
-                cardImage.color = new Color(253f/255f, 241f/255f, 255f/255f);
-                LeftNumberimage.color = new Color (250f/255f, 107f/255f, 1f/255f);
-                RightTextImage.color = new Color(250f/255f, 107f/255f, 1f/255f);
-                foreach (var text in scheduleTexts)
-                {
-                    text.color = Color.white;
-                }
+                cardImage.color = new Color(1f, 0.5f, 0f);
                 break;
 
             case EReservedExperimentState.Failed:
-                cardImage.color = new Color(252f/255f, 244f/255f, 245f/255f);
-                LeftNumberimage.color = new Color(207f/255f, 39f/255f, 42f/255f);
-                RightTextImage.color = new Color(207f/255f, 39f/255f, 42f/255f);
-                foreach(var text in scheduleTexts)
-                {
-                    text.color = Color.white;
-                }
+                cardImage.color = Color.red;
                 break;
 
             case EReservedExperimentState.Finished:
-                cardImage.color = new Color(241f/255f, 241f/255f, 242f/255f);
-                LeftNumberimage.color = new Color(170f/255f, 169f/255f, 170f/255f);
-                RightTextImage.color = new Color(170f/255f, 169f/255f, 170f/255f);
-                foreach (var text in scheduleTexts)
-                {
-                    text.color = Color.white;
-                }
+                cardImage.color = Color.gray;
                 break;
         }
     }
@@ -544,4 +502,16 @@ public class DataCard : UiObjectBase
 
 
     #endregion
-}
+
+
+    #region SettingCard
+
+    public void SettingInitialize(InstrumentInfo info)
+    {
+
+    }
+
+
+
+    #endregion
+}*/
