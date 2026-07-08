@@ -116,11 +116,8 @@ public class LoggingManager : ManagerBase
         OnChangeLoggingState?.Invoke(loggingState);
     }
 
-    public ELoggingState CheckLoggingState()
-    {
-        return loggingState;
-    }
-
+    public ELoggingState CheckLoggingState() => loggingState;
+    
     private IEnumerator LoggingRoutine()
     {
         loggingState = ELoggingState.Logging;

@@ -195,11 +195,32 @@ public class DataBox : UiObjectBase
     {
         base.OnClick();
 
-        if (dataBoxType == EDataBoxType.Control) return;
         
-        Debug.Log($"[DataBox] {dataBoxType} Box가 클릭되었습니다. 현재 상태: {(isSherinkged ? "최소화" : "최대화")}");
 
-        Manager.Ui.OnDataBoxExpanded(this);
+        if (isSherinkged)
+        {
+            if (dataBoxType == EDataBoxType.Control) return;
+
+            Debug.Log($"[DataBox] {dataBoxType} Box가 클릭되었습니다. 현재 상태: {(isSherinkged ? "최소화" : "최대화")}");
+
+            Manager.Ui.OnDataBoxExpanded(this); 
+        }
+        else
+        {
+            if (dataBoxType == EDataBoxType.Monitoring || dataBoxType == EDataBoxType.Control)
+            {
+                cameraController.SetCameraPosition(ECameraPosition.Idle.ToString());
+            }
+            else if (dataBoxType == EDataBoxType.Experiment)
+            {
+
+                // 1. Experiment Monitor 활성화
+                Manager.Ui.OnMonitorChanged(EUiScreen.Experiment);
+
+                // 2. 클릭된 Schedule의 상세 정보를 보여주는 기능 추가 (예: 새로운 UI 패널, 팝업 등)
+                Manager.Ui.SetExperimentMonitor(Manager.Experiment.CallCurrentSchedule());
+            }
+        }
     }
 
     public void OnClickButton(string button)
@@ -261,9 +282,9 @@ public class DataBox : UiObjectBase
         else if(dataBoxType == EDataBoxType.Monitoring || dataBoxType == EDataBoxType.Control)
         {
             //TODO : Monitoring, Control DataCard가 클릭 되었을 때 해당 데이터 중 System을 잘 보여주는 위치로 카메라 이동시키는 기능.
-            // 1. 클릭된 DataCard의 Group을 이용하여 해당 System의 위치를 파악한다.
-
+            // 1. 클릭된 DataCard의 Group을 이용하여 해당 System의 위치를 파악한다.(cardID에 System값을 넣음)
             // 2. 카메라를 해당 위치로 이동시키는 기능 추가 (예: CameraController 스크립트의 MoveToSystem 함수 호출)
+            cameraController.SetCameraPosition(cardId);
         }
     }
 

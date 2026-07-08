@@ -30,6 +30,7 @@ public enum EUiBtnFunc
     LoggingReset,
     LoggingSave,
     SettingApply,
+    SettingClose,
     Exit,
 }
 
@@ -268,7 +269,7 @@ public class Monitor : UiObjectBase
                 Manager.Experiment.ResetExperiment();
                 break;
             case nameof(EUiBtnFunc.ExperimentDelete):
-                Manager.Experiment.RemoveSchedule();
+                Manager.Experiment.RemoveSchedule(MonitorSchedule.No);
                 break;
             case nameof(EUiBtnFunc.ExperimentNew):
                 ClearExperimentMonitor();
@@ -286,6 +287,9 @@ public class Monitor : UiObjectBase
                 break;
             case nameof(EUiBtnFunc.SettingApply):
                 ApplySetting();
+                break;
+            case nameof(EUiBtnFunc.SettingClose):
+                Manager.Ui.OnMonitorChanged(EUiScreen.Basic);
                 break;
             default :
 
@@ -569,7 +573,48 @@ public class Monitor : UiObjectBase
 
         EnterNewScheduleMode(true);
     }
+    private void ScheduleChangerEventLisener(List<ExperimentWrapper> schedules)
+    {
+        if (ScheduleNo == null)
+        {
+            Debug.LogError($"[{gameObject.name}] ScheduleNo Dropdown 연결 안 됨");
+            return;
+        }
 
+        List<string> options = new List<string> { "..." };
+
+        if (schedules != null)
+        {
+            foreach (var schedule in schedules)
+                options.Add(schedule.No.ToString());
+        }
+
+        ScheduleNo.ClearOptions();
+        ScheduleNo.AddOptions(options);
+
+        if (schedules == null || schedules.Count == 0)
+        {
+            currentScheduleIndex = -1;
+            MonitorSchedule = null;
+
+            ScheduleNo.SetValueWithoutNotify(0);
+            ScheduleNo.RefreshShownValue();
+
+            EnterNewScheduleMode(true);
+            return;
+        }
+
+        if (currentScheduleIndex < 0 || currentScheduleIndex >= schedules.Count)
+            currentScheduleIndex = schedules.Count - 1;
+
+        ScheduleNo.SetValueWithoutNotify(currentScheduleIndex + 1);
+        ScheduleNo.RefreshShownValue();
+
+
+        SetExperimentMonitor(schedules[currentScheduleIndex]);
+    }
+
+    /*
     private void ScheduleChangerEventLisener(List<ExperimentWrapper> schedules)
     {
         if (schedules == null || schedules.Count == 0)
@@ -592,16 +637,17 @@ public class Monitor : UiObjectBase
 
         List<string> options = new List<string>();
 
+        options.Add("...");
+
         for (int i = 0; i < schedules.Count; i++)
         {
             options.Add((i + 1).ToString());
         }
 
         // 새 Schedule 추가용 옵션
-        options.Add("...");
+        ScheduleNo.AddOptions(options);
 
         ScheduleNo.ClearOptions();
-        ScheduleNo.AddOptions(options);
 
         // 현재 선택값 보정
         if (currentScheduleIndex < 0 || currentScheduleIndex >= schedules.Count)
@@ -611,7 +657,7 @@ public class Monitor : UiObjectBase
 
         ScheduleNo.SetValueWithoutNotify(currentScheduleIndex);
         ScheduleNo.RefreshShownValue();
-    }
+    }*/
     private ExperimentWrapper WrappingCurrentExperiment()
     {
         List<ExperimentInfo> experiments = new List<ExperimentInfo>();

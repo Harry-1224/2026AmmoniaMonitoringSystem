@@ -279,6 +279,29 @@ public partial class ExperimentManager : ManagerBase
             Debug.Log($"[Experiment] Schedule 추가 : {schedule.No}");
         }
 
+        if (ExperimentScheduleChange == null)
+        {
+            Debug.Log("[Experiment] Listener Count : 0");
+        }
+        else
+        {
+            Delegate[] listeners = ExperimentScheduleChange.GetInvocationList();
+
+            Debug.Log($"[Experiment] Listener Count : {listeners.Length}");
+
+            for (int i = 0; i < listeners.Length; i++)
+            {
+                var listener = listeners[i];
+
+                Debug.Log(
+                    $"[{i}] " +
+                    $"Target = {listener.Target}, " +
+                    $"Type = {listener.Target?.GetType().Name}, " +
+                    $"Method = {listener.Method.Name}"
+                );
+            }
+        }
+
         // UI 및 Monitor 갱신 이벤트
         ExperimentScheduleChange?.Invoke(
             new List<ExperimentWrapper>(experimentSchedules)
@@ -286,12 +309,17 @@ public partial class ExperimentManager : ManagerBase
 
         return true;
     }
-    public void RemoveSchedule(int index = -1)
+    public void RemoveSchedule(int no = -1)
     {
-        if (index < 0 || index >= experimentSchedules.Count) return;
 
-        //현재 실행 중이면 삭제 금지
-        if (index == CurrentScheduleIndex)
+        int index = experimentSchedules.FindIndex(x => x.No == no);
+
+        if (index < 0) return;
+
+        bool isRunningState = CurrentState == EExperimentStateMachine.Running || CurrentState == EExperimentStateMachine.Stopping || waitPLCResponse;
+
+        // 현재 실행 중이면 삭제 금지
+        if (isRunningState && index == CurrentScheduleIndex)
         {
             Debug.LogWarning("현재 실행 중인 스케줄은 삭제 불가");
             return;
@@ -302,6 +330,11 @@ public partial class ExperimentManager : ManagerBase
         //앞쪽 삭제 시 index 보정
         if (index < CurrentScheduleIndex)
             CurrentScheduleIndex--;
+
+        for (int i = 0; i < experimentSchedules.Count; i++)
+        {
+            experimentSchedules[i].No = i + 1;
+        }
 
         ExperimentScheduleChange?.Invoke(new List<ExperimentWrapper>(experimentSchedules));
     }

@@ -11,12 +11,27 @@ public class UiObjectBase : ObjectBase, IUiObject,
 {
     [Header("UI Setting")]
     public bool isManagable = false; // UiManager에서 관리할지 여부
+    protected CameraController cameraController;
 
     protected override void Initialize()
     {
         base.Initialize();
 
         if(isManagable) Manager.Ui.RegistUiObject(ObjectID, this);
+
+        if (Camera.main != null)
+        {
+            cameraController = Camera.main.GetComponent<CameraController>();
+
+            if (cameraController == null)
+            {
+                Debug.LogWarning("[UiObject] MainCamera에 CameraController가 없습니다.");
+            }
+        }
+        else
+        {
+            Debug.LogWarning("[UiObject] MainCamera를 찾을 수 없습니다.");
+        }
     }
     
     #region Ui System

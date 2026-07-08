@@ -247,10 +247,10 @@ public partial class ExperimentManager
         {
             state = EExperimentStateMachine.Idle;
         }
-
+        ELoggingState logState = Manager.Logging.CheckLoggingState();
 
         // 무슨 경우에도 일단 Running이 아닌데 로깅 중이면 로깅 종료
-        if (state != EExperimentStateMachine.Running && Manager.Logging.CheckLoggingState() == ELoggingState.Logging)
+        if (!waitPLCResponse && state != EExperimentStateMachine.Running && logState == ELoggingState.Logging)
             StopAndSaveLogging(experimentSchedules[CurrentScheduleIndex]); 
 
         if (state != CurrentState)
@@ -371,8 +371,10 @@ public partial class ExperimentManager
 
                 SettingExperimentState(currentEx, EReservedExperimentState.Finished);
 
-                CurrentScheduleIndex++;
-
+                if (CurrentScheduleIndex <= experimentSchedules.Count - 1)
+                {
+                    CurrentScheduleIndex++;
+                }
                 // 다음 예약된 실험이 있는경우
                 if (CurrentScheduleIndex < experimentSchedules.Count)
                 {

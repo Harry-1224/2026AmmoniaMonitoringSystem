@@ -89,7 +89,7 @@ public class DataCard : UiObjectBase
     private Monitor containingMonitor;
     private ExperimentInfo experimentInfo;
 
-    protected override void Initialize()
+    protected void Initialize(bool beforeVersionDonotUse)
     {
         base.Initialize();
 
@@ -106,6 +106,23 @@ public class DataCard : UiObjectBase
             else
             {
                 Debug.LogWarning($"[{name}] ScheduleNo 오브젝트를 찾을 수 없습니다.");
+            }
+        }
+    }
+    protected override void Initialize()
+    {
+        base.Initialize();
+
+        InitializeMultiSlots();
+
+        if (cardType == EDataCardType.ExperimentSchedule)
+        {
+            experimentScheduleNo = GetComponentsInChildren<TextMeshProUGUI>(true)
+                .FirstOrDefault(x => x.name == "ScheduleNo");
+
+            if (experimentScheduleNo == null)
+            {
+                Debug.LogWarning($"[{name}] ScheduleNo TextMeshProUGUI를 찾을 수 없습니다.");
             }
         }
     }
@@ -272,7 +289,9 @@ public class DataCard : UiObjectBase
     public override void OnClick()
     {
         base.OnClick();
-        if( cardType != EDataCardType.ExperimentData) containingBox.OnClickedDataCard(cardType, ObjectID);
+        if( cardType != EDataCardType.ExperimentData && cardType != EDataCardType.ExperimentSchedule) containingBox.OnClickedDataCard(cardType, info.Values.FirstOrDefault().System);
+        else containingBox.OnClickedDataCard(cardType, ObjectID);
+
     }
 
     private void OnTextUpdate(Datas data, EDataCategory dataCategory = EDataCategory.Value)
@@ -284,8 +303,8 @@ public class DataCard : UiObjectBase
             case EDataCategory.Value:
                 UpdateValueText(data);
                 break;
-            case EDataCategory.Custom:
-                UpdateCustomText(data);
+            case EDataCategory.Inte:
+                UpdateMultiText(data);
                 break;
         }
     }
@@ -326,6 +345,28 @@ public class DataCard : UiObjectBase
         }
     }
 
+    private void UpdateMultiText(Datas data)
+    {
+        // data를 모니터링할 MultiSlotValueTexts의 인덱스를 찾기 위해 MultiSlotNames에서 Measurement를 검색
+        int index = MultiSlotNames.IndexOf(info[data.Name].Measurement);
+
+        if (index < 0)
+        {
+            Debug.LogWarning($"Measurement '{info[data.Name].Measurement}'를 MultiSlotNames에서 찾을 수 없습니다.");
+            return;
+        }
+
+        if (index < MultiSlotValueTexts.Count)
+        {
+            //MultiSlotValueTexts의 인덱스가 범위 내에 있는 경우에만 업데이트
+            MultiSlotValueTexts[index].text = data.Value.ToString();
+        }
+        else
+        {
+            Debug.LogWarning($"MultiSlotValueTexts의 인덱스 {index}가 범위를 벗어났습니다. (Count: {MultiSlotValueTexts.Count})");
+        }
+
+    }
     private void UpdateCustomText(Datas data)
     {
         if (valueText != null)

@@ -32,9 +32,11 @@ public class ObjectBase : MonoBehaviour, IObject
     }
     protected virtual void OnEnable()
     {
-        if (isInitialized) return;
+        if (!isInitialized)
+        {
+            Initialize();
+        }
 
-        Initialize();
         EventSubscriber();
     }
     protected virtual void OnDisable()
