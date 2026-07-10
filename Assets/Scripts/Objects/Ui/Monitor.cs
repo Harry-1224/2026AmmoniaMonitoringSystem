@@ -29,6 +29,8 @@ public enum EUiBtnFunc
     LoggingStop,
     LoggingReset,
     LoggingSave,
+    TimeoutCountUp,
+    TimeoutCountDown,
     SettingApply,
     SettingClose,
     Exit,
@@ -67,25 +69,23 @@ public class Monitor : UiObjectBase
         switch (MonitorType)
         {
             case EMonitorType.Monitoring:
-                // Monitoring 타입에 대한 초기화 로직
+                // Monitoring 타입에 대한 반복 로직
                 break;
             case EMonitorType.Experiment:
-                // Experiment 타입에 대한 초기화 로직
+                // Experiment 타입에 대한 반복 로직
 
                 // 1. Monitor Schedule 없음
                 if (MonitorSchedule == null)
                     return;
 
                 // 2. Processing / Stopping 상태만 허용
-                bool isRunning =
-                    MonitorSchedule.ReservedState == EReservedExperimentState.Processing
-                    || MonitorSchedule.ReservedState == EReservedExperimentState.Resetting;
+                bool isRunning = MonitorSchedule.ReservedState == EReservedExperimentState.Processing || MonitorSchedule.ReservedState == EReservedExperimentState.Resetting;
 
                 ExperimnetUpdate(isRunning);
 
                 break;
             case EMonitorType.Setting:
-                // Setting 타입에 대한 초기화 로직
+                // Setting 타입에 대한 반복 로직
                 break;
         }
     }
@@ -137,6 +137,11 @@ public class Monitor : UiObjectBase
             case EMonitorType.Setting:
                 // Setting 타입에 대한 초기화 로직
                 // 1. Setting에 필요한 데이터(Network 변수, InstrumentInfo)를 DataManager, NetworkManager 등에서 로드.
+                InitializeSetting();
+
+                InitializeSettingCards();
+
+
                 break;
         }
     }
@@ -291,6 +296,14 @@ public class Monitor : UiObjectBase
             case nameof(EUiBtnFunc.SettingClose):
                 Manager.Ui.OnMonitorChanged(EUiScreen.Basic);
                 break;
+            case nameof(EUiBtnFunc.TimeoutCountUp):
+                failCount++;
+                if(InputFailCount != null) InputFailCount.text = failCount.ToString();
+                break;
+            case nameof(EUiBtnFunc.TimeoutCountDown):
+                failCount--;
+                if (InputFailCount != null) InputFailCount.text = failCount.ToString();
+                break;
             default :
 
                 break;
@@ -344,7 +357,7 @@ public class Monitor : UiObjectBase
 
         DataCard[] cards = cardRoot.GetComponentsInChildren<DataCard>(true);
 
-       instruments = Manager.Data.CallData<Dictionary<string, InstrumentInfo>>("Monitoring");
+        instruments = Manager.Data.CallData<Dictionary<string, InstrumentInfo>>("Monitoring");
 
         foreach (DataCard card in cards)
         {
@@ -958,6 +971,9 @@ public class Monitor : UiObjectBase
     public TMP_InputField InputSlaveID;
     public TMP_InputField[] InputIP = new TMP_InputField[4];
     public TMP_InputField InputPort;
+
+    private int failCount;
+
     public TextMeshProUGUI InputFailCount;
     public TMP_InputField InputTimeout;
     private void InitializeSetting()
@@ -975,7 +991,10 @@ public class Monitor : UiObjectBase
             InputPort.text = Manager.Network.Port.ToString();
 
         if (InputFailCount != null)
-            InputFailCount.text = Manager.Network.MaxFailCount.ToString();
+        {
+            failCount = Manager.Network.MaxFailCount;
+            InputFailCount.text = failCount.ToString();
+        }
 
         if (InputTimeout != null)
             InputTimeout.text = Manager.Network.Timeout.ToString();

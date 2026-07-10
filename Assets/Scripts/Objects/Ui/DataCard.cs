@@ -67,6 +67,7 @@ public class DataCard : UiObjectBase
     // Main Value 외에도 여러 개의 TextMeshProUGUI를 관리하기 위한 리스트
     private List<TextMeshProUGUI> MultiSlotTexts = new List<TextMeshProUGUI>();
     private List<TextMeshProUGUI> MultiSlotValueTexts = new List<TextMeshProUGUI>();
+    private List<TMP_InputField> MultiSlotInputFields = new List<TMP_InputField>();
 
 
     [Header("Experiment Schedule")]
@@ -117,26 +118,53 @@ public class DataCard : UiObjectBase
 
         if (cardType == EDataCardType.ExperimentSchedule)
         {
-            experimentScheduleNo = GetComponentsInChildren<TextMeshProUGUI>(true)
-                .FirstOrDefault(x => x.name == "ScheduleNo");
+            experimentScheduleNo = GetComponentsInChildren<TextMeshProUGUI>(true).FirstOrDefault(x => x.name == "ScheduleNo");
 
             if (experimentScheduleNo == null)
             {
                 Debug.LogWarning($"[{name}] ScheduleNo TextMeshProUGUI를 찾을 수 없습니다.");
             }
         }
-    }
-
-    public void Initialize(InstrumentInfo InstrumentInfo)
-    {
-        if(string.IsNullOrEmpty(ObjectID))
+        else if(cardType == EDataCardType.SettingCard)
         {
-            ObjectID = InstrumentInfo.Group;
+
+        }
+    }
+    public void Initialize(InstrumentInfo instrumentInfo)
+    {
+        if (instrumentInfo == null)
+            return;
+
+        if (cardType == EDataCardType.SettingCard)
+        {
+            info[instrumentInfo.Tag] = instrumentInfo;
+
+            tagText.text = instrumentInfo.Tag;
+            valueText.text = instrumentInfo.NO.ToString();
+
+            for (int i = 0; i < MultiSlotNames.Count; i++)
+            {
+                string propertyName = MultiSlotNames[i];
+
+                object value = GetInstrumentInfoValue(instrumentInfo, propertyName);
+
+
+                if (i < MultiSlotInputFields.Count && MultiSlotInputFields[i] != null)
+                {
+                    MultiSlotInputFields[i].text = value?.ToString() ?? "";
+                }
+            }
+
+            return;
+        }
+
+        if (string.IsNullOrEmpty(ObjectID))
+        {
+            ObjectID = instrumentInfo.Group;
             UpdateTagText(ObjectID);
         }
 
-        info[InstrumentInfo.Tag] = InstrumentInfo;
-
+        info[instrumentInfo.Tag] = instrumentInfo;
     }
     public void Initialize(ExperimentInfo experimentInfo)
     {
@@ -157,51 +185,59 @@ public class DataCard : UiObjectBase
                 .ToList();
         }
     }
+
     private void InitializeMultiSlots()
     {
         MultiSlotTexts.Clear();
         MultiSlotValueTexts.Clear();
 
-        TextMeshProUGUI[] texts =
-            GetComponentsInChildren<TextMeshProUGUI>(true);
+        TextMeshProUGUI[] texts = GetComponentsInChildren<TextMeshProUGUI>(true);
 
-        MultiSlotTexts = GetTextsByRule(texts, MultiSlotTextRule);
-        MultiSlotValueTexts = GetTextsByRule(texts, MultiSlotValueRule);
+
+        MultiSlotTexts = GetComponentsByRule<TextMeshProUGUI>(texts, MultiSlotTextRule);
+        if (cardType != EDataCardType.SettingCard) MultiSlotValueTexts = GetComponentsByRule<TextMeshProUGUI>(texts, MultiSlotValueRule);
+        else
+        {
+            MultiSlotInputFields.Clear();
+
+            TMP_InputField[] fields = GetComponentsInChildren<TMP_InputField>(true);
+
+            MultiSlotInputFields = GetComponentsByRule<TMP_InputField>(fields, MultiSlotValueRule);
+        }
 
         // MultiSlotNames -> MultiText에 적용
         for (int i = 0; i < MultiSlotTexts.Count; i++)
-        {
-            if (i >= MultiSlotNames.Count)
-                break;
+            {
+                if (i >= MultiSlotNames.Count)
+                    break;
 
-            if (MultiSlotTexts[i] == null)
-                continue;
+                if (MultiSlotTexts[i] == null)
+                    continue;
 
-            MultiSlotTexts[i].text = $"{MultiSlotNames[i]} :";
+                MultiSlotTexts[i].text = $"{MultiSlotNames[i]} :";
 
-        }
+            }
 
 
         //Debug.Log($"[{name}] MultiText : {MultiSlotTexts.Count}, " + $"MultiValue : {MultiSlotValueTexts.Count}");
     }
-
-    private List<TextMeshProUGUI> GetTextsByRule(
-        TextMeshProUGUI[] texts,
-        string rule)
+    private List<T> GetComponentsByRule<T>(T[] components, string rule) where T : Component
     {
-        return texts
-            .Where(t => t.name.StartsWith(rule))
-            .OrderBy(t =>
-            {
-                string numberText = t.name.Replace(rule, "");
+        if (components == null)
+            return new List<T>();
 
-                if (int.TryParse(numberText, out int number))
-                    return number;
+        return components.Where(t => t != null && t.name.StartsWith(rule)).OrderBy(t =>
+        {
+            string numberText = t.name.Replace(rule, "");
 
-                return int.MaxValue;
-            })
-            .ToList();
+            if (int.TryParse(numberText, out int number))
+                return number;
+
+            return int.MaxValue;
+        }).ToList();
     }
+
+
     protected override void EventSubscriber()
     {
         base.EventSubscriber();
@@ -369,8 +405,7 @@ public class DataCard : UiObjectBase
     }
     private void UpdateCustomText(Datas data)
     {
-        if (valueText != null)
-            valueText.text = $"{data.Name} : {data.Value}";
+        if (valueText != null) valueText.text = $"{data.Name} : {data.Value}";
     }
     private void UpdateStateButton(Datas data)
     {
@@ -582,7 +617,31 @@ public class DataCard : UiObjectBase
             }
         }
     }
-
+    private object GetInstrumentInfoValue(InstrumentInfo info, string propertyName)
+    {
+        return propertyName switch
+        {
+            nameof(InstrumentInfo.NO) => info.NO,
+            nameof(InstrumentInfo.Tag) => info.Tag,
+            nameof(InstrumentInfo.Function) => info.Function,
+            nameof(InstrumentInfo.PointType) => info.PointType,
+            nameof(InstrumentInfo.Type) => info.Type,
+            nameof(InstrumentInfo.InstrumentType) => info.InstrumentType,
+            nameof(InstrumentInfo.Measurement) => info.Measurement,
+            nameof(InstrumentInfo.Group) => info.Group,
+            nameof(InstrumentInfo.System) => info.System,
+            nameof(InstrumentInfo.DataType) => info.DataType,
+            nameof(InstrumentInfo.RangeMin) => info.RangeMin,
+            nameof(InstrumentInfo.RangeMax) => info.RangeMax,
+            nameof(InstrumentInfo.PLCMin) => info.PLCMin,
+            nameof(InstrumentInfo.PLCMax) => info.PLCMax,
+            nameof(InstrumentInfo.Address) => info.Address,
+            nameof(InstrumentInfo.Useable) => info.Useable,
+            nameof(InstrumentInfo.Description) => info.Description,
+            nameof(InstrumentInfo.Note) => info.Note,
+            _ => null
+        };
+    }
 
     #endregion
 }

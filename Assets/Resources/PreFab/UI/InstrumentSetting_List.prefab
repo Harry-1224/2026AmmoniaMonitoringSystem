@@ -190,7 +190,7 @@ GameObject:
   - component: {fileID: 8579908688170127498}
   - component: {fileID: 1655171725361430479}
   m_Layer: 5
-  m_Name: NO
+  m_Name: No
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -859,22 +859,25 @@ MonoBehaviour:
   ObjectID: 
   isManagable: 0
   cardType: 12
-  tagText: {fileID: 0}
-  valueText: {fileID: 0}
+  tagText: {fileID: 2561182143517005555}
+  valueText: {fileID: 1655171725361430479}
   DataSettingField: {fileID: 0}
   StateButton: {fileID: 0}
   MultiSlotTextRule: MultiText_
   MultiSlotValueRule: MultiValueText_
   MultiSlotNames:
-  - SensorLow
-  - SensorHigh
-  - PLCLow
-  - PLCHigh
-  - DataAdress
+  - RangeMin
+  - RangeMax
+  - PLCMin
+  - PLCMax
+  - Address
   scheduleNameText: {fileID: 0}
   scheduleDescriptionText: {fileID: 0}
   scheduleValue: {fileID: 0}
   cardImage: {fileID: 0}
+  LeftNumberimage: {fileID: 0}
+  RightTextImage: {fileID: 0}
+  scheduleTexts: []
 --- !u!1 &2601777999817475434
 GameObject:
   m_ObjectHideFlags: 0
@@ -2722,7 +2725,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Experiment_Process_End
+  m_text: '-'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: ba1439e79f840cf45859f8b1d38a9190, type: 2}
   m_sharedMaterial: {fileID: 3194442167160812300, guid: ba1439e79f840cf45859f8b1d38a9190, type: 2}
