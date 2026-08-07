@@ -19990,8 +19990,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1075017454}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.2995935, y: 0.38027197, z: -0.107122906, w: 0.86842483}
-  m_LocalPosition: {x: -0.40000033, y: 1.4400003, z: -2.3400002}
+  m_LocalRotation: {x: 0.11589994, y: -5.860318e-11, z: 0.0044529405, w: 0.9932509}
+  m_LocalPosition: {x: 0, y: 2.88, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -20102,7 +20102,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Unity.Cinemachine::Unity.Cinemachine.CinemachineSplineCart
   m_SplineSettings:
     Spline: {fileID: 2021528426}
-    Position: 1
+    Position: 0
     Units: 1
   UpdateMethod: 0
   AutomaticDolly:
@@ -34614,7 +34614,7 @@ MonoBehaviour:
           w: 1
     - Position:
         x: -0.4
-        y: 0.56
+        y: 0.35
         z: -2.34
       TangentIn:
         x: 0
