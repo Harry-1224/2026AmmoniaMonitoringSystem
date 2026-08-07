@@ -6,78 +6,111 @@ using UnityEngine.Splines;
 public class DollyCartMover : MonoBehaviour
 {
     [SerializeField] private CinemachineSplineCart cart;
-    [SerializeField] private float moveDuration = 3f;
+
+    [Header("이동 속도 (m/s)")]
+    [SerializeField] private float moveSpeed = 5f;
+
+    [Header("가속 / 감속")]
+    [SerializeField] private bool useSmoothStep = true;
 
     private Coroutine moveCoroutine;
 
-    private void Start()
+    private void Awake()
     {
         if (cart == null)
             cart = GetComponent<CinemachineSplineCart>();
 
         if (cart == null)
-        {
             Debug.LogError("CinemachineSplineCart가 연결되지 않았습니다.");
-            return;
-        }
     }
+
     public void MoveToKnot(int knotIndex)
     {
         if (cart == null)
-            cart = GetComponent<CinemachineSplineCart>();
-
-        if (cart == null)
         {
             Debug.LogError("CinemachineSplineCart가 연결되지 않았습니다.");
             return;
         }
 
-        cart.PositionUnits = PathIndexUnit.Knot;
+        if (cart.Spline == null)
+        {
+            Debug.LogError("SplineContainer가 연결되지 않았습니다.");
+            return;
+        }
 
-        float start = cart.SplinePosition;
-        float end = knotIndex;
+        Spline spline = cart.Spline.Spline;
+
+        // 현재 위치를 Distance 단위로 변환
+        float currentDistance =
+            spline.ConvertIndexUnit(
+                cart.SplinePosition,
+                cart.PositionUnits,
+                PathIndexUnit.Distance
+            );
+
+        // 목적 Knot을 Distance 단위로 변환
+        float targetDistance =
+            spline.ConvertIndexUnit(
+                knotIndex,
+                PathIndexUnit.Knot,
+                PathIndexUnit.Distance
+            );
+
+        cart.PositionUnits = PathIndexUnit.Distance;
+        cart.SplinePosition = currentDistance;
+
+        float distance =
+            Mathf.Abs(targetDistance - currentDistance);
+
+        float duration =
+            distance / Mathf.Max(moveSpeed, 0.01f);
 
         if (moveCoroutine != null)
             StopCoroutine(moveCoroutine);
 
-        moveCoroutine = StartCoroutine(MoveCart(start, end));
+        moveCoroutine = StartCoroutine(
+            MoveCart(
+                currentDistance,
+                targetDistance,
+                duration
+            )
+        );
     }
 
-    public void MoveToKnot0()
-    {
-        MoveToKnot(0);
-    }
+    public void MoveToKnot0() => MoveToKnot(0);
+    public void MoveToKnot1() => MoveToKnot(1);
+    public void MoveToKnot2() => MoveToKnot(2);
+    public void MoveToKnot3() => MoveToKnot(3);
+    public void MoveToKnot4() => MoveToKnot(4);
 
-    public void MoveToKnot1()
+    private IEnumerator MoveCart(
+        float start,
+        float end,
+        float duration)
     {
-        MoveToKnot(1);
-    }
-
-    public void MoveToKnot2()
-    {
-        MoveToKnot(2);
-    }
-    public void MoveToKnot3()
-    {
-        MoveToKnot(3);
-    }
-    public void MoveToKnot4()
-    {
-        MoveToKnot(4);
-    }
-    private IEnumerator MoveCart(float start, float end)
-    {
-        float time = 0f;
-
-        while (time < moveDuration)
+        if (Mathf.Approximately(start, end))
         {
-            time += Time.deltaTime;
+            cart.SplinePosition = end;
+            moveCoroutine = null;
+            yield break;
+        }
 
-            float t = time / moveDuration;
-            t = Mathf.Clamp01(t);
-            t = Mathf.SmoothStep(0f, 1f, t);
+        float elapsedTime = 0f;
 
-            cart.SplinePosition = Mathf.Lerp(start, end, t);
+        while (elapsedTime < duration)
+        {
+            elapsedTime += Time.deltaTime;
+
+            float t =
+                Mathf.Clamp01(
+                    elapsedTime / duration
+                );
+
+            if (useSmoothStep)
+                t = Mathf.SmoothStep(0f, 1f, t);
+
+            cart.SplinePosition =
+                Mathf.Lerp(start, end, t);
 
             yield return null;
         }
