@@ -5,6 +5,7 @@ using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using System.Collections;
 
 public enum EDataCardType
 {
@@ -14,7 +15,7 @@ public enum EDataCardType
     InputDataC,
     OutputDataA,
     OutputDataB,
-    OutputDataC,
+    OutputData_Inverter,
     ExperimentSchedule,
     ExperimentData,
     ExperimentData_DoubleToggle,
@@ -30,6 +31,7 @@ public enum EDataCardButtonType
     ButtonToggle,
     ButtonTimeSet,
     ButtonDataSet,
+    ButtonSpecial,
     Button
 }
 public enum EDataCategory
@@ -41,6 +43,7 @@ public enum EDataCategory
     Setting,
     Inte,
     Custom,
+    Toggle
 }
 
 public class DataCard : UiObjectBase
@@ -52,15 +55,19 @@ public class DataCard : UiObjectBase
 
     public TextMeshProUGUI tagText;
     public TextMeshProUGUI valueText;
+    public int decimalPoint = 2;
 
     public TMP_InputField DataSettingField;
 
     public Button StateButton;
 
+    private Coroutine timerCoroutine;
+
     [Header("MultiSlot")]
     // MultiSlot TextMeshProUGUI를 관리하기 위한 규칙
     public string MultiSlotTextRule = "MultiText_";
     public string MultiSlotValueRule = "MultiValueText_";
+    public string MultiSlotLampRule = "MultiLamp_";
     public List<string> MultiSlotNames = new List<string>();
 
 
@@ -68,6 +75,7 @@ public class DataCard : UiObjectBase
     private List<TextMeshProUGUI> MultiSlotTexts = new List<TextMeshProUGUI>();
     private List<TextMeshProUGUI> MultiSlotValueTexts = new List<TextMeshProUGUI>();
     private List<TMP_InputField> MultiSlotInputFields = new List<TMP_InputField>();
+    private List<Image> MultiSlotImange = new List<Image>();
 
 
     [Header("Experiment Schedule")]
@@ -207,7 +215,7 @@ public class DataCard : UiObjectBase
 
         // MultiSlotNames -> MultiText에 적용
         for (int i = 0; i < MultiSlotTexts.Count; i++)
-            {
+        {
                 if (i >= MultiSlotNames.Count)
                     break;
 
@@ -215,10 +223,7 @@ public class DataCard : UiObjectBase
                     continue;
 
                 MultiSlotTexts[i].text = $"{MultiSlotNames[i]} :";
-
-            }
-
-
+        }
         //Debug.Log($"[{name}] MultiText : {MultiSlotTexts.Count}, " + $"MultiValue : {MultiSlotValueTexts.Count}");
     }
     private List<T> GetComponentsByRule<T>(T[] components, string rule) where T : Component
@@ -308,16 +313,69 @@ public class DataCard : UiObjectBase
                     value = data.Value > 0 ? (ushort)0 : (ushort)1;
                 }
                 else value = 1;
+                
+                Debug.Log($"[{target.Tag}] State Change : {value}");
+
                 Manager.Network.ReserveDateWriteing(target.PointType, (ushort)target.Address, value);
                 break;
             case nameof(EDataCardButtonType.ButtonDataSet):
                 target = info.Values.FirstOrDefault(x => x.Type == EDataCategory.Setting);
-
-                value = ushort.Parse(DataSettingField.text);
-
+                value = ConvertDataToPLC(float.Parse(DataSettingField.text), target);
                 Manager.Network.ReserveDateWriteing(target.PointType, (ushort)target.Address, value);
+
                 break;
+
             case nameof(EDataCardButtonType.ButtonTimeSet):
+                target = info.Values.FirstOrDefault(
+        x => x.PointType == "DO");
+
+                if (target == null)
+                {
+                    Debug.LogWarning(
+                        $"[DataCard/{ObjectID}] DO 타입을 찾을 수 없습니다.");
+                    return;
+                }
+
+                if (DataSettingField == null)
+                {
+                    Debug.LogWarning(
+                        $"[DataCard/{ObjectID}] Timer InputField가 없습니다.");
+                    return;
+                }
+
+                if (!int.TryParse(
+                        DataSettingField.text,
+                        out int timerValue))
+                {
+                    Debug.LogWarning(
+                        $"[DataCard/{ObjectID}] 잘못된 Timer 값: " +
+                        $"{DataSettingField.text}");
+                    return;
+                }
+
+                if (timerValue <= 0)
+                {
+                    Debug.LogWarning(
+                        $"[DataCard/{ObjectID}] Timer는 0보다 커야 합니다.");
+                    return;
+                }
+
+                // 기존 타이머가 작동 중이라면 종료
+                if (timerCoroutine != null)
+                {
+                    StopCoroutine(timerCoroutine);
+
+                    // 기존 타이머를 취소했으므로 안전하게 OFF
+                    Manager.Network.ReserveDateWriteing(
+                        target.PointType,
+                        (ushort)target.Address,
+                        0);
+                }
+
+                timerCoroutine = StartCoroutine(
+                    TimerDOControl(target, timerValue));
+
+                break;
                 break;
 
         }
@@ -329,7 +387,7 @@ public class DataCard : UiObjectBase
         else containingBox.OnClickedDataCard(cardType, ObjectID);
 
     }
-
+    
     private void OnTextUpdate(Datas data, EDataCategory dataCategory = EDataCategory.Value)
     {
         if (data == null || dataCategory == EDataCategory.None) return;
@@ -337,9 +395,11 @@ public class DataCard : UiObjectBase
         switch (dataCategory)
         {
             case EDataCategory.Value:
+            case EDataCategory.Toggle:
                 UpdateValueText(data);
                 break;
-            case EDataCategory.Inte:
+
+            default:
                 UpdateMultiText(data);
                 break;
         }
@@ -353,7 +413,7 @@ public class DataCard : UiObjectBase
             tagText.text = tag;
     }
 
-    private void UpdateValueText(Datas data)
+    private void UpdateValueText(Datas data, EDataCategory dataCategory = 0)
     {
         if (valueText == null)
         {
@@ -375,9 +435,21 @@ public class DataCard : UiObjectBase
         {
             valueText.text = data.Value > 0 ? "Open" : "Close";
         }
+        else if (cardType == EDataCardType.OutputData_Inverter)
+        {
+            if(dataCategory == EDataCategory.Toggle)
+            {
+                if (StateButton != null) StateButton.GetComponentInChildren<TMP_Text>().text = data.Value > 0 ? "Run" : "Stop";
+                else Debug.LogWarning($"[DataCard - {data.Name}] State Button is Null");
+            }
+            else
+            {
+                valueText.text = data.Value.ToString($"F{decimalPoint}");
+            }
+        }
         else
         {
-            valueText.text = data.Value.ToString();
+            valueText.text = data.Value.ToString($"F{decimalPoint}");
         }
     }
 
@@ -641,6 +713,42 @@ public class DataCard : UiObjectBase
             nameof(InstrumentInfo.Note) => info.Note,
             _ => null
         };
+    }
+
+    #endregion
+
+    #region Utility
+    // TODO : Setting Field 작성 시 숫자만 찍히는 코드
+
+    // TODO : Setting Field의 숫자를 Data To PLC로 Converting하는 코드
+    private ushort ConvertDataToPLC(float setData, InstrumentInfo info)
+    {
+        ushort value = (ushort)(((setData - info.RangeMin) * (info.PLCMax - info.PLCMin) / (info.RangeMax - info.RangeMin)) + info.PLCMin);
+        return value;
+    }
+
+    private void TurnLampState(bool state)
+    {
+
+    }
+
+    private IEnumerator TimerDOControl(InstrumentInfo target, int timerValue)
+    {
+        float waitSeconds = timerValue / 100f;
+
+        // ON
+        Manager.Network.ReserveDateWriteing(target.PointType, (ushort)target.Address, 1);
+
+        Debug.Log( $"[{target.Tag}] Timer Start : " +  $"{timerValue} ({waitSeconds:F2}s)");
+
+        yield return new WaitForSeconds(waitSeconds);
+
+        // OFF
+        Manager.Network.ReserveDateWriteing( target.PointType,(ushort)target.Address,0);
+
+        Debug.Log( $"[{target.Tag}] Timer Finish → OFF");
+
+        timerCoroutine = null;
     }
 
     #endregion

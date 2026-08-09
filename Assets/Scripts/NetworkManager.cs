@@ -441,7 +441,7 @@ public class NetworkManager : ManagerBase
         try
         {
             // 2. 데이터 요청
-            GetDatas = modbusService.CallData((byte)EDataAddressRange.SlaveID, (ushort)EDataAddressRange.AddressStart, (ushort)EDataAddressRange.AddressEnd);
+            GetDatas = modbusService.CallData(slaveID, (ushort)EDataAddressRange.AddressStart, (ushort)EDataAddressRange.AddressEnd);
 
             // * 매개변수가 null이 아닐경우 데이터 비교
         }
@@ -509,7 +509,7 @@ public class NetworkManager : ManagerBase
             }
         }
     // 5. 필요한 데이터 만큼만 잘라내어 Data Write
-        modbusService.SendData((byte)EDataAddressRange.SlaveID, (ushort)EDataAddressRange.OutputAddressStart, data.Skip((int)EDataAddressRange.OutputAddressStart).Select(x => (ushort)x).ToArray());
+        modbusService.SendData(slaveID, (ushort)EDataAddressRange.OutputAddressStart, data.Skip((int)EDataAddressRange.OutputAddressStart).Select(x => (ushort)x).ToArray());
 
         return data;
     }

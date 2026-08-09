@@ -249,9 +249,9 @@ public partial class ExperimentManager
         }
         ELoggingState logState = Manager.Logging.CheckLoggingState();
 
-        // 무슨 경우에도 일단 Running이 아닌데 로깅 중이면 로깅 종료
-        if (!waitPLCResponse && state != EExperimentStateMachine.Running && logState == ELoggingState.Logging)
-            StopAndSaveLogging(experimentSchedules[CurrentScheduleIndex]); 
+        // 무슨 경우에도 일단 Running이 아닌데 로깅 중이면 로깅 종료(실험이 시작될 때 로깅이 진행중이면 안되는 관계로 종료)
+        // TODO : 실험이 진행중이 아닌 상황에서도 로깅이 종료되는 현상 발생. 실험이 시작될 때만 한정하여 시작하도록 설정
+        // if (!waitPLCResponse && state != EExperimentStateMachine.Running && logState == ELoggingState.Logging) StopAndSaveLogging(experimentSchedules[CurrentScheduleIndex]); 
 
         if (state != CurrentState)
         {

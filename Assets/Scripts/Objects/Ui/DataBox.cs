@@ -4,6 +4,7 @@ using System.Linq;
 using TMPro;
 using UnityEditor.UIElements;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 /// <summary>
 /// DataBox의 Type을 구분하는 Enum
@@ -130,6 +131,8 @@ public class DataBox : UiObjectBase
                 // 2. Control Box에서 ControlDataCard를 생성한다.
                 OnDataCardGenerated(dataBoxType.ToString(), instruments);
 
+
+
                 break;
             case EDataBoxType.Experiment:
                 // - NOTE : Experiment Box에서 InstrumentInfo는 진행중인 실험의 진행도를 파악하기 위해 사용된다.
@@ -161,6 +164,8 @@ public class DataBox : UiObjectBase
     {
         if (dataBoxType == EDataBoxType.Experiment || dataBoxType == EDataBoxType.Logging) Manager.Experiment.ExperimentScheduleChange += OnExperimentScheduleChanged;
         Manager.Data.OnDataChanged += OnDataChanged;
+
+        Debug.Log($"Event Set Complete : {dataBoxType.ToString()}");
     }
 
     protected override void EventUnsubscriber()
@@ -292,7 +297,20 @@ public class DataBox : UiObjectBase
     {
         if (Container == null)
         {
-            Debug.LogError("[DataBox] Container가 null입니다.");
+            Debug.LogError(
+                $"[DataBox/{dataBoxType}] Container가 null입니다.");
+            return;
+        }
+        if (instruments == null)
+        {
+            Debug.LogError(
+                $"[DataBox/{dataBoxType}] instruments가 null입니다.");
+            return;
+        }
+        if (dataCards == null)
+        {
+            Debug.LogError(
+                $"[DataBox/{dataBoxType}] dataCards가 초기화되지 않았습니다.");
             return;
         }
 
@@ -301,49 +319,136 @@ public class DataBox : UiObjectBase
             Destroy(child.gameObject);
         }
 
+        Datas data = new Datas();
         dataCards.Clear();
-
         foreach (var item in instruments)
         {
             InstrumentInfo info = item.Value;
+            GameObject obj = null;
 
-            if (info == null) continue;
-            if (!info.Useable) continue;
-            if (info.Function != type) continue; 
-            if (dataCards.TryGetValue(info.Group, out DataCard existingCard))
+            try
             {
-                //만약 같은 Group의 DataCard가 이미 존재한다면, 해당 DataCard를 업데이트한다.
-                existingCard.Initialize(info);
-                continue;
+                if (info == null)
+                {
+                    Debug.LogWarning(
+                        $"[DataBox/{dataBoxType}] InstrumentInfo가 null입니다. " +
+                        $"Key: {item.Key}");
+
+                    continue;
+                }
+
+                if (!info.Useable)
+                    continue;
+
+                if (info.Function != type)
+                    continue;
+
+                if (string.IsNullOrWhiteSpace(info.Group))
+                {
+                    Debug.LogWarning(
+                        $"[DataBox/{dataBoxType}] Group이 비어 있습니다. " +
+                        $"Key: {item.Key}, Tag: {info.Tag}");
+
+                    continue;
+                }
+
+                if (dataCards.TryGetValue(
+                        info.Group,
+                        out DataCard existingCard))
+                {
+                    if (existingCard == null)
+                    {
+                        Debug.LogWarning(
+                            $"[DataBox/{dataBoxType}] 기존 DataCard가 null입니다. " +
+                            $"Group: {info.Group}");
+
+                        dataCards.Remove(info.Group);
+                    }
+                    else
+                    {
+                        existingCard.Initialize(info);
+                        continue;
+                    }
+                }
+
+                if (string.IsNullOrWhiteSpace(info.InstrumentType))
+                {
+                    Debug.LogWarning(
+                        $"[DataBox/{dataBoxType}] InstrumentType이 비어 있습니다. " +
+                        $"Tag: {info.Tag}, Group: {info.Group}");
+
+                    continue;
+                }
+
+                string prefabName = info.InstrumentType.Trim();
+                string path = $"PreFab/UI/{prefabName}";
+
+                GameObject prefab = Resources.Load<GameObject>(path);
+
+                if (prefab == null)
+                {
+                    Debug.LogWarning(
+                        $"[DataBox/{dataBoxType}] Prefab Load 실패\n" +
+                        $"Path: {path}\n" +
+                        $"Tag: {info.Tag}\n" +
+                        $"Group: {info.Group}");
+
+                    continue;
+                }
+
+                obj = Instantiate(prefab, Container);
+                obj.name = info.Group;
+
+                DataCard card = obj.GetComponent<DataCard>();
+
+                if (card == null)
+                {
+                    Debug.LogWarning(
+                        $"[DataBox/{dataBoxType}] DataCard 스크립트가 없습니다.\n" +
+                        $"Prefab: {prefabName}\n" +
+                        $"Tag: {info.Tag}\n" +
+                        $"Group: {info.Group}");
+
+                    Destroy(obj);
+                    obj = null;
+                    continue;
+                }
+
+                card.Initialize(info);
+                card.RegistBox(this);
+
+                dataCards[info.Group] = card;
+
+
+                string key = item.Key;
+                data.Name = key;
+                data.Group = item.Value.Group;
+                dataCards[item.Value.Group].OnFunctionCalled(data);
+
             }
-
-            string prefabName = info.InstrumentType.ToString();
-            string path = $"PreFab/UI/{prefabName}";
-
-            GameObject prefab = Resources.Load<GameObject>(path);
-
-            if (prefab == null)
+            catch (Exception ex)
             {
-                Debug.LogWarning($"[DataBox] Prefab Load 실패: {path}");
-                continue;
+                // 프리팹은 생성됐지만 Initialize 등에서 실패한 경우 제거
+                if (obj != null)
+                    Destroy(obj);
+
+                Debug.LogError(
+                    $"[DataBox/{dataBoxType}] DataCard 처리 중 예외 발생\n" +
+                    $"DictionaryKey: {item.Key}\n" +
+                    $"Tag: {info?.Tag ?? "null"}\n" +
+                    $"Group: {info?.Group ?? "null"}\n" +
+                    $"Function: {info?.Function ?? "null"}\n" +
+                    $"InstrumentType: {info?.InstrumentType ?? "null"}\n" +
+                    $"ExceptionType: {ex.GetType().Name}\n" +
+                    $"Message: {ex.Message}");
+
+                Debug.LogException(ex, this);
+
+                // throw를 사용하지 않으므로 다음 item으로 계속 진행
             }
-
-            GameObject obj = Instantiate(prefab, Container);
-            obj.name = info.Group;
-
-            DataCard card = obj.GetComponent<DataCard>();
-
-            if (card == null)
-            {
-                Debug.LogWarning($"[DataBox] DataCard 스크립트가 없습니다: {prefabName}");
-                Destroy(obj);
-                continue;
-            }
-
-            card.Initialize(info);
-            card.RegistBox(this);
-            dataCards[info.Group] = card;
         }
+
+
     }
     private void OnExperimentDataCardGenerated(List<ExperimentWrapper> schedules)
     {

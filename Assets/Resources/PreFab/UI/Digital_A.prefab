@@ -370,15 +370,20 @@ MonoBehaviour:
   cardType: 3
   tagText: {fileID: 309354840384606546}
   valueText: {fileID: 3068558482010092560}
+  decimalPoint: 2
   DataSettingField: {fileID: 0}
   StateButton: {fileID: 7500928846028069256}
   MultiSlotTextRule: MultiText_
   MultiSlotValueRule: MultiValueText_
+  MultiSlotLampRule: MultiLamp_
   MultiSlotNames: []
   scheduleNameText: {fileID: 0}
   scheduleDescriptionText: {fileID: 0}
   scheduleValue: {fileID: 0}
   cardImage: {fileID: 0}
+  LeftNumberimage: {fileID: 0}
+  RightTextImage: {fileID: 0}
+  scheduleTexts: []
 --- !u!1 &4722065380877085150
 GameObject:
   m_ObjectHideFlags: 0
