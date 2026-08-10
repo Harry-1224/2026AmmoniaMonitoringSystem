@@ -64,10 +64,12 @@ public class ObjectBase : MonoBehaviour, IObject
     {
         // 1. DataManager
         // 2. NetworkManager
+        // 3. LoggingManager
     }
     protected virtual void EventUnsubscriber()
     {
         // 1. DataManager
         // 2. NetworkManager
+
     }
 }

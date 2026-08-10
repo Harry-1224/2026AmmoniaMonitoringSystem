@@ -31,7 +31,7 @@ public enum EDataCardButtonType
     ButtonToggle,
     ButtonTimeSet,
     ButtonDataSet,
-    ButtonSpecial,
+    ButtonTogggleMode,
     Button
 }
 public enum EDataCategory
@@ -43,7 +43,9 @@ public enum EDataCategory
     Setting,
     Inte,
     Custom,
-    Toggle
+    Toggle,
+    InteReset,
+    Mode
 }
 
 public class DataCard : UiObjectBase
@@ -58,9 +60,11 @@ public class DataCard : UiObjectBase
     public int decimalPoint = 2;
 
     public TMP_InputField DataSettingField;
-
+    public Toggle DataUseableSet;
     public Button StateButton;
 
+    // Timer Parametter
+    private int timerValue = 0;
     private Coroutine timerCoroutine;
 
     [Header("MultiSlot")]
@@ -246,11 +250,17 @@ public class DataCard : UiObjectBase
     protected override void EventSubscriber()
     {
         base.EventSubscriber();
+        // LoggingManger
+        //Manager.Logging.OnLoggingStarted += LoggingStartEventHandler;
+        //Manager.Logging.OnLoggingStopped += LoggingStopEventHandler;
     }
     protected override void EventUnsubscriber()
     {
         base.EventUnsubscriber();
+        //Manager.Logging.OnLoggingStarted -= LoggingStartEventHandler;
+        //Manager.Logging.OnLoggingStopped -= LoggingStopEventHandler;
     }
+
 
     public void RegistBox(object containing)
     {
@@ -273,17 +283,20 @@ public class DataCard : UiObjectBase
     public override void OnFunctionCalled(object obj = null)
     {
         // obj가 Dictionary<string, Datas>가 아닐경우 return
-        if (obj is not Datas datas)
-            return;
+        if (obj is not Datas datas)  return;
 
         string name = datas.Name;
 
-        if (info.ContainsKey(name))
-        {
-            currentData[name] = datas;
-            OnTextUpdate(datas, info[name].Type);
-        }
+        if (!info.ContainsKey(name)) return;
 
+
+        currentData[name] = datas; 
+        if (info[name].Type == EDataCategory.Mode && DataUseableSet != null)
+        {
+            DataUseableSet.isOn = datas.Value > 0;
+            return;
+        }
+        OnTextUpdate(datas, info[name].Type);
     }
 
     /// <summary>
@@ -299,24 +312,121 @@ public class DataCard : UiObjectBase
 
         switch (buttonType) 
         {
+            case nameof(EDataCardButtonType.ButtonTogggleMode):
+                target = info.Values.FirstOrDefault(x => x.Type == EDataCategory.Mode);
+
+                if (target == null)
+                {
+                    Debug.LogWarning(
+                        $"[DataCard/{ObjectID}] Mode 타입을 찾을 수 없습니다.");
+                    return;
+                }
+
+                if (DataUseableSet == null)
+                {
+                    Debug.LogWarning(
+                        $"[DataCard/{ObjectID}] DataUseableSet이 없습니다.");
+                    return;
+                }
+
+                // Toggle에서 원하는 값
+                // ON  = 1
+                // OFF = 0
+                value = DataUseableSet.isOn? (ushort)1 : (ushort)0;
+
+                // 현재 Network에서 받은 값 확인
+                if (currentData.TryGetValue(target.Tag, out Datas data))
+                {
+                    bool currentState = data.Value > 0;
+
+                    // 현재 값과 Toggle 값이 같으면 전송할 필요 없음
+                    if (currentState == DataUseableSet.isOn)
+                    {
+                        Debug.Log( $"[{target.Tag}] 이미 같은 상태입니다. " + $"State = {value}");
+                        return;
+                    }
+                }
+
+                // 값이 다를 때만 PLC로 전송
+                Manager.Network.ReserveDateWriteing(target.PointType, (ushort)target.Address, value);
+
+                Debug.Log( $"[{target.Tag}] Mode Change → {value}");
+
+                break;
+
             case nameof(EDataCardButtonType.ButtonToggle):
+
                 target = info.Values.FirstOrDefault(x => x.PointType == "DO");
 
                 if (target == null)
                 {
-                    Debug.LogWarning("[DataCard] DO 타입을 찾을 수 없습니다.");
+                    Debug.LogWarning($"[DataCard/{ObjectID}] DO 타입을 찾을 수 없습니다.");
                     return;
                 }
 
-                if (currentData.TryGetValue(target.Tag, out var data))
+                // 현재 DO 상태를 기준으로 다음 값 결정
+                if (currentData.TryGetValue(target.Tag, out var _data))
                 {
-                    value = data.Value > 0 ? (ushort)0 : (ushort)1;
+                    value = _data.Value > 0
+                        ? (ushort)0
+                        : (ushort)1;
                 }
-                else value = 1;
-                
-                Debug.Log($"[{target.Tag}] State Change : {value}");
+                else
+                {
+                    // 현재 상태를 모르면 ON으로 시작
+                    value = 1;
+                }
 
-                Manager.Network.ReserveDateWriteing(target.PointType, (ushort)target.Address, value);
+                Debug.Log($"[{target.Tag}] State Change : {value} / Timer : {timerValue}");
+
+                // ======================================================
+                // OFF
+                // ======================================================
+                if (value == 0)
+                {
+                    // 타이머 실행 중이면 중단
+                    if (timerCoroutine != null)
+                    {
+                        StopCoroutine(timerCoroutine);
+                        timerCoroutine = null;
+                    }
+
+                    Manager.Network.ReserveDateWriteing(
+                        target.PointType,
+                        (ushort)target.Address,
+                        0);
+
+                    Debug.Log($"[{target.Tag}] DO OFF");
+
+                    break;
+                }
+
+                // ======================================================
+                // ON
+                // ======================================================
+
+                // 타이머가 설정되어 있는 경우
+                if (timerValue > 0)
+                {
+                    // 이전 타이머가 혹시 남아있다면 중단
+                    if (timerCoroutine != null)
+                    {
+                        StopCoroutine(timerCoroutine);
+                    }
+
+                    timerCoroutine = StartCoroutine(
+                        TimerDOControl(target, timerValue));
+                }
+                else
+                {
+                    // 타이머가 없으면 일반 Toggle
+                    Manager.Network.ReserveDateWriteing(
+                        target.PointType,
+                        (ushort)target.Address,
+                        1);
+
+                    Debug.Log($"[{target.Tag}] DO ON");
+                }
                 break;
             case nameof(EDataCardButtonType.ButtonDataSet):
                 target = info.Values.FirstOrDefault(x => x.Type == EDataCategory.Setting);
@@ -326,56 +436,36 @@ public class DataCard : UiObjectBase
                 break;
 
             case nameof(EDataCardButtonType.ButtonTimeSet):
-                target = info.Values.FirstOrDefault(
-        x => x.PointType == "DO");
-
-                if (target == null)
-                {
-                    Debug.LogWarning(
-                        $"[DataCard/{ObjectID}] DO 타입을 찾을 수 없습니다.");
-                    return;
-                }
-
                 if (DataSettingField == null)
                 {
-                    Debug.LogWarning(
-                        $"[DataCard/{ObjectID}] Timer InputField가 없습니다.");
+                    Debug.LogWarning($"[DataCard/{ObjectID}] Timer InputField가 없습니다.");
                     return;
                 }
 
-                if (!int.TryParse(
-                        DataSettingField.text,
-                        out int timerValue))
+                if (!int.TryParse(DataSettingField.text,out int inputTimerValue))
                 {
-                    Debug.LogWarning(
-                        $"[DataCard/{ObjectID}] 잘못된 Timer 값: " +
-                        $"{DataSettingField.text}");
+                    Debug.LogWarning( $"[DataCard/{ObjectID}] 잘못된 Timer 값: " + $"{DataSettingField.text}");
                     return;
                 }
 
-                if (timerValue <= 0)
+                if (inputTimerValue < 0)
                 {
-                    Debug.LogWarning(
-                        $"[DataCard/{ObjectID}] Timer는 0보다 커야 합니다.");
+                    Debug.LogWarning($"[DataCard/{ObjectID}] Timer 값은 " + $"0 이상이어야 합니다.");
                     return;
                 }
 
-                // 기존 타이머가 작동 중이라면 종료
-                if (timerCoroutine != null)
-                {
-                    StopCoroutine(timerCoroutine);
+                // 실제 동작하지 않고 값만 저장
+                timerValue = inputTimerValue;
 
-                    // 기존 타이머를 취소했으므로 안전하게 OFF
-                    Manager.Network.ReserveDateWriteing(
-                        target.PointType,
-                        (ushort)target.Address,
-                        0);
+                if (timerValue == 0)
+                {
+                    Debug.Log( $"[DataCard/{ObjectID}] Timer 해제 → 일반 Toggle 모드");
+                }
+                else
+                {
+                    Debug.Log($"[DataCard/{ObjectID}] Timer 설정 : " + $"{timerValue} → {timerValue / 100f:F2}초");
                 }
 
-                timerCoroutine = StartCoroutine(
-                    TimerDOControl(target, timerValue));
-
-                break;
                 break;
 
         }
@@ -715,6 +805,214 @@ public class DataCard : UiObjectBase
         };
     }
 
+    #endregion
+
+    #region Logging
+
+    private Coroutine loggingCoroutine;
+
+    private float integratedValue = 0f;
+
+    private const float LoggingInterval = 0.5f;
+
+    // Flow 시간 단위 환산값
+    // /sec = 1
+    // /min = 60
+    // /hour = 3600
+    private float TimeUnit = 60f;
+
+    private void LoggingStartEventHandler()
+    {
+        if (!info.Values.Any(x => x != null && x.Type == EDataCategory.Inte))
+            return;
+
+        // 이미 실행 중이면 중복 실행 방지
+        if (loggingCoroutine != null)
+            return;
+
+        loggingCoroutine = StartCoroutine(LoggingRoutine());
+
+        Debug.Log($"[DataCard/{ObjectID}] Logging Coroutine Start");
+    }
+
+    private void LoggingStopEventHandler()
+    {
+        if (loggingCoroutine == null)
+            return;
+
+        StopCoroutine(loggingCoroutine);
+        loggingCoroutine = null;
+
+        Debug.Log($"[DataCard/{ObjectID}] Logging Coroutine Stop");
+    }
+    private IEnumerator LoggingRoutine()
+    {
+        WaitForSeconds wait = new WaitForSeconds(LoggingInterval);
+
+        while (true)
+        {
+            yield return wait;
+
+            //LoggingUpdate();
+        }
+    }
+    /*
+    public void OnDataUseableChanged(bool isOn)
+    {
+        integratedValue = 0f;
+
+        InstrumentInfo inteInfo = info.Values.FirstOrDefault(x =>
+            x != null &&
+            x.Type == EDataCategory.Inte);
+
+        if (inteInfo == null)
+            return;
+
+        Datas resetData = new Datas
+        {
+            Name = inteInfo.Tag,
+            Value = 0f
+        };
+
+        // DataCard
+        currentData[inteInfo.Tag] = resetData;
+
+        // DataManager
+        Manager.Data.UpdateData(
+            inteInfo.Tag,
+            resetData);
+
+        // UI
+        OnTextUpdate(
+            resetData,
+            EDataCategory.Inte);
+
+        Debug.Log(
+            $"[DataCard/{ObjectID}] " +
+            $"적산 Reset → {inteInfo.Tag} = 0");
+    }
+
+
+    private void LoggingUpdate()
+    {
+        // =====================================================
+        // 1. 적산 기능이 활성화된 상태인지 확인
+        // 현재 요구사항: Toggle이 OFF일 때 적산
+        // =====================================================
+        if (DataUseableSet == null)
+            return;
+
+        if (DataUseableSet.isOn)
+            return;
+
+
+        // =====================================================
+        // 2. 현재 Flow에 해당하는 Value 정보 찾기
+        // =====================================================
+        InstrumentInfo valueInfo = info.Values.FirstOrDefault(x =>
+            x != null &&
+            x.Type == EDataCategory.Value);
+
+        if (valueInfo == null)
+        {
+            Debug.LogWarning(
+                $"[DataCard/{ObjectID}] Value 타입 InstrumentInfo가 없습니다.");
+
+            return;
+        }
+
+
+        // =====================================================
+        // 3. currentData에서 현재 Flow 값 가져오기
+        // =====================================================
+        if (!currentData.TryGetValue(
+                valueInfo.Tag,
+                out Datas flowData))
+        {
+            Debug.LogWarning(
+                $"[DataCard/{ObjectID}] Flow 데이터가 없습니다. " +
+                $"Tag={valueInfo.Tag}");
+
+            return;
+        }
+
+
+        // =====================================================
+        // 4. Inte 정보 찾기
+        // =====================================================
+        InstrumentInfo inteInfo = info.Values.FirstOrDefault(x =>
+            x != null &&
+            x.Type == EDataCategory.Inte);
+
+        if (inteInfo == null)
+        {
+            Debug.LogWarning(
+                $"[DataCard/{ObjectID}] Inte 타입 InstrumentInfo가 없습니다.");
+
+            return;
+        }
+
+
+        // =====================================================
+        // 5. Flow 적산
+        //
+        // Flow × (경과시간 / Flow 시간단위)
+        //
+        // L/min이라면:
+        // Flow × (0.5 / 60)
+        //
+        // Nm3/h라면:
+        // Flow × (0.5 / 3600)
+        // =====================================================
+        float deltaValue =
+            flowData.Value * (LoggingInterval / TimeUnit);
+
+        integratedValue += deltaValue;
+
+
+        // =====================================================
+        // 6. Inte의 Tag를 Key로 Datas 생성
+        // =====================================================
+        Datas integratedData = new Datas
+        {
+            Name = inteInfo.Tag,
+            Value = integratedValue
+        };
+
+
+        // =====================================================
+        // 7. DataCard의 currentData 업데이트
+        // =====================================================
+        currentData[inteInfo.Tag] = integratedData;
+
+
+        // =====================================================
+        // 8. DataManager 업데이트
+        // =====================================================
+
+        // ↓ 이 부분은 DataManager의 실제 데이터 변경 함수명에
+        // 맞춰서 사용해야 함.
+        Manager.Data.UpdateData(
+            inteInfo.Tag,
+            integratedData);
+
+
+        // =====================================================
+        // 9. UI 업데이트
+        // =====================================================
+        OnTextUpdate(
+            integratedData,
+            EDataCategory.Inte);
+
+
+        Debug.Log(
+            $"[DataCard/{ObjectID}] Flow 적산\n" +
+            $"Flow Tag={valueInfo.Tag}\n" +
+            $"Flow={flowData.Value}\n" +
+            $"Delta={deltaValue}\n" +
+            $"Inte Tag={inteInfo.Tag}\n" +
+            $"Integrated={integratedValue}");
+    }*/
     #endregion
 
     #region Utility

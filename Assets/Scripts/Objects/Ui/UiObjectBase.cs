@@ -11,7 +11,7 @@ public class UiObjectBase : ObjectBase, IUiObject,
 {
     [Header("UI Setting")]
     public bool isManagable = false; // UiManager에서 관리할지 여부
-    protected CameraController cameraController;
+    protected DollyCartMover cameraController;
 
     protected override void Initialize()
     {
@@ -21,7 +21,7 @@ public class UiObjectBase : ObjectBase, IUiObject,
 
         if (Camera.main != null)
         {
-            cameraController = Camera.main.GetComponent<CameraController>();
+            cameraController = Camera.main.GetComponent<DollyCartMover>();
 
             if (cameraController == null)
             {

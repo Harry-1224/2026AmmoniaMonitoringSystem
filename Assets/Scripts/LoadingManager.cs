@@ -8,7 +8,7 @@ public class LoadingManager : ManagerBase
     //  - 로딩 관리 시스템
     //  - 로딩 시작 시 OnStartLoading 이벤트 발생
 
-    protected void Start()
+    protected override void Start()
     {
         OnStartLoading();
     }

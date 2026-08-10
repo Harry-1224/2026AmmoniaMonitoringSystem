@@ -2841,10 +2841,13 @@ MonoBehaviour:
   cardType: 8
   tagText: {fileID: 176679559}
   valueText: {fileID: 176679558}
+  decimalPoint: 2
   DataSettingField: {fileID: 0}
+  DataUseableSet: {fileID: 0}
   StateButton: {fileID: 0}
   MultiSlotTextRule: MultiSlot_
   MultiSlotValueRule: MultiValue_
+  MultiSlotLampRule: MultiLamp_
   MultiSlotNames: []
   scheduleNameText: {fileID: 0}
   scheduleDescriptionText: {fileID: 0}
@@ -3166,10 +3169,13 @@ MonoBehaviour:
   cardType: 8
   tagText: {fileID: 199306935}
   valueText: {fileID: 199306934}
+  decimalPoint: 2
   DataSettingField: {fileID: 0}
+  DataUseableSet: {fileID: 0}
   StateButton: {fileID: 0}
   MultiSlotTextRule: MultiSlot_
   MultiSlotValueRule: MultiValue_
+  MultiSlotLampRule: MultiLamp_
   MultiSlotNames: []
   scheduleNameText: {fileID: 0}
   scheduleDescriptionText: {fileID: 0}
@@ -14640,7 +14646,7 @@ Light:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 723988637}
   m_Enabled: 1
-  serializedVersion: 12
+  serializedVersion: 13
   m_Type: 1
   m_Color: {r: 1, g: 0.95686275, b: 0.8392157, a: 1}
   m_Intensity: 1
@@ -14692,7 +14698,7 @@ Light:
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ForceVisible: 0
-  m_ShadowRadius: 0
+  m_ShapeRadius: 0
   m_ShadowAngle: 0
   m_LightUnit: 1
   m_LuxAtDistance: 1
@@ -15241,10 +15247,13 @@ MonoBehaviour:
   cardType: 8
   tagText: {fileID: 752400676}
   valueText: {fileID: 752400675}
+  decimalPoint: 2
   DataSettingField: {fileID: 0}
+  DataUseableSet: {fileID: 0}
   StateButton: {fileID: 0}
   MultiSlotTextRule: MultiSlot_
   MultiSlotValueRule: MultiValue_
+  MultiSlotLampRule: MultiLamp_
   MultiSlotNames: []
   scheduleNameText: {fileID: 0}
   scheduleDescriptionText: {fileID: 0}
@@ -15659,10 +15668,13 @@ MonoBehaviour:
   cardType: 8
   tagText: {fileID: 768282801}
   valueText: {fileID: 768282800}
+  decimalPoint: 2
   DataSettingField: {fileID: 0}
+  DataUseableSet: {fileID: 0}
   StateButton: {fileID: 0}
   MultiSlotTextRule: MultiSlot_
   MultiSlotValueRule: MultiValue_
+  MultiSlotLampRule: MultiLamp_
   MultiSlotNames: []
   scheduleNameText: {fileID: 0}
   scheduleDescriptionText: {fileID: 0}
@@ -15902,10 +15914,13 @@ MonoBehaviour:
   cardType: 8
   tagText: {fileID: 785294979}
   valueText: {fileID: 785294978}
+  decimalPoint: 2
   DataSettingField: {fileID: 0}
+  DataUseableSet: {fileID: 0}
   StateButton: {fileID: 0}
   MultiSlotTextRule: MultiSlot_
   MultiSlotValueRule: MultiValue_
+  MultiSlotLampRule: MultiLamp_
   MultiSlotNames: []
   scheduleNameText: {fileID: 0}
   scheduleDescriptionText: {fileID: 0}
@@ -16773,10 +16788,13 @@ MonoBehaviour:
   cardType: 8
   tagText: {fileID: 858546324}
   valueText: {fileID: 858546323}
+  decimalPoint: 2
   DataSettingField: {fileID: 0}
+  DataUseableSet: {fileID: 0}
   StateButton: {fileID: 0}
   MultiSlotTextRule: MultiSlot_
   MultiSlotValueRule: MultiValue_
+  MultiSlotLampRule: MultiLamp_
   MultiSlotNames: []
   scheduleNameText: {fileID: 0}
   scheduleDescriptionText: {fileID: 0}
@@ -16935,10 +16953,13 @@ MonoBehaviour:
   cardType: 0
   tagText: {fileID: 0}
   valueText: {fileID: 0}
+  decimalPoint: 2
   DataSettingField: {fileID: 0}
+  DataUseableSet: {fileID: 0}
   StateButton: {fileID: 0}
   MultiSlotTextRule: MultiText_
   MultiSlotValueRule: MultiValueText_
+  MultiSlotLampRule: MultiLamp_
   MultiSlotNames: []
   scheduleNameText: {fileID: 0}
   scheduleDescriptionText: {fileID: 0}
@@ -17878,10 +17899,13 @@ MonoBehaviour:
   cardType: 8
   tagText: {fileID: 945687312}
   valueText: {fileID: 945687311}
+  decimalPoint: 2
   DataSettingField: {fileID: 0}
+  DataUseableSet: {fileID: 0}
   StateButton: {fileID: 0}
   MultiSlotTextRule: MultiSlot_
   MultiSlotValueRule: MultiValue_
+  MultiSlotLampRule: MultiLamp_
   MultiSlotNames: []
   scheduleNameText: {fileID: 0}
   scheduleDescriptionText: {fileID: 0}
@@ -20557,10 +20581,13 @@ MonoBehaviour:
   cardType: 0
   tagText: {fileID: 0}
   valueText: {fileID: 0}
+  decimalPoint: 2
   DataSettingField: {fileID: 0}
+  DataUseableSet: {fileID: 0}
   StateButton: {fileID: 0}
   MultiSlotTextRule: MultiText_
   MultiSlotValueRule: MultiValueText_
+  MultiSlotLampRule: MultiLamp_
   MultiSlotNames: []
   scheduleNameText: {fileID: 0}
   scheduleDescriptionText: {fileID: 0}
@@ -23288,10 +23315,13 @@ MonoBehaviour:
   cardType: 8
   tagText: {fileID: 1306864770}
   valueText: {fileID: 1306864769}
+  decimalPoint: 2
   DataSettingField: {fileID: 0}
+  DataUseableSet: {fileID: 0}
   StateButton: {fileID: 0}
   MultiSlotTextRule: MultiSlot_
   MultiSlotValueRule: MultiValue_
+  MultiSlotLampRule: MultiLamp_
   MultiSlotNames: []
   scheduleNameText: {fileID: 0}
   scheduleDescriptionText: {fileID: 0}
@@ -23804,10 +23834,13 @@ MonoBehaviour:
   cardType: 8
   tagText: {fileID: 1330064512}
   valueText: {fileID: 1330064511}
+  decimalPoint: 2
   DataSettingField: {fileID: 0}
+  DataUseableSet: {fileID: 0}
   StateButton: {fileID: 0}
   MultiSlotTextRule: MultiSlot_
   MultiSlotValueRule: MultiValue_
+  MultiSlotLampRule: MultiLamp_
   MultiSlotNames: []
   scheduleNameText: {fileID: 0}
   scheduleDescriptionText: {fileID: 0}
@@ -24188,10 +24221,13 @@ MonoBehaviour:
   cardType: 8
   tagText: {fileID: 1369881753}
   valueText: {fileID: 1369881752}
+  decimalPoint: 2
   DataSettingField: {fileID: 0}
+  DataUseableSet: {fileID: 0}
   StateButton: {fileID: 0}
   MultiSlotTextRule: MultiSlot_
   MultiSlotValueRule: MultiValue_
+  MultiSlotLampRule: MultiLamp_
   MultiSlotNames: []
   scheduleNameText: {fileID: 0}
   scheduleDescriptionText: {fileID: 0}
@@ -27000,10 +27036,13 @@ MonoBehaviour:
   cardType: 0
   tagText: {fileID: 0}
   valueText: {fileID: 0}
+  decimalPoint: 2
   DataSettingField: {fileID: 0}
+  DataUseableSet: {fileID: 0}
   StateButton: {fileID: 0}
   MultiSlotTextRule: MultiSlot_
   MultiSlotValueRule: MultiValue_
+  MultiSlotLampRule: MultiLamp_
   MultiSlotNames: []
   scheduleNameText: {fileID: 0}
   scheduleDescriptionText: {fileID: 0}
@@ -28071,10 +28110,13 @@ MonoBehaviour:
   cardType: 0
   tagText: {fileID: 0}
   valueText: {fileID: 0}
+  decimalPoint: 2
   DataSettingField: {fileID: 0}
+  DataUseableSet: {fileID: 0}
   StateButton: {fileID: 0}
   MultiSlotTextRule: MultiText_
   MultiSlotValueRule: MultiValueText_
+  MultiSlotLampRule: MultiLamp_
   MultiSlotNames: []
   scheduleNameText: {fileID: 0}
   scheduleDescriptionText: {fileID: 0}
@@ -29777,10 +29819,13 @@ MonoBehaviour:
   cardType: 8
   tagText: {fileID: 1777969742}
   valueText: {fileID: 1777969741}
+  decimalPoint: 2
   DataSettingField: {fileID: 0}
+  DataUseableSet: {fileID: 0}
   StateButton: {fileID: 0}
   MultiSlotTextRule: MultiSlot_
   MultiSlotValueRule: MultiValue_
+  MultiSlotLampRule: MultiLamp_
   MultiSlotNames: []
   scheduleNameText: {fileID: 0}
   scheduleDescriptionText: {fileID: 0}
@@ -31164,10 +31209,13 @@ MonoBehaviour:
   cardType: 8
   tagText: {fileID: 1852156290}
   valueText: {fileID: 1852156289}
+  decimalPoint: 2
   DataSettingField: {fileID: 0}
+  DataUseableSet: {fileID: 0}
   StateButton: {fileID: 0}
   MultiSlotTextRule: MultiSlot_
   MultiSlotValueRule: MultiValue_
+  MultiSlotLampRule: MultiLamp_
   MultiSlotNames: []
   scheduleNameText: {fileID: 0}
   scheduleDescriptionText: {fileID: 0}
@@ -32705,6 +32753,7 @@ Canvas:
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
   m_VertexColorAlwaysGammaSpace: 0
+  m_UseReflectionProbes: 0
   m_AdditionalShaderChannelsFlag: 25
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
@@ -34795,10 +34844,13 @@ MonoBehaviour:
   cardType: 8
   tagText: {fileID: 2100551540}
   valueText: {fileID: 2100551539}
+  decimalPoint: 2
   DataSettingField: {fileID: 0}
+  DataUseableSet: {fileID: 0}
   StateButton: {fileID: 0}
   MultiSlotTextRule: MultiSlot_
   MultiSlotValueRule: MultiValue_
+  MultiSlotLampRule: MultiLamp_
   MultiSlotNames: []
   scheduleNameText: {fileID: 0}
   scheduleDescriptionText: {fileID: 0}
