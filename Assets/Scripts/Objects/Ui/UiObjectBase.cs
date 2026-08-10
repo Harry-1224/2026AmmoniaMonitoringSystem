@@ -2,6 +2,17 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
+// <summary>
+// 호출을 할 때 
+
+// Enum 호출 하고 싶을때는
+// dollyCartMover.SetDollyPosition(EDollyPosition.TestBad);
+
+// string 호출 하고 싶을때는
+// dollyCartMover.SetDollyPosition("TestBad");
+
+// int 호출 하고 싶을때는
+// dollyCartMover.SetDollyPosition(1);
 public class UiObjectBase : ObjectBase, IUiObject,
     IPointerClickHandler,
     IPointerEnterHandler,
@@ -11,7 +22,9 @@ public class UiObjectBase : ObjectBase, IUiObject,
 {
     [Header("UI Setting")]
     public bool isManagable = false; // UiManager에서 관리할지 여부
-    protected DollyCartMover cameraController;
+
+    protected DollyCameraController dollyCartMover;
+
 
     protected override void Initialize()
     {
@@ -21,11 +34,12 @@ public class UiObjectBase : ObjectBase, IUiObject,
 
         if (Camera.main != null)
         {
-            cameraController = Camera.main.GetComponent<DollyCartMover>();
 
-            if (cameraController == null)
+            dollyCartMover = Camera.main.GetComponent<DollyCameraController>();
+
+            if (dollyCartMover == null)
             {
-                Debug.LogWarning("[UiObject] MainCamera에 CameraController가 없습니다.");
+                Debug.LogWarning("[UiObject] MainCamera에 DollyCartMover가 없습니다.");
             }
         }
         else
@@ -37,7 +51,7 @@ public class UiObjectBase : ObjectBase, IUiObject,
     #region Ui System
     public virtual void OnClick()
     {
-
+       
     }
     public virtual void OnHoverEnter()
     {

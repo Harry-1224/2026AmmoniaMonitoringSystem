@@ -214,7 +214,7 @@ public class DataBox : UiObjectBase
         {
             if (dataBoxType == EDataBoxType.Monitoring || dataBoxType == EDataBoxType.Control)
             {
-                cameraController.SetCameraPosition(ECameraPosition.Idle.ToString());
+                dollyCartMover.SetDollyPosition(ECameraPosition.Idle.ToString());
             }
             else if (dataBoxType == EDataBoxType.Experiment)
             {
@@ -289,7 +289,7 @@ public class DataBox : UiObjectBase
             //TODO : Monitoring, Control DataCard가 클릭 되었을 때 해당 데이터 중 System을 잘 보여주는 위치로 카메라 이동시키는 기능.
             // 1. 클릭된 DataCard의 Group을 이용하여 해당 System의 위치를 파악한다.(cardID에 System값을 넣음)
             // 2. 카메라를 해당 위치로 이동시키는 기능 추가 (예: CameraController 스크립트의 MoveToSystem 함수 호출)
-            cameraController.SetCameraPosition(cardId);
+            dollyCartMover.SetDollyPosition(cardId);
         }
     }
 
