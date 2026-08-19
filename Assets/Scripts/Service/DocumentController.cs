@@ -43,7 +43,7 @@ public class DocumentController
     {
         try
         {
-            string path = Path.Combine(Application.streamingAssetsPath, "DataTable.xlsx");
+            string path = Path.Combine(Application.streamingAssetsPath, "DataTable", "DataTable.xlsx");
 
             using (var stream = File.Open(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
             using (var reader = ExcelReaderFactory.CreateOpenXmlReader(stream))

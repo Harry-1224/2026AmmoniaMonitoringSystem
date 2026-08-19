@@ -1,10 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using TMPro;
-using UnityEditor;
-using UnityEditor.Timeline.Actions;
 using UnityEngine;
-using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
 public enum EMonitorType
@@ -44,6 +41,8 @@ public class Monitor : UiObjectBase
 
     public Transform Container;
     private Dictionary<string, DataCard> dataCards = new Dictionary<string, DataCard>();
+
+    private Dictionary<string, DataCard> buttonCards = new Dictionary<string, DataCard>();
 
 
     protected override void Start()
@@ -98,8 +97,32 @@ public class Monitor : UiObjectBase
         switch (MonitorType)
         {
             case EMonitorType.Monitoring:
+                // Monitoring + Control 데이터 가져오기
+                var monitoringInstruments = Manager.Data.CallData<Dictionary<string, InstrumentInfo>>("Monitoring");
+
+                var controlInstruments = Manager.Data.CallData<Dictionary<string, InstrumentInfo>>("Control");
+
+                // 두 Dictionary 합치기
+                instruments = new Dictionary<string, InstrumentInfo>();
+
+                if (monitoringInstruments != null)
+                {
+                    foreach (var pair in monitoringInstruments)
+                    {
+                        instruments[pair.Key] = pair.Value;
+                    }
+                }
+
+                if (controlInstruments != null)
+                {
+                    foreach (var pair in controlInstruments)
+                    {
+                        instruments[pair.Key] = pair.Value;
+                    }
+                }
                 // Monitoring 타입에 대한 초기화 로직
                 InitializeMonitoringCards();
+                InitializeButtonCards();
                 // 1. Monitor 내의 컨텐츠 (objects, texts 등)를 등록 및 초기화
                 // 2. Monitor에 필요한 현재 데이터를 DataManager에서 로드한다.
                 break;
@@ -199,8 +222,13 @@ public class Monitor : UiObjectBase
                         string infoKey = item.Key;
                         if (obj.ContainsKey(infoKey))
                         {
+                            string group = item.Value.Group;
                             Datas data = obj[infoKey];
-                            dataCards[item.Value.Group].OnFunctionCalled(data);
+                            if(dataCards.ContainsKey(group))dataCards[group].OnFunctionCalled(data);
+                            if (buttonCards.ContainsKey(group))
+                            { 
+                                buttonCards[group].OnFunctionCalled(data); 
+                            }
                         }
                     }
                 }
@@ -343,6 +371,7 @@ public class Monitor : UiObjectBase
             text.text = value;
         }
     }
+
     private void InitializeMonitoringCards()
     {
         dataCards.Clear();
@@ -354,11 +383,14 @@ public class Monitor : UiObjectBase
             Debug.LogError("[Monitor] MonitoringCards 오브젝트를 찾을 수 없습니다.");
             return;
         }
+        else
+        {
+            cardRoot.gameObject.SetActive(true);
+        }
 
         DataCard[] cards = cardRoot.GetComponentsInChildren<DataCard>(true);
 
-        instruments = Manager.Data.CallData<Dictionary<string, InstrumentInfo>>("Monitoring");
-
+        // DataCard 검색
         foreach (DataCard card in cards)
         {
             string tag = card.gameObject.name.Trim();
@@ -367,22 +399,76 @@ public class Monitor : UiObjectBase
                 continue;
 
             if (dataCards.ContainsKey(tag))
-            {
-                //Debug.LogWarning($"[Monitor] 중복 DataCard 이름 발견: {tag}");
                 continue;
+
+            var infos = instruments.Values
+                .Where(x => x.Group == tag);
+
+            foreach (var info in infos)
+            {
+                card.Initialize(info);
+
+                Datas data = Manager.Data.CallData<Datas>(info.Tag);
+
+                if (data != null)
+                {
+                    card.OnFunctionCalled(data);
+                }
             }
+
+            dataCards.Add(tag, card);
+        }
+
+        Debug.Log($"[Monitor] Monitoring DataCard 등록 완료: {dataCards.Count}개 ");
+    }
+    private void InitializeButtonCards()
+    {
+        buttonCards.Clear();
+
+
+        Transform cardRoot = transform.Find("MonitoringButtons"); 
+
+        if (cardRoot != null)
+        {
+            cardRoot.gameObject.SetActive(true);
+        }
+        else
+        {
+            Debug.LogError("[Monitor] MonitoringButtons 오브젝트를 찾을 수 없습니다.");
+            return;
+        }
+
+        DataCard[] cards = cardRoot.GetComponentsInChildren<DataCard>(true);
+
+        // DataCard 검색
+        foreach (DataCard card in cards)
+        {
+            string tag = card.gameObject.name.Trim();
+
+            if (string.IsNullOrEmpty(tag))
+                continue;
+
+            if (buttonCards.ContainsKey(tag))
+                continue;
 
             var infos = instruments.Values.Where(x => x.Group == tag);
 
             foreach (var info in infos)
             {
                 card.Initialize(info);
-                card.OnFunctionCalled(Manager.Data.CallData<Datas>(info.Tag));
+
+                Datas data = Manager.Data.CallData<Datas>(info.Tag);
+
+                if (data != null)
+                {
+                    card.OnFunctionCalled(data);
+                }
             }
-            dataCards.Add(tag, card);
+
+            buttonCards.Add(tag, card);
         }
 
-        Debug.Log($"[Monitor] Monitoring DataCard 등록 완료: {dataCards.Count}개");
+        Debug.Log($"[Monitor] Monitoring DataCard 등록 완료: {buttonCards.Count}개 ");
     }
     private void UpdateMonitoringCard(InstrumentInfo info)
     {

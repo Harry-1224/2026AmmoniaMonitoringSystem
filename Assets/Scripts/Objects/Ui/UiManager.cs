@@ -1,7 +1,5 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Threading;
-using UnityEditor.SceneManagement;
 using UnityEngine;
 
 public enum EUi

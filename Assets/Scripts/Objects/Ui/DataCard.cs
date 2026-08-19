@@ -1,7 +1,5 @@
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
-using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -23,6 +21,7 @@ public enum EDataCardType
     MonitoringCardA,
     MonitoringCardB,
     MonitoringCardC,
+    MonitoringCard_Button,
     SettingCard,
 }
 
@@ -45,7 +44,8 @@ public enum EDataCategory
     Custom,
     Toggle,
     InteReset,
-    Mode
+    Mode,
+    Command
 }
 
 public class DataCard : UiObjectBase
@@ -207,8 +207,7 @@ public class DataCard : UiObjectBase
 
 
         MultiSlotTexts = GetComponentsByRule<TextMeshProUGUI>(texts, MultiSlotTextRule);
-        if (cardType != EDataCardType.SettingCard) MultiSlotValueTexts = GetComponentsByRule<TextMeshProUGUI>(texts, MultiSlotValueRule);
-        else
+        if (cardType == EDataCardType.SettingCard)
         {
             MultiSlotInputFields.Clear();
 
@@ -216,6 +215,17 @@ public class DataCard : UiObjectBase
 
             MultiSlotInputFields = GetComponentsByRule<TMP_InputField>(fields, MultiSlotValueRule);
         }
+        else if (cardType == EDataCardType.MonitoringCard_Button) 
+        {
+            MultiSlotImange.Clear();
+
+            Image[] images = GetComponentsInChildren<Image>(true);
+
+            MultiSlotImange = GetComponentsByRule<Image>(images, MultiSlotLampRule);
+
+        }
+        else MultiSlotValueTexts = GetComponentsByRule<TextMeshProUGUI>(texts, MultiSlotValueRule);
+        
 
         // MultiSlotNames -> MultiText에 적용
         for (int i = 0; i < MultiSlotTexts.Count; i++)
@@ -280,7 +290,7 @@ public class DataCard : UiObjectBase
     /// 데이터 변화시 DataCard의 UI를 업데이트하는 함수
     /// </summary>
     /// <param name="obj"></param>
-    public override void OnFunctionCalled(object obj = null)
+    public override void OnFunctionCalled( object obj = null)
     {
         // obj가 Dictionary<string, Datas>가 아닐경우 return
         if (obj is not Datas datas)  return;
@@ -291,14 +301,34 @@ public class DataCard : UiObjectBase
 
 
         currentData[name] = datas; 
-        if (info[name].Type == EDataCategory.Mode && DataUseableSet != null)
-        {
-            DataUseableSet.isOn = datas.Value > 0;
-            return;
-        }
+
         OnTextUpdate(datas, info[name].Type);
     }
+    /**/
+    public  void OnFunctionCalled(bool before, object obj = null)
+    {
+        // obj가 Dictionary<string, Datas>가 아닐경우 return
+        if (obj is not Datas datas) return;
 
+        string name = datas.Name;
+
+        if (!info.ContainsKey(name)) return;
+
+
+        currentData[name] = datas;
+        if (info[name].PointType == "DI" && info[name].PointType == "DO") HandleDigitalData(datas);
+        else HandleAnalogData(datas);
+    }
+
+    private void HandleDigitalData(Datas datas)
+    {
+
+    }
+
+    private void HandleAnalogData(Datas datas)
+    {
+
+    }
     /// <summary>
     /// DataCard에 있는 Button이 클릭이 되면 작동되는 함수
     /// </summary>
@@ -488,7 +518,9 @@ public class DataCard : UiObjectBase
             case EDataCategory.Toggle:
                 UpdateValueText(data);
                 break;
-
+            case EDataCategory.Mode:
+                if (DataUseableSet != null) DataUseableSet.isOn = data.Value > 0;
+                break;
             default:
                 UpdateMultiText(data);
                 break;
@@ -505,7 +537,7 @@ public class DataCard : UiObjectBase
 
     private void UpdateValueText(Datas data, EDataCategory dataCategory = 0)
     {
-        if (valueText == null)
+        if (valueText == null && cardType != EDataCardType.MonitoringCard_Button)
         {
             Debug.LogWarning($"[DataCard] Value Text is null : {ObjectID}");
             return;
@@ -532,10 +564,20 @@ public class DataCard : UiObjectBase
                 if (StateButton != null) StateButton.GetComponentInChildren<TMP_Text>().text = data.Value > 0 ? "Run" : "Stop";
                 else Debug.LogWarning($"[DataCard - {data.Name}] State Button is Null");
             }
-            else
+            else if(dataCategory == EDataCategory.Value)
             {
                 valueText.text = data.Value.ToString($"F{decimalPoint}");
             }
+            else
+            {
+
+                valueText.text = data.Value.ToString($"F{decimalPoint}");
+            }
+        }
+        else if (cardType == EDataCardType.MonitoringCard_Button)
+        {
+            bool state = data.Value > 0;
+            TurnLampState(MultiSlotImange[0], state);
         }
         else
         {
@@ -557,7 +599,7 @@ public class DataCard : UiObjectBase
         if (index < MultiSlotValueTexts.Count)
         {
             //MultiSlotValueTexts의 인덱스가 범위 내에 있는 경우에만 업데이트
-            MultiSlotValueTexts[index].text = data.Value.ToString();
+            MultiSlotValueTexts[index].text = data.Value.ToString($"F{decimalPoint}");
         }
         else
         {
@@ -1025,9 +1067,14 @@ public class DataCard : UiObjectBase
         return value;
     }
 
-    private void TurnLampState(bool state)
+    /// <summary>
+    /// Lamp의 색은 Red, Green이다.
+    /// </summary>
+    /// <param name="state"></param>
+    private void TurnLampState(Image img, bool state)
     {
-
+        if (state) img.color = Color.green;
+        else img.color = Color.red;
     }
 
     private IEnumerator TimerDOControl(InstrumentInfo target, int timerValue)

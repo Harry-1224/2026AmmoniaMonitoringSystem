@@ -2,9 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using TMPro;
-using UnityEditor.UIElements;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 /// <summary>
 /// DataBox의 Type을 구분하는 Enum
@@ -162,7 +160,12 @@ public class DataBox : UiObjectBase
 
     protected override void EventSubscriber()
     {
-        if (dataBoxType == EDataBoxType.Experiment || dataBoxType == EDataBoxType.Logging) Manager.Experiment.ExperimentScheduleChange += OnExperimentScheduleChanged;
+        if (dataBoxType == EDataBoxType.Experiment) Manager.Experiment.ExperimentScheduleChange += OnExperimentScheduleChanged;
+        if(dataBoxType == EDataBoxType.Logging)
+        {
+            Manager.Experiment.ExperimentScheduleChange += OnExperimentScheduleChanged;
+            Manager.Logging.OnLoggingStarted += SetCurrentLogging;
+        }
         Manager.Data.OnDataChanged += OnDataChanged;
 
         Debug.Log($"Event Set Complete : {dataBoxType.ToString()}");
@@ -170,7 +173,12 @@ public class DataBox : UiObjectBase
 
     protected override void EventUnsubscriber()
     {
-        if (dataBoxType == EDataBoxType.Experiment || dataBoxType == EDataBoxType.Logging) Manager.Experiment.ExperimentScheduleChange -= OnExperimentScheduleChanged; 
+        if (dataBoxType == EDataBoxType.Experiment) Manager.Experiment.ExperimentScheduleChange -= OnExperimentScheduleChanged;
+        if (dataBoxType == EDataBoxType.Logging)
+        {
+            Manager.Experiment.ExperimentScheduleChange -= OnExperimentScheduleChanged;
+            Manager.Logging.OnLoggingStarted -= SetCurrentLogging;
+        }
         Manager.Data.OnDataChanged -= OnDataChanged;
     }
 

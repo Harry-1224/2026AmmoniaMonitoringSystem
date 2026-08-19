@@ -2,13 +2,8 @@ using ExcelDataReader;
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
-using UnityEditor.Experimental.GraphView;
 using UnityEngine;
-using UnityEngine.Analytics;
-using static UnityEditor.Progress;
 
 public class Datas
 {
@@ -411,9 +406,12 @@ public class DataManager : ManagerBase
             float realMin = info.RangeMin;
             float realMax = info.RangeMax;
 
+
+            /*
             // 범위를 벗어나면 오류 처리
             if (raw > plcMax) return realMax;
             else if (raw < plcMin) return realMin;
+            */
 
             // 4. float 캐스팅 강제
             float normalized = ((float)raw - plcMin) / plcRange;

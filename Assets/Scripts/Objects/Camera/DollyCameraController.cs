@@ -66,15 +66,9 @@ public class DollyCameraController : MonoBehaviour
     // =========================================================
     public void SetDollyPosition(string str)
     {
-        if (!System.Enum.TryParse(
-                str,
-                true,
-                out ECameraPosition dollyPosition))
+        if (!System.Enum.TryParse(str, true, out ECameraPosition dollyPosition))
         {
-            Debug.LogWarning(
-                $"존재하지 않는 Dolly 위치입니다: {str}",
-                this
-            );
+            Debug.LogWarning( $"존재하지 않는 Dolly 위치입니다: {str}",this);
 
             return;
         }
@@ -102,17 +96,18 @@ public class DollyCameraController : MonoBehaviour
                 MoveToKnot(2);
                 break;
 
-            case ECameraPosition.WaterSupply:
+            case ECameraPosition.TreatedWater:
                 MoveToKnot(3);
                 break;
 
-            case ECameraPosition.Experiment:
+            case ECameraPosition.WaterSupply:
                 MoveToKnot(4);
                 break;
 
-            case ECameraPosition.TreatedWater:
+            case ECameraPosition.Experiment:
                 MoveToKnot(5);
                 break;
+
 
             default:
                 Debug.LogWarning(
