@@ -1,0 +1,3 @@
+<linker>
+  <assembly fullname="System.Text.Encoding.CodePages" preserve="all" />
+</linker>

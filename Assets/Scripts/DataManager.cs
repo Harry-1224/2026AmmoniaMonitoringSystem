@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Text;
 using UnityEngine;
 
 public class Datas
@@ -52,7 +53,7 @@ public class DataManager : ManagerBase
     protected override void Intialize()
     {
         base.Intialize();
-
+        Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
         //Excel 파일에서 데이터 로드
         if (!documentController.LoadDocument())
             return;
