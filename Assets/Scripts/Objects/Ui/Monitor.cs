@@ -320,6 +320,7 @@ public class Monitor : UiObjectBase
                 break;
             case nameof(EUiBtnFunc.SettingApply):
                 ApplySetting();
+                Debug.Log("세팅버튼");
                 break;
             case nameof(EUiBtnFunc.SettingClose):
                 Manager.Ui.OnMonitorChanged(EUiScreen.Basic);
