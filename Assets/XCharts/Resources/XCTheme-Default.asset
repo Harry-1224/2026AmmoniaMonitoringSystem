@@ -70,7 +70,7 @@ MonoBehaviour:
     m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
     m_TextColor: {r: 0.31764707, g: 0.3019608, b: 0.3019608, a: 1}
     m_TextBackgroundColor: {r: 0, g: 0, b: 0, a: 0}
-    m_FontSize: 50
+    m_FontSize: 45
     m_TMPFont: {fileID: 0}
     m_LineType: 0
     m_LineWidth: 3
@@ -101,7 +101,7 @@ MonoBehaviour:
     m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
     m_TextColor: {r: 0, g: 0, b: 0, a: 1}
     m_TextBackgroundColor: {r: 1, g: 1, b: 1, a: 1}
-    m_FontSize: 50
+    m_FontSize: 30
     m_TMPFont: {fileID: 0}
     m_LineType: 0
     m_LineWidth: 3
@@ -156,7 +156,7 @@ MonoBehaviour:
     m_TriangeLen: 20
   m_Serie:
     m_LineWidth: 3
-    m_LineSymbolSize: 10
+    m_LineSymbolSize: 2
     m_ScatterSymbolSize: 20
     m_CandlestickColor:
       serializedVersion: 2

@@ -131,6 +131,8 @@ public class Monitor : UiObjectBase
             case EMonitorType.Graph:
 
 
+                break;
+
             case EMonitorType.Experiment:
                 // Experiment 타입에 대한 초기화 로직
 

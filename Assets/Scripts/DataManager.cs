@@ -1,4 +1,4 @@
-using ExcelDataReader;
+ï»¿using ExcelDataReader;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -17,8 +17,8 @@ public class Datas
 public class DataManager : ManagerBase
 {
     // DataManager
-    //  - ½Ì±ÛÅæ ÆĞÅÏÀ¸·Î ±¸ÇöÇÏ¿© ¾îµğ¼­µç Á¢±Ù °¡´ÉÇÏµµ·Ï ÇÔ
-    //  - µ¥ÀÌÅÍ °ü¸® ½Ã½ºÅÛ ±¸Çö, NetworkManager·ÎºÎÅÍ µ¥ÀÌÅÍ¸¦ ¼ö½ÅÇÏ¿© ÀúÀå ¹× °ü¸®
+    //  - ì‹±ê¸€í†¤ íŒ¨í„´ìœ¼ë¡œ êµ¬í˜„í•˜ì—¬ ì–´ë””ì„œë“  ì ‘ê·¼ ê°€ëŠ¥í•˜ë„ë¡ í•¨
+    //  - ë°ì´í„° ê´€ë¦¬ ì‹œìŠ¤í…œ êµ¬í˜„, NetworkManagerë¡œë¶€í„° ë°ì´í„°ë¥¼ ìˆ˜ì‹ í•˜ì—¬ ì €ì¥ ë° ê´€ë¦¬
 
     public string SavePath = "";
 
@@ -54,7 +54,7 @@ public class DataManager : ManagerBase
     {
         base.Intialize();
         Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-        //Excel ÆÄÀÏ¿¡¼­ µ¥ÀÌÅÍ ·Îµå
+        //Excel íŒŒì¼ì—ì„œ ë°ì´í„° ë¡œë“œ
         if (!documentController.LoadDocument())
             return;
 
@@ -103,7 +103,7 @@ public class DataManager : ManagerBase
             };
         }
 
-        Debug.Log($"[DataManager] DataDictionary ÃÊ±âÈ­ ¿Ï·á : {DataDictionary.Count}");
+        Debug.Log($"[DataManager] DataDictionary ì´ˆê¸°í™” ì™„ë£Œ : {DataDictionary.Count}");
     }
 
     public void ClearLoggedData()
@@ -115,7 +115,7 @@ public class DataManager : ManagerBase
             item.Value.LoggedData.Clear();
         }
 
-        Debug.Log("[DataManager] LoggedData ÃÊ±âÈ­ ¿Ï·á");
+        Debug.Log("[DataManager] LoggedData ì´ˆê¸°í™” ì™„ë£Œ");
     }
 
     #region Singleton
@@ -126,11 +126,11 @@ public class DataManager : ManagerBase
         {
             Instance = this;
 
-            DontDestroyOnLoad(gameObject); // ¾À ÀüÈ¯ ½Ã À¯Áö
+            DontDestroyOnLoad(gameObject); // ì”¬ ì „í™˜ ì‹œ ìœ ì§€
         }
         else
         {
-            Destroy(gameObject); // Áßº¹ ¹æÁö
+            Destroy(gameObject); // ì¤‘ë³µ ë°©ì§€
         }
     }
 
@@ -143,7 +143,7 @@ public class DataManager : ManagerBase
 
     public T CallData<T>(string dataName = null)
     {
-        // µ¥ÀÌÅÍ ºÒ·¯¿À´Â ·ÎÁ÷ ±¸Çö
+        // ë°ì´í„° ë¶ˆëŸ¬ì˜¤ëŠ” ë¡œì§ êµ¬í˜„
         if (typeof(T) == typeof(InstrumentInfo))
         {
             InstrumentInfos.TryGetValue(dataName, out InstrumentInfo data);
@@ -247,7 +247,7 @@ public class DataManager : ManagerBase
 
     public List<InstrumentInfo> SortInstrumentInfoByAddress()
     {
-        // TODO : Instrument Info¸¦ Address¼øÀ¸·Î Á¤·ÄÇÏ¿© ListÇüÅÂ·Î return
+        // TODO : Instrument Infoë¥¼ Addressìˆœìœ¼ë¡œ ì •ë ¬í•˜ì—¬ Listí˜•íƒœë¡œ return
         return new List<InstrumentInfo>();
     }
 
@@ -260,7 +260,7 @@ public class DataManager : ManagerBase
         if (state == EExperimentStateMachine.Stopping)
         {
             ExportLoggedData();
-            //Áö±İ±îÁö ·Î±ëµÈ µ¥ÀÌÅÍ ¸®¼Â
+            //ì§€ê¸ˆê¹Œì§€ ë¡œê¹…ëœ ë°ì´í„° ë¦¬ì…‹
             ClearLoggedData();
         }
     }
@@ -289,7 +289,7 @@ public class DataManager : ManagerBase
 
             data.LoggedData.Add(log);
         }
-        //Debug.Log($"[DataManager] Logging ÀúÀå ¿Ï·á : {loggingTime:HH:mm:ss.fff}");
+        //Debug.Log($"[DataManager] Logging ì €ì¥ ì™„ë£Œ : {loggingTime:HH:mm:ss.fff}");
     }
 
     #endregion
@@ -374,16 +374,16 @@ public class DataManager : ManagerBase
 
     private float ConvertPLCToData(InstrumentInfo info, ushort[] rawData)
     {
-        //1. À¯È¿¼º °Ë»ç
+        //1. ìœ íš¨ì„± ê²€ì‚¬
         if (info == null || rawData == null || rawData.Length == 0)
             return 0;
 
         ushort raw = 0;
 
-        // 2. Å¸ÀÔº° Ã³¸®
+        // 2. íƒ€ì…ë³„ ì²˜ë¦¬
         if (info.PointType == "AI" || info.PointType == "AO")
         {
-            // ¹üÀ§ Ã¼Å©
+            // ë²”ìœ„ ì²´í¬
             if (info.Address < 0 || info.Address >= rawData.Length)
             {
                 Debug.LogError($"[ConvertPLCToData] Address Out of Range : {info.Address}");
@@ -396,7 +396,7 @@ public class DataManager : ManagerBase
             float plcMax = info.PLCMax;
 
 
-            // 3. 0 division ¹æÁö
+            // 3. 0 division ë°©ì§€
             float plcRange = plcMax - plcMin;
             if (plcRange == 0)
             {
@@ -409,12 +409,12 @@ public class DataManager : ManagerBase
 
 
             /*
-            // ¹üÀ§¸¦ ¹ş¾î³ª¸é ¿À·ù Ã³¸®
+            // ë²”ìœ„ë¥¼ ë²—ì–´ë‚˜ë©´ ì˜¤ë¥˜ ì²˜ë¦¬
             if (raw > plcMax) return realMax;
             else if (raw < plcMin) return realMin;
             */
 
-            // 4. float Ä³½ºÆÃ °­Á¦
+            // 4. float ìºìŠ¤íŒ… ê°•ì œ
             float normalized = ((float)raw - plcMin) / plcRange;
 
             float value = normalized * (realMax - realMin) + realMin;
@@ -423,11 +423,11 @@ public class DataManager : ManagerBase
         }
         else if (info.PointType == "DI" || info.PointType == "DO")
         {
-            // ÁÖ¼Ò ¡æ ¿öµå / ºñÆ® ºĞ¸®
+            // ì£¼ì†Œ â†’ ì›Œë“œ / ë¹„íŠ¸ ë¶„ë¦¬
             int wordIndex = info.Address / 10;
             int bitIndex = info.Address % 10;
 
-            // ¹üÀ§ Ã¼Å©
+            // ë²”ìœ„ ì²´í¬
             if (wordIndex < 0 || wordIndex >= rawData.Length)
             {
                 Debug.LogError($"[ConvertPLCToData] Address Out of Range : {info.Address}");
@@ -436,7 +436,7 @@ public class DataManager : ManagerBase
 
            raw = rawData[wordIndex];
 
-            // ÇØ´ç ºñÆ® ÃßÃâ
+            // í•´ë‹¹ ë¹„íŠ¸ ì¶”ì¶œ
             int bit = (raw >> bitIndex) & 1;
 
             return bit == 1 ? 1f : 0f;

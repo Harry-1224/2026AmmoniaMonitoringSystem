@@ -1,4 +1,4 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 
 public static class Manager
 {
@@ -45,7 +45,7 @@ public class ObjectBase : MonoBehaviour, IObject
     }
 
     /// <summary>
-    /// OnEnable ½ÃÁ¡¿¡¼­ ÀÛµ¿ÇÏ¸ç, ObjectÀÇ Á¾·ù¿¡ µû¶ó ÇÊ¿äÇÑ ÄÄÆ÷³ÍÆ®³ª µ¥ÀÌÅÍ¸¦ ÃÊ±âÈ­ÇÑ´Ù.
+    /// OnEnable ì‹œì ì—ì„œ ì‘ë™í•˜ë©°, Objectì˜ ì¢…ë¥˜ì— ë”°ë¼ í•„ìš”í•œ ì»´í¬ë„ŒíŠ¸ë‚˜ ë°ì´í„°ë¥¼ ì´ˆê¸°í™”í•œë‹¤.
     /// </summary>
     protected virtual void Initialize()
     {
