@@ -1,4 +1,4 @@
-using System.Collections.Concurrent;
+ï»¿using System.Collections.Concurrent;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -20,9 +20,9 @@ public enum EUiScreen
 public partial class UiManager : ManagerBase
 {
     // UiManager
-    //  - Main Canvas¿¡ ±×·ÁÁö´Â UI¸¦ ´ã´ç.
-    //  - °¢ »óÈ²¿¡ µû¶ó ÀûÀıÇÑ UI¸¦ Ç¥Ãâ.
-    //  - µ¥ÀÌÅÍ ¼öÁı ½Ã 
+    //  - Main Canvasì— ê·¸ë ¤ì§€ëŠ” UIë¥¼ ë‹´ë‹¹.
+    //  - ê° ìƒí™©ì— ë”°ë¼ ì ì ˆí•œ UIë¥¼ í‘œì¶œ.
+    //  - ë°ì´í„° ìˆ˜ì§‘ ì‹œ 
 
     
     private Transform canvasTransform;
@@ -56,7 +56,7 @@ public partial class UiManager : ManagerBase
 
     protected void OnDataChanged(object obj)
     {
-        // DataManager¿¡¼­ Data°¡ º¯°æµÉ ¶§¸¶´Ù DataBox´Â DataManager¿¡¼­ Data¸¦ ¹Ş¾Æ¿Í¼­ DataCard¸¦ ¾÷µ¥ÀÌÆ®ÇÑ´Ù.
+        // DataManagerì—ì„œ Dataê°€ ë³€ê²½ë  ë•Œë§ˆë‹¤ DataBoxëŠ” DataManagerì—ì„œ Dataë¥¼ ë°›ì•„ì™€ì„œ DataCardë¥¼ ì—…ë°ì´íŠ¸í•œë‹¤.
         if (obj == null || obj.GetType() != typeof(Dictionary<string, Datas>)) return;
 
         var data = (Dictionary<string, Datas>)obj;
@@ -71,11 +71,11 @@ public partial class UiManager : ManagerBase
         if (Instance == null)
         {
             Instance = this;
-            DontDestroyOnLoad(gameObject); // ¾À ÀüÈ¯ ½Ã À¯Áö
+            DontDestroyOnLoad(gameObject); // ì”¬ ì „í™˜ ì‹œ ìœ ì§€
         }
         else
         {
-            Destroy(gameObject); // Áßº¹ ¹æÁö
+            Destroy(gameObject); // ì¤‘ë³µ ë°©ì§€
         }
     }
     #endregion
@@ -108,7 +108,7 @@ public partial class UiManager : ManagerBase
 
         if (canvas == null)
         {
-            Debug.LogError("[UiManager] Canvas ¾øÀ½");
+            Debug.LogError("[UiManager] Canvas ì—†ìŒ");
             return;
         }
 
@@ -120,7 +120,7 @@ public partial class UiManager : ManagerBase
 
         var transforms = canvasTransform.GetComponentsInChildren<Transform>(true);
 
-        // ÀÌ¸§ ¡æ ¿ÀºêÁ§Æ® ¸Ê
+        // ì´ë¦„ â†’ ì˜¤ë¸Œì íŠ¸ ë§µ
         Dictionary<string, GameObject> map = new();
 
         foreach (var t in transforms)
@@ -135,7 +135,7 @@ public partial class UiManager : ManagerBase
 
             if (!map.TryGetValue(name, out var obj))
             {
-                Debug.LogWarning($"[UiManager] UI ¿ÀºêÁ§Æ® ¾øÀ½: {name}");
+                Debug.LogWarning($"[UiManager] UI ì˜¤ë¸Œì íŠ¸ ì—†ìŒ: {name}");
                 continue;
             }
 
@@ -151,10 +151,11 @@ public partial class UiManager : ManagerBase
         foreach (Monitor monitor in monitors)
         {
             EMonitorType screen = monitor.MonitorType;
+            Debug.Log($"{monitor.gameObject.name} : {screen.ToString()}");
 
             if (HUDScreen.ContainsKey(screen.ToString()))
             {
-                Debug.LogWarning($"[UiManager] HUDScreen Áßº¹: {screen}");
+                Debug.LogWarning($"[UiManager] HUDScreen ì¤‘ë³µ: {screen}");
                 continue;
             }
 

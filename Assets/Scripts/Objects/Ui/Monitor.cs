@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+ï»¿using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 using UnityEngine;
@@ -7,6 +7,7 @@ using UnityEngine.UI;
 public enum EMonitorType
 {
     Monitoring,
+    Graph,
     Experiment,
     Setting
 }
@@ -48,17 +49,17 @@ public class Monitor : UiObjectBase
     protected override void Start()
     {
         base.Start();
-        // MonitorType¿¡ µû¶ó ÇÊ¿äÇÑ ÄÄÆ÷³ÍÆ®³ª µ¥ÀÌÅÍ¸¦ ÃÊ±âÈ­
+        // MonitorTypeì— ë”°ë¼ í•„ìš”í•œ ì»´í¬ë„ŒíŠ¸ë‚˜ ë°ì´í„°ë¥¼ ì´ˆê¸°í™”
         switch (MonitorType)
         {
             case EMonitorType.Monitoring:
-                // Monitoring Å¸ÀÔ¿¡ ´ëÇÑ ÃÊ±âÈ­ ·ÎÁ÷
+                // Monitoring íƒ€ì…ì— ëŒ€í•œ ì´ˆê¸°í™” ë¡œì§
                 break;
             case EMonitorType.Experiment:
-                // Experiment Å¸ÀÔ¿¡ ´ëÇÑ ÃÊ±âÈ­ ·ÎÁ÷
+                // Experiment íƒ€ì…ì— ëŒ€í•œ ì´ˆê¸°í™” ë¡œì§
                 break;
             case EMonitorType.Setting:
-                // Setting Å¸ÀÔ¿¡ ´ëÇÑ ÃÊ±âÈ­ ·ÎÁ÷
+                // Setting íƒ€ì…ì— ëŒ€í•œ ì´ˆê¸°í™” ë¡œì§
                 break;
         }
     }
@@ -68,41 +69,41 @@ public class Monitor : UiObjectBase
         switch (MonitorType)
         {
             case EMonitorType.Monitoring:
-                // Monitoring Å¸ÀÔ¿¡ ´ëÇÑ ¹İº¹ ·ÎÁ÷
+                // Monitoring íƒ€ì…ì— ëŒ€í•œ ë°˜ë³µ ë¡œì§
                 break;
             case EMonitorType.Experiment:
-                // Experiment Å¸ÀÔ¿¡ ´ëÇÑ ¹İº¹ ·ÎÁ÷
+                // Experiment íƒ€ì…ì— ëŒ€í•œ ë°˜ë³µ ë¡œì§
 
-                // 1. Monitor Schedule ¾øÀ½
+                // 1. Monitor Schedule ì—†ìŒ
                 if (MonitorSchedule == null)
                     return;
 
-                // 2. Processing / Stopping »óÅÂ¸¸ Çã¿ë
+                // 2. Processing / Stopping ìƒíƒœë§Œ í—ˆìš©
                 bool isRunning = MonitorSchedule.ReservedState == EReservedExperimentState.Processing || MonitorSchedule.ReservedState == EReservedExperimentState.Resetting;
 
                 ExperimnetUpdate(isRunning);
 
                 break;
             case EMonitorType.Setting:
-                // Setting Å¸ÀÔ¿¡ ´ëÇÑ ¹İº¹ ·ÎÁ÷
+                // Setting íƒ€ì…ì— ëŒ€í•œ ë°˜ë³µ ë¡œì§
                 break;
         }
     }
 
-    // ObjectBase¿¡¼­ »ó¼Ó¹Ş¾ÒÀ¸¸ç, Enable ½ÃÁ¡¿¡¼­ ÀÛµ¿.
+    // ObjectBaseì—ì„œ ìƒì†ë°›ì•˜ìœ¼ë©°, Enable ì‹œì ì—ì„œ ì‘ë™.
     protected override void Initialize()
     {
         base.Initialize();
-        // MonitorType¿¡ µû¶ó ÇÊ¿äÇÑ ÄÄÆ÷³ÍÆ®³ª µ¥ÀÌÅÍ¸¦ ÃÊ±âÈ­
+        // MonitorTypeì— ë”°ë¼ í•„ìš”í•œ ì»´í¬ë„ŒíŠ¸ë‚˜ ë°ì´í„°ë¥¼ ì´ˆê¸°í™”
         switch (MonitorType)
         {
             case EMonitorType.Monitoring:
-                // Monitoring + Control µ¥ÀÌÅÍ °¡Á®¿À±â
+                // Monitoring + Control ë°ì´í„° ê°€ì ¸ì˜¤ê¸°
                 var monitoringInstruments = Manager.Data.CallData<Dictionary<string, InstrumentInfo>>("Monitoring");
 
                 var controlInstruments = Manager.Data.CallData<Dictionary<string, InstrumentInfo>>("Control");
 
-                // µÎ Dictionary ÇÕÄ¡±â
+                // ë‘ Dictionary í•©ì¹˜ê¸°
                 instruments = new Dictionary<string, InstrumentInfo>();
 
                 if (monitoringInstruments != null)
@@ -120,16 +121,16 @@ public class Monitor : UiObjectBase
                         instruments[pair.Key] = pair.Value;
                     }
                 }
-                // Monitoring Å¸ÀÔ¿¡ ´ëÇÑ ÃÊ±âÈ­ ·ÎÁ÷
+                // Monitoring íƒ€ì…ì— ëŒ€í•œ ì´ˆê¸°í™” ë¡œì§
                 InitializeMonitoringCards();
                 InitializeButtonCards();
-                // 1. Monitor ³»ÀÇ ÄÁÅÙÃ÷ (objects, texts µî)¸¦ µî·Ï ¹× ÃÊ±âÈ­
-                // 2. Monitor¿¡ ÇÊ¿äÇÑ ÇöÀç µ¥ÀÌÅÍ¸¦ DataManager¿¡¼­ ·ÎµåÇÑ´Ù.
+                // 1. Monitor ë‚´ì˜ ì»¨í…ì¸  (objects, texts ë“±)ë¥¼ ë“±ë¡ ë° ì´ˆê¸°í™”
+                // 2. Monitorì— í•„ìš”í•œ í˜„ì¬ ë°ì´í„°ë¥¼ DataManagerì—ì„œ ë¡œë“œí•œë‹¤.
                 break;
             case EMonitorType.Experiment:
-                // Experiment Å¸ÀÔ¿¡ ´ëÇÑ ÃÊ±âÈ­ ·ÎÁ÷
+                // Experiment íƒ€ì…ì— ëŒ€í•œ ì´ˆê¸°í™” ë¡œì§
 
-                // 1. Type DropdownÀÇ ¿É¼ÇÀ» Manager.Experiment.experimentDefinesÀÇ Key°ªÀ¸·Î µî·ÏÇÏ´Â ·ÎÁ÷À» ÀÛ¼ºÇÒ °Í. (±âÁ¸ ¿É¼ÇÀº ClearOptions()·Î Á¦°ÅÇÑ ÈÄ µî·ÏÇÒ °Í.)
+                // 1. Type Dropdownì˜ ì˜µì…˜ì„ Manager.Experiment.experimentDefinesì˜ Keyê°’ìœ¼ë¡œ ë“±ë¡í•˜ëŠ” ë¡œì§ì„ ì‘ì„±í•  ê²ƒ. (ê¸°ì¡´ ì˜µì…˜ì€ ClearOptions()ë¡œ ì œê±°í•œ í›„ ë“±ë¡í•  ê²ƒ.)
                 Type.ClearOptions();
                 List<string> options = new List<string>();
                 options.Add("...");
@@ -142,7 +143,7 @@ public class Monitor : UiObjectBase
                 Type.value = 0;
                 Type.RefreshShownValue();
 
-                // 2. ÇöÀç ¿¹¾àµÈ ScheduleÀÇ °¹¼ö¸¦ ÆÄ¾ÇÇÏ°í ScheduleNo DropdownÀÇ ¿É¼ÇÀ¸·Î µî·ÏÇÏ´Â ·ÎÁ÷À» ÀÛ¼ºÇÒ °Í. (±âÁ¸ ¿É¼ÇÀº ClearOptions()·Î Á¦°ÅÇÑ ÈÄ µî·ÏÇÒ °Í, Ã³À½Àº "..."À¸·Î µî·Ï ÈÄ ÃÊ±â°ªÀº 0)
+                // 2. í˜„ì¬ ì˜ˆì•½ëœ Scheduleì˜ ê°¯ìˆ˜ë¥¼ íŒŒì•…í•˜ê³  ScheduleNo Dropdownì˜ ì˜µì…˜ìœ¼ë¡œ ë“±ë¡í•˜ëŠ” ë¡œì§ì„ ì‘ì„±í•  ê²ƒ. (ê¸°ì¡´ ì˜µì…˜ì€ ClearOptions()ë¡œ ì œê±°í•œ í›„ ë“±ë¡í•  ê²ƒ, ì²˜ìŒì€ "..."ìœ¼ë¡œ ë“±ë¡ í›„ ì´ˆê¸°ê°’ì€ 0)
                 ScheduleNo.ClearOptions();
                 options.Clear();
                 options.Add("...");
@@ -154,12 +155,12 @@ public class Monitor : UiObjectBase
                 ScheduleNo.value = 0;
                 ScheduleNo.RefreshShownValue();
 
-                // 3. Monitor ³»ÀÇ ÄÁÅÙÃ÷ (objects, texts µî)¸¦ µî·Ï ¹× ÃÊ±âÈ­
+                // 3. Monitor ë‚´ì˜ ì»¨í…ì¸  (objects, texts ë“±)ë¥¼ ë“±ë¡ ë° ì´ˆê¸°í™”
 
                 break;
             case EMonitorType.Setting:
-                // Setting Å¸ÀÔ¿¡ ´ëÇÑ ÃÊ±âÈ­ ·ÎÁ÷
-                // 1. Setting¿¡ ÇÊ¿äÇÑ µ¥ÀÌÅÍ(Network º¯¼ö, InstrumentInfo)¸¦ DataManager, NetworkManager µî¿¡¼­ ·Îµå.
+                // Setting íƒ€ì…ì— ëŒ€í•œ ì´ˆê¸°í™” ë¡œì§
+                // 1. Settingì— í•„ìš”í•œ ë°ì´í„°(Network ë³€ìˆ˜, InstrumentInfo)ë¥¼ DataManager, NetworkManager ë“±ì—ì„œ ë¡œë“œ.
                 InitializeSetting();
 
                 InitializeSettingCards();
@@ -171,38 +172,38 @@ public class Monitor : UiObjectBase
     protected override void EventSubscriber()
     {
         base.EventSubscriber();
-        // MonitorType¿¡ µû¶ó ÇÊ¿äÇÑ ÀÌº¥Æ® ±¸µ¶
+        // MonitorTypeì— ë”°ë¼ í•„ìš”í•œ ì´ë²¤íŠ¸ êµ¬ë…
         switch (MonitorType)
         {
             case EMonitorType.Monitoring:
                 Manager.Data.OnDataChanged += OnDataChanged;
                 break;
             case EMonitorType.Experiment:
-                // Experiment Å¸ÀÔ¿¡ ´ëÇÑ ÀÌº¥Æ® ±¸µ¶ ·ÎÁ÷
+                // Experiment íƒ€ì…ì— ëŒ€í•œ ì´ë²¤íŠ¸ êµ¬ë… ë¡œì§
                 Manager.Experiment.ExperimentScheduleChange += ScheduleChangerEventLisener;
                 Manager.Data.OnDataChanged += OnDataChanged;
                 break;
             case EMonitorType.Setting:
-                // Setting Å¸ÀÔ¿¡ ´ëÇÑ ÀÌº¥Æ® ±¸µ¶ ·ÎÁ÷
+                // Setting íƒ€ì…ì— ëŒ€í•œ ì´ë²¤íŠ¸ êµ¬ë… ë¡œì§
                 break;
         }
     }
     protected override void EventUnsubscriber()
     {
         base.EventUnsubscriber();
-        // MonitorType¿¡ µû¶ó ÇÊ¿äÇÑ ÀÌº¥Æ® ±¸µ¶ ÇØÁ¦
+        // MonitorTypeì— ë”°ë¼ í•„ìš”í•œ ì´ë²¤íŠ¸ êµ¬ë… í•´ì œ
         switch (MonitorType)
         {
             case EMonitorType.Monitoring:
                 Manager.Data.OnDataChanged -= OnDataChanged;
                 break;
             case EMonitorType.Experiment:
-                // Experiment Å¸ÀÔ¿¡ ´ëÇÑ ÀÌº¥Æ® ±¸µ¶ ÇØÁ¦ ·ÎÁ÷
+                // Experiment íƒ€ì…ì— ëŒ€í•œ ì´ë²¤íŠ¸ êµ¬ë… í•´ì œ ë¡œì§
                 Manager.Experiment.ExperimentScheduleChange -= ScheduleChangerEventLisener;
                 Manager.Data.OnDataChanged -= OnDataChanged;
                 break;
             case EMonitorType.Setting:
-                // Setting Å¸ÀÔ¿¡ ´ëÇÑ ÀÌº¥Æ® ±¸µ¶ ÇØÁ¦ ·ÎÁ÷
+                // Setting íƒ€ì…ì— ëŒ€í•œ ì´ë²¤íŠ¸ êµ¬ë… í•´ì œ ë¡œì§
                 break;
         }
     }
@@ -210,13 +211,13 @@ public class Monitor : UiObjectBase
 
     protected override void OnDataChanged(Dictionary<string, Datas> obj)
     {
-        // DataManager¿¡¼­ µ¥ÀÌÅÍ°¡ º¯°æµÉ ¶§¸¶´Ù monitoringTexts¿¡ µî·ÏµÈ  ÄÄÆ÷³ÍÆ®µéÀÇ ÅØ½ºÆ®¸¦ ¾÷µ¥ÀÌÆ®ÇÏ´Â ·ÎÁ÷
+        // DataManagerì—ì„œ ë°ì´í„°ê°€ ë³€ê²½ë  ë•Œë§ˆë‹¤ monitoringTextsì— ë“±ë¡ëœ  ì»´í¬ë„ŒíŠ¸ë“¤ì˜ í…ìŠ¤íŠ¸ë¥¼ ì—…ë°ì´íŠ¸í•˜ëŠ” ë¡œì§
         switch (MonitorType)
         {
             case EMonitorType.Monitoring:
                 try
                 {
-                    // DataManager¿¡¼­ Data°¡ º¯°æµÉ ¶§¸¶´Ù DataBox´Â DataManager¿¡¼­ Data¸¦ ¹Ş¾Æ¿Í¼­ DataCard¸¦ ¾÷µ¥ÀÌÆ®ÇÑ´Ù.
+                    // DataManagerì—ì„œ Dataê°€ ë³€ê²½ë  ë•Œë§ˆë‹¤ DataBoxëŠ” DataManagerì—ì„œ Dataë¥¼ ë°›ì•„ì™€ì„œ DataCardë¥¼ ì—…ë°ì´íŠ¸í•œë‹¤.
                     foreach (var item in instruments)
                     {
                         string infoKey = item.Key;
@@ -234,7 +235,7 @@ public class Monitor : UiObjectBase
                 }
                 catch (System.Exception ex)
                 {
-                    Debug.LogError($"[Monitor/{MonitorType.ToString()}] Data º¯°æ Ã³¸® Áß ¿À·ù ¹ß»ı: {ex.Message}");
+                    Debug.LogError($"[Monitor/{MonitorType.ToString()}] Data ë³€ê²½ ì²˜ë¦¬ ì¤‘ ì˜¤ë¥˜ ë°œìƒ: {ex.Message}");
                 }
 
                 break;
@@ -260,11 +261,11 @@ public class Monitor : UiObjectBase
                 if (!obj.TryGetValue(key, out processData))
                 {
                     processData = null;
-                    Debug.LogWarning($"[Monitor] Process Data ¾øÀ½: {key}");
+                    Debug.LogWarning($"[Monitor] Process Data ì—†ìŒ: {key}");
                     return;
                 }
 
-                // ºñÆ® µ¥ÀÌÅÍ
+                // ë¹„íŠ¸ ë°ì´í„°
                 ushort processBits = (ushort)processData.Value;
 
                 foreach (var card in dataCards.Values)
@@ -281,7 +282,7 @@ public class Monitor : UiObjectBase
         }
     }
 
-    // Monitor ³»ÀÇ ¹öÆ°ÀÌ Å¬¸¯µÇ¾úÀ» ¶§, MonitorType¿¡ µû¶ó ÀûÀıÇÑ Çàµ¿À» ÇÏ´Â ·ÎÁ÷
+    // Monitor ë‚´ì˜ ë²„íŠ¼ì´ í´ë¦­ë˜ì—ˆì„ ë•Œ, MonitorTypeì— ë”°ë¼ ì ì ˆí•œ í–‰ë™ì„ í•˜ëŠ” ë¡œì§
     public void OnBtnClicked(string func)
     {
         switch (func)
@@ -316,11 +317,11 @@ public class Monitor : UiObjectBase
                 Manager.Experiment.LoadSchedules("");
                 break;
             case nameof(EUiBtnFunc.Exit):
-                // TODO : MonitorÃ¢À» ´İÀ» ¶§ ¹®Á¦°¡ ÀÖÀ» ¶§ ¹®Á¦¸¦ ¾Ë¸®±â À§ÇØ UiMnaager¿¡ °ü·Ã µ¥ÀÌÅÍ¸¦ º¸³»°í ÄÚ·çÆ¾À¸·Î ´ë±âÇÏ´Ù °ªÀ» ¹Ş¾Æ¿Í¼­ Á¾·áÇÒÁö ¸»Áö °áÁ¤ÇÏ´Â ·ÎÁ÷À» ÀÛ¼ºÇÒ °Í.
+                // TODO : Monitorì°½ì„ ë‹«ì„ ë•Œ ë¬¸ì œê°€ ìˆì„ ë•Œ ë¬¸ì œë¥¼ ì•Œë¦¬ê¸° ìœ„í•´ UiMnaagerì— ê´€ë ¨ ë°ì´í„°ë¥¼ ë³´ë‚´ê³  ì½”ë£¨í‹´ìœ¼ë¡œ ëŒ€ê¸°í•˜ë‹¤ ê°’ì„ ë°›ì•„ì™€ì„œ ì¢…ë£Œí• ì§€ ë§ì§€ ê²°ì •í•˜ëŠ” ë¡œì§ì„ ì‘ì„±í•  ê²ƒ.
                 break;
             case nameof(EUiBtnFunc.SettingApply):
                 ApplySetting();
-                Debug.Log("¼¼ÆÃ¹öÆ°");
+                Debug.Log("ì„¸íŒ…ë²„íŠ¼");
                 break;
             case nameof(EUiBtnFunc.SettingClose):
                 Manager.Ui.OnMonitorChanged(EUiScreen.Basic);
@@ -347,7 +348,7 @@ public class Monitor : UiObjectBase
             case EMonitorType.Monitoring:
             case EMonitorType.Experiment:
 
-                Debug.Log($"[Monitor] Å¬¸¯µÊ : {MonitorType}");
+                Debug.Log($"[Monitor] í´ë¦­ë¨ : {MonitorType}");
 
                 //Manager.Ui.OnDataBoxClicked(this);
                 break;
@@ -363,7 +364,7 @@ public class Monitor : UiObjectBase
     private Dictionary<string, InstrumentInfo> instruments = new Dictionary<string, InstrumentInfo>();
 
 
-    // monitoringTexts¿¡ TextMeshProUGUI ÄÄÆ÷³ÍÆ®¸¦ µî·ÏÇÏ´Â ·ÎÁ÷, Key´Â InstrumentÀÇ Tag°ú ÀÏÄ¡ÇØ¾ß ÇÔ
+    // monitoringTextsì— TextMeshProUGUI ì»´í¬ë„ŒíŠ¸ë¥¼ ë“±ë¡í•˜ëŠ” ë¡œì§, KeyëŠ” Instrumentì˜ Tagê³¼ ì¼ì¹˜í•´ì•¼ í•¨
     public void RegistText(TextMeshProUGUI text, string key) => monitoringTexts[key] = text;
     private void UpdateMonitoringText(string key, string value)
     {
@@ -381,7 +382,7 @@ public class Monitor : UiObjectBase
 
         if (cardRoot == null)
         {
-            Debug.LogError("[Monitor] MonitoringCards ¿ÀºêÁ§Æ®¸¦ Ã£À» ¼ö ¾ø½À´Ï´Ù.");
+            Debug.LogError("[Monitor] MonitoringCards ì˜¤ë¸Œì íŠ¸ë¥¼ ì°¾ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤.");
             return;
         }
         else
@@ -391,7 +392,7 @@ public class Monitor : UiObjectBase
 
         DataCard[] cards = cardRoot.GetComponentsInChildren<DataCard>(true);
 
-        // DataCard °Ë»ö
+        // DataCard ê²€ìƒ‰
         foreach (DataCard card in cards)
         {
             string tag = card.gameObject.name.Trim();
@@ -420,14 +421,14 @@ public class Monitor : UiObjectBase
             dataCards.Add(tag, card);
         }
 
-        Debug.Log($"[Monitor] Monitoring DataCard µî·Ï ¿Ï·á: {dataCards.Count}°³ ");
+        Debug.Log($"[Monitor] Monitoring DataCard ë“±ë¡ ì™„ë£Œ: {dataCards.Count}ê°œ ");
     }
     private void InitializeButtonCards()
     {
         buttonCards.Clear();
 
 
-        Transform cardRoot = transform.Find("MonitoringButtons"); 
+        Transform cardRoot = transform.Find("MonitoringCards"); 
 
         if (cardRoot != null)
         {
@@ -435,13 +436,13 @@ public class Monitor : UiObjectBase
         }
         else
         {
-            Debug.LogError("[Monitor] MonitoringButtons ¿ÀºêÁ§Æ®¸¦ Ã£À» ¼ö ¾ø½À´Ï´Ù.");
+            Debug.LogError("[Monitor] MonitoringCards ì˜¤ë¸Œì íŠ¸ë¥¼ ì°¾ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤.");
             return;
         }
 
         DataCard[] cards = cardRoot.GetComponentsInChildren<DataCard>(true);
 
-        // DataCard °Ë»ö
+        // DataCard ê²€ìƒ‰
         foreach (DataCard card in cards)
         {
             string tag = card.gameObject.name.Trim();
@@ -469,7 +470,7 @@ public class Monitor : UiObjectBase
             buttonCards.Add(tag, card);
         }
 
-        Debug.Log($"[Monitor] Monitoring DataCard µî·Ï ¿Ï·á: {buttonCards.Count}°³ ");
+        Debug.Log($"[Monitor] Monitoring DataCard ë“±ë¡ ì™„ë£Œ: {buttonCards.Count}ê°œ ");
     }
     private void UpdateMonitoringCard(InstrumentInfo info)
     {
@@ -477,7 +478,7 @@ public class Monitor : UiObjectBase
 
         if (!dataCards.TryGetValue(group, out DataCard card))
         {
-            Debug.LogWarning($"[Monitor] Group°ú ¸ÅÄªµÇ´Â DataCard ¾øÀ½: {group}");
+            Debug.LogWarning($"[Monitor] Groupê³¼ ë§¤ì¹­ë˜ëŠ” DataCard ì—†ìŒ: {group}");
             return;
         }
 
@@ -543,7 +544,7 @@ public class Monitor : UiObjectBase
         Debug.Log($"[Experiment] Progress : {currentProcess} / {totalProcess}");
     }
 
-    // - NOTE : ExperimentBox¿¡¼­ ¼±ÅÃµÈ ½ÇÇèÀ» È­¸é¿¡ ¼ÂÆÃ
+    // - NOTE : ExperimentBoxì—ì„œ ì„ íƒëœ ì‹¤í—˜ì„ í™”ë©´ì— ì…‹íŒ…
     public void SetExperimentMonitor(ExperimentWrapper selectedExperiment)
     {
         if (selectedExperiment == null)
@@ -582,7 +583,7 @@ public class Monitor : UiObjectBase
     }
 
     /// <summary>
-    /// TypeÀÇ DropdownÀÌ º¯°æµÇ¾úÀ» ¶§ È£ÃâµÇ´Â ¸Ş¼­µå
+    /// Typeì˜ Dropdownì´ ë³€ê²½ë˜ì—ˆì„ ë•Œ í˜¸ì¶œë˜ëŠ” ë©”ì„œë“œ
     /// </summary>
     public void SetExperimentType(int num)
     {
@@ -591,12 +592,12 @@ public class Monitor : UiObjectBase
 
         string selectedType = Type.options[num].text;
 
-        // ÇöÀç ¼±ÅÃµÈ ScheduleÀÌ ¾øÀ¸¸é ±âº» Á¤ÀÇ µ¥ÀÌÅÍ ±âÁØÀ¸·Î Ä«µå °»½Å
+        // í˜„ì¬ ì„ íƒëœ Scheduleì´ ì—†ìœ¼ë©´ ê¸°ë³¸ ì •ì˜ ë°ì´í„° ê¸°ì¤€ìœ¼ë¡œ ì¹´ë“œ ê°±ì‹ 
         if (ScheduleNo.value == 0)
         {
             if (!Manager.Experiment.experimentDefines.ContainsKey(selectedType))
             {
-                Debug.LogWarning($"[ExperimentMonitor] Á¤ÀÇµÇÁö ¾ÊÀº ½ÇÇè Å¸ÀÔ: {selectedType}");
+                Debug.LogWarning($"[ExperimentMonitor] ì •ì˜ë˜ì§€ ì•Šì€ ì‹¤í—˜ íƒ€ì…: {selectedType}");
                 RefreshExperimentInfoCards(null);
                 return;
             }
@@ -608,12 +609,12 @@ public class Monitor : UiObjectBase
             return;
         }
 
-        // ÇöÀç ¼±ÅÃµÈ ScheduleÀÌ ÀÖÀ¸¸é ¼±ÅÃµÈ Schedule ±âÁØÀ¸·Î Ä«µå °»½Å
+        // í˜„ì¬ ì„ íƒëœ Scheduleì´ ìˆìœ¼ë©´ ì„ íƒëœ Schedule ê¸°ì¤€ìœ¼ë¡œ ì¹´ë“œ ê°±ì‹ 
         ExperimentWrapper currentSchedule = Manager.Experiment.CallSchedule(ScheduleNo.value - 1);
 
         if (currentSchedule == null)
         {
-            Debug.LogWarning($"[ExperimentMonitor] Schedule ¾øÀ½: {ScheduleNo.value}");
+            Debug.LogWarning($"[ExperimentMonitor] Schedule ì—†ìŒ: {ScheduleNo.value}");
             RefreshExperimentInfoCards(null);
             return;
         }
@@ -621,7 +622,7 @@ public class Monitor : UiObjectBase
         RefreshExperimentInfoCards(currentSchedule.Experiments);
     }
 
-    // ScheduleNo Dropdown °ªÀÌ º¯°æµÇ¾úÀ» ¶§ È£Ãâ
+    // ScheduleNo Dropdown ê°’ì´ ë³€ê²½ë˜ì—ˆì„ ë•Œ í˜¸ì¶œ
     public void SetExperimentSchedule(int value)
     {
         if (ScheduleNo == null)
@@ -640,7 +641,7 @@ public class Monitor : UiObjectBase
 
         if (!int.TryParse(selectedText, out int scheduleNo))
         {
-            Debug.LogWarning($"[ExperimentMonitor] Àß¸øµÈ ScheduleNo: {selectedText}");
+            Debug.LogWarning($"[ExperimentMonitor] ì˜ëª»ëœ ScheduleNo: {selectedText}");
             return;
         }
 
@@ -651,7 +652,7 @@ public class Monitor : UiObjectBase
 
         if (schedule == null)
         {
-            Debug.LogWarning($"[ExperimentMonitor] Schedule ¾øÀ½: {scheduleNo}");
+            Debug.LogWarning($"[ExperimentMonitor] Schedule ì—†ìŒ: {scheduleNo}");
             RefreshExperimentInfoCards(null);
             return;
         }
@@ -677,7 +678,7 @@ public class Monitor : UiObjectBase
     {
         if (ScheduleNo == null)
         {
-            Debug.LogError($"[{gameObject.name}] ScheduleNo Dropdown ¿¬°á ¾È µÊ");
+            Debug.LogError($"[{gameObject.name}] ScheduleNo Dropdown ì—°ê²° ì•ˆ ë¨");
             return;
         }
 
@@ -744,12 +745,12 @@ public class Monitor : UiObjectBase
             options.Add((i + 1).ToString());
         }
 
-        // »õ Schedule Ãß°¡¿ë ¿É¼Ç
+        // ìƒˆ Schedule ì¶”ê°€ìš© ì˜µì…˜
         ScheduleNo.AddOptions(options);
 
         ScheduleNo.ClearOptions();
 
-        // ÇöÀç ¼±ÅÃ°ª º¸Á¤
+        // í˜„ì¬ ì„ íƒê°’ ë³´ì •
         if (currentScheduleIndex < 0 || currentScheduleIndex >= schedules.Count)
         {
             currentScheduleIndex = 0;
@@ -766,7 +767,7 @@ public class Monitor : UiObjectBase
 
         string selectedScheduleText = ScheduleNo.options[ScheduleNo.value].text;
 
-        // ÇöÀç Schedule No°¡ "..."ÀÌ¸é »õ Schedule·Î Ãß°¡
+        // í˜„ì¬ Schedule Noê°€ "..."ì´ë©´ ìƒˆ Scheduleë¡œ ì¶”ê°€
         if (selectedScheduleText == "...")
         {
             number = Manager.Experiment.CallCurrentSchedules().Count + 1;
@@ -797,7 +798,7 @@ public class Monitor : UiObjectBase
     {
         if (infos == null || infos.Count == 0)
         {
-            Debug.LogWarning("[DataBox] »ı¼ºÇÒ Experiment InformationÀÌ ¾ø½À´Ï´Ù.");
+            Debug.LogWarning("[DataBox] ìƒì„±í•  Experiment Informationì´ ì—†ìŠµë‹ˆë‹¤.");
 
             foreach (var card in dataCards.Values)
                 card.gameObject.SetActive(false);
@@ -886,7 +887,7 @@ public class Monitor : UiObjectBase
     {
         if (Container == null)
         {
-            Debug.LogError("[DataBox] Container°¡ nullÀÔ´Ï´Ù.");
+            Debug.LogError("[DataBox] Containerê°€ nullì…ë‹ˆë‹¤.");
             return null;
         }
 
@@ -896,7 +897,7 @@ public class Monitor : UiObjectBase
 
         if (prefab == null)
         {
-            Debug.LogWarning($"[DataBox] Experiment Prefab Load ½ÇÆĞ: {path}");
+            Debug.LogWarning($"[DataBox] Experiment Prefab Load ì‹¤íŒ¨: {path}");
             return null;
         }
 
@@ -907,7 +908,7 @@ public class Monitor : UiObjectBase
 
         if (card == null)
         {
-            Debug.LogWarning($"[DataBox] {key}¿¡ DataCard ½ºÅ©¸³Æ®°¡ ¾ø½À´Ï´Ù.");
+            Debug.LogWarning($"[DataBox] {key}ì— DataCard ìŠ¤í¬ë¦½íŠ¸ê°€ ì—†ìŠµë‹ˆë‹¤.");
             Destroy(obj);
             return null;
         }
@@ -1014,7 +1015,7 @@ public class Monitor : UiObjectBase
     }
 
     /// <summary>
-    /// ÇöÀç ¸ğ´ÏÅÍ¸µ ÇÏ´Â ½ÇÇèÀÇ ÁøÇà ·üÀ» °è»ê
+    /// í˜„ì¬ ëª¨ë‹ˆí„°ë§ í•˜ëŠ” ì‹¤í—˜ì˜ ì§„í–‰ ë¥ ì„ ê³„ì‚°
     /// </summary>
     private void UpdateExperimentProgress()
     {
@@ -1028,7 +1029,7 @@ public class Monitor : UiObjectBase
     }
 
     /// <summary>
-    /// ÇöÀç ¸ğ´ÏÅÍ¸µ ÇÏ´Â ½ÇÇèÀÇ ÀıÂ÷ ÁøÇàÀ» º¸°í ExperimentInfoCardÀÇ »ö»óÀ» °»½Å
+    /// í˜„ì¬ ëª¨ë‹ˆí„°ë§ í•˜ëŠ” ì‹¤í—˜ì˜ ì ˆì°¨ ì§„í–‰ì„ ë³´ê³  ExperimentInfoCardì˜ ìƒ‰ìƒì„ ê°±ì‹ 
     /// </summary>
     private void UpdateExperimentInfoCardColors()
     {
@@ -1051,8 +1052,8 @@ public class Monitor : UiObjectBase
     #endregion
 
     #region Setting
-    // 1. Network º¯¼ö
-    // 2. InstrumentInfo º¯¼ö
+    // 1. Network ë³€ìˆ˜
+    // 2. InstrumentInfo ë³€ìˆ˜
 
     [Header("Setting")]
     public TMP_InputField InputSlaveID;
@@ -1067,7 +1068,7 @@ public class Monitor : UiObjectBase
     {
         if (Manager.Network == null)
         {
-            Debug.LogWarning("[Setting] NetworkManager°¡ ¾ø½À´Ï´Ù.");
+            Debug.LogWarning("[Setting] NetworkManagerê°€ ì—†ìŠµë‹ˆë‹¤.");
             return;
         }
 
@@ -1093,7 +1094,7 @@ public class Monitor : UiObjectBase
     {
         if (InputIP == null || InputIP.Length < 4)
         {
-            Debug.LogWarning("[Setting] IP InputField ¹è¿­ÀÌ ºÎÁ·ÇÕ´Ï´Ù.");
+            Debug.LogWarning("[Setting] IP InputField ë°°ì—´ì´ ë¶€ì¡±í•©ë‹ˆë‹¤.");
             return;
         }
 
@@ -1101,7 +1102,7 @@ public class Monitor : UiObjectBase
 
         if (parts.Length != 4)
         {
-            Debug.LogWarning($"[Setting] IP Çü½Ä ¿À·ù: {ip}");
+            Debug.LogWarning($"[Setting] IP í˜•ì‹ ì˜¤ë¥˜: {ip}");
             return;
         }
 
@@ -1118,7 +1119,7 @@ public class Monitor : UiObjectBase
 
         if (Container == null)
         {
-            Debug.LogError("[Setting] Container°¡ nullÀÔ´Ï´Ù.");
+            Debug.LogError("[Setting] Containerê°€ nullì…ë‹ˆë‹¤.");
             return;
         }
 
@@ -1126,7 +1127,7 @@ public class Monitor : UiObjectBase
 
         if (instrumentInfos == null || instrumentInfos.Count == 0)
         {
-            Debug.LogWarning("[Setting] Setting InstrumentInfo°¡ ¾ø½À´Ï´Ù.");
+            Debug.LogWarning("[Setting] Setting InstrumentInfoê°€ ì—†ìŠµë‹ˆë‹¤.");
             return;
         }
 
@@ -1152,7 +1153,7 @@ public class Monitor : UiObjectBase
 
         RebuildSettingLayout();
 
-        Debug.Log($"[Setting] DataCard »ı¼º ¿Ï·á : {dataCards.Count}°³");
+        Debug.Log($"[Setting] DataCard ìƒì„± ì™„ë£Œ : {dataCards.Count}ê°œ");
     }
     private DataCard CreateSettingDataCard(InstrumentInfo info, string key)
     {
@@ -1162,7 +1163,7 @@ public class Monitor : UiObjectBase
 
         if (prefab == null)
         {
-            Debug.LogWarning($"[Setting] Prefab Load ½ÇÆĞ: {path}");
+            Debug.LogWarning($"[Setting] Prefab Load ì‹¤íŒ¨: {path}");
             return null;
         }
 
@@ -1173,7 +1174,7 @@ public class Monitor : UiObjectBase
 
         if (card == null)
         {
-            Debug.LogWarning($"[Setting] {key}¿¡ DataCard ½ºÅ©¸³Æ®°¡ ¾ø½À´Ï´Ù.");
+            Debug.LogWarning($"[Setting] {key}ì— DataCard ìŠ¤í¬ë¦½íŠ¸ê°€ ì—†ìŠµë‹ˆë‹¤.");
             Destroy(obj);
             return null;
         }
@@ -1199,7 +1200,7 @@ public class Monitor : UiObjectBase
     {
         if (!byte.TryParse(InputSlaveID.text, out byte slaveID))
         {
-            Debug.LogWarning("[Setting] SlaveID ÀÔ·Â ¿À·ù");
+            Debug.LogWarning("[Setting] SlaveID ì…ë ¥ ì˜¤ë¥˜");
             return;
         }
 
@@ -1207,25 +1208,25 @@ public class Monitor : UiObjectBase
 
         if (string.IsNullOrWhiteSpace(ip))
         {
-            Debug.LogWarning("[Setting] IP ÀÔ·Â ¿À·ù");
+            Debug.LogWarning("[Setting] IP ì…ë ¥ ì˜¤ë¥˜");
             return;
         }
 
         if (!int.TryParse(InputPort.text, out int port))
         {
-            Debug.LogWarning("[Setting] Port ÀÔ·Â ¿À·ù");
+            Debug.LogWarning("[Setting] Port ì…ë ¥ ì˜¤ë¥˜");
             return;
         }
 
         if (!int.TryParse(InputFailCount.text, out int failCount))
         {
-            Debug.LogWarning("[Setting] Fail Count ÀÔ·Â ¿À·ù");
+            Debug.LogWarning("[Setting] Fail Count ì…ë ¥ ì˜¤ë¥˜");
             return;
         }
 
         if (!int.TryParse(InputTimeout.text, out int timeout))
         {
-            Debug.LogWarning("[Setting] Timeout ÀÔ·Â ¿À·ù");
+            Debug.LogWarning("[Setting] Timeout ì…ë ¥ ì˜¤ë¥˜");
             return;
         }
 
@@ -1247,7 +1248,7 @@ public class Monitor : UiObjectBase
             timeout
         );
 
-        Debug.Log($"[Setting] Àû¿ë ¿Ï·á : IP={ip}, Port={port}, SlaveID={slaveID}, FailCount={failCount}, Timeout={timeout}");
+        Debug.Log($"[Setting] ì ìš© ì™„ë£Œ : IP={ip}, Port={port}, SlaveID={slaveID}, FailCount={failCount}, Timeout={timeout}");
 
         if (reconnect)
         {
