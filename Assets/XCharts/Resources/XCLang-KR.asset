@@ -1,0 +1,96 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b65fc8b25febc4b9e8acb500d16770b2, type: 3}
+  m_Name: XCLang-KR
+  m_EditorClassIdentifier: 
+  langName: KR
+  time:
+    months:
+    - "1\uC6D4"
+    - "2\uC6D4"
+    - "3\uC6D4"
+    - "4\uC6D4"
+    - "5\uC6D4"
+    - "5\uC6D4"
+    - "7\uC6D4"
+    - "8\uC6D4"
+    - "9\uC6D4"
+    - "10\uC6D4"
+    - "11\uC6D4"
+    - "12\uC6D4"
+    monthAbbr:
+    - "1\uC6D4"
+    - "2\uC6D4"
+    - "3\uC6D4"
+    - "4\uC6D4"
+    - "5\uC6D4"
+    - "6\uC6D4"
+    - "7\uC6D4"
+    - "8\uC6D4"
+    - "9\uC6D4"
+    - "10\uC6D4"
+    - "11\uC6D4"
+    - "12\uC6D4"
+    dayOfMonth:
+    - 1
+    - 2
+    - 3
+    - 4
+    - 5
+    - 6
+    - 7
+    - 8
+    - 9
+    - 10
+    - 11
+    - 12
+    - 13
+    - 14
+    - 15
+    - 16
+    - 17
+    - 18
+    - 19
+    - 20
+    - 21
+    - 22
+    - 23
+    - 24
+    - 25
+    - 26
+    - 27
+    - 28
+    - 29
+    - 30
+    - 31
+    dayOfWeek:
+    - "\uC77C\uC694\uC77C"
+    - "\uC6D4\uC694\uC77C"
+    - "\uD654\uC694\uC77C"
+    - "\uC218\uC694\uC77C"
+    - "\uBAA9\uC694\uC77C"
+    - "\uAE08\uC694\uC77C"
+    - "\uD1A0\uC694\uC77C"
+    dayOfWeekAbbr:
+    - "\uC77C"
+    - "\uC6D4"
+    - "\uD654"
+    - "\uC218"
+    - "\uBAA9"
+    - "\uAE08"
+    - "\uD1A0"
+  candlestick:
+    dimensionNames:
+    - open
+    - close
+    - lowest
+    - highest

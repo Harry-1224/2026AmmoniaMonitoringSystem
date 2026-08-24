@@ -127,6 +127,10 @@ public class Monitor : UiObjectBase
                 // 1. Monitor 내의 컨텐츠 (objects, texts 등)를 등록 및 초기화
                 // 2. Monitor에 필요한 현재 데이터를 DataManager에서 로드한다.
                 break;
+
+            case EMonitorType.Graph:
+
+
             case EMonitorType.Experiment:
                 // Experiment 타입에 대한 초기화 로직
 
