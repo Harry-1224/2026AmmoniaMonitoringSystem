@@ -1,17 +1,17 @@
-using System.Collections.Generic;
+ï»¿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
 // <summary>
-// È£ÃâÀ» ÇÒ ¶§ 
+// í˜¸ì¶œì„ í•  ë•Œ 
 
-// Enum È£Ãâ ÇÏ°í ½ÍÀ»¶§´Â
+// Enum í˜¸ì¶œ í•˜ê³  ì‹¶ì„ë•ŒëŠ”
 // dollyCartMover.SetDollyPosition(EDollyPosition.TestBad);
 
-// string È£Ãâ ÇÏ°í ½ÍÀ»¶§´Â
+// string í˜¸ì¶œ í•˜ê³  ì‹¶ì„ë•ŒëŠ”
 // dollyCartMover.SetDollyPosition("TestBad");
 
-// int È£Ãâ ÇÏ°í ½ÍÀ»¶§´Â
+// int í˜¸ì¶œ í•˜ê³  ì‹¶ì„ë•ŒëŠ”
 // dollyCartMover.SetDollyPosition(1);
 public class UiObjectBase : ObjectBase, IUiObject,
     IPointerClickHandler,
@@ -21,7 +21,7 @@ public class UiObjectBase : ObjectBase, IUiObject,
     IPointerUpHandler
 {
     [Header("UI Setting")]
-    public bool isManagable = false; // UiManager¿¡¼­ °ü¸®ÇÒÁö ¿©ºÎ
+    public bool isManagable = false; // UiManagerì—ì„œ ê´€ë¦¬í• ì§€ ì—¬ë¶€
 
     protected DollyCameraController dollyCartMover;
 
@@ -39,12 +39,12 @@ public class UiObjectBase : ObjectBase, IUiObject,
 
             if (dollyCartMover == null)
             {
-                Debug.LogWarning("[UiObject] MainCamera¿¡ DollyCartMover°¡ ¾ø½À´Ï´Ù.");
+                Debug.LogWarning("[UiObject] MainCameraì— DollyCartMoverê°€ ì—†ìŠµë‹ˆë‹¤.");
             }
         }
         else
         {
-            Debug.LogWarning("[UiObject] MainCamera¸¦ Ã£À» ¼ö ¾ø½À´Ï´Ù.");
+            Debug.LogWarning("[UiObject] MainCameraë¥¼ ì°¾ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤.");
         }
     }
     
@@ -74,7 +74,7 @@ public class UiObjectBase : ObjectBase, IUiObject,
 
     }
 
-    // Unity ÀÌº¥Æ® ¡æ ÀÎÅÍÆäÀÌ½º ¿¬°á
+    // Unity ì´ë²¤íŠ¸ â†’ ì¸í„°íŽ˜ì´ìŠ¤ ì—°ê²°
     public void OnPointerClick(PointerEventData eventData) => OnClick();
     public void OnPointerEnter(PointerEventData eventData) => OnHoverEnter();
     public void OnPointerExit(PointerEventData eventData) => OnHoverExit();

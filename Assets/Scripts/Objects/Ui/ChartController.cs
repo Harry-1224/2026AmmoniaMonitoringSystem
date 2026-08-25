@@ -15,53 +15,35 @@ public class ChartController : UiObjectBase
 
     [Header("Chart Settings")]
     [SerializeField] LineChart lineChart;
-    [SerializeField] private XAxis xAxis;
+    private XAxis xAxis => lineChart.GetChartComponent<XAxis>(0);
     [SerializeField] private const int MaxPoints = 100;
     [SerializeField] private const int MaxXAxisLabels = 10;
-    [SerializeField]
-    private ChartTestDataSource testDataSource;
 
     private HashSet<string> chartTags;
     private readonly Dictionary<string, Serie> seriesDictionary = new();
 
+    protected override void Start()
+    {
+        
+    }
+
+    private GameObject TestOBJ;
     protected override void OnEnable()
     {
         base.OnEnable();
 
-        if (testDataSource != null)
-        {
-            LoadTestHistory();
-            testDataSource.OnDataChanged += UpdateChart;
-        }
-        else
-        {
-            LoadChartHistory();
-        }
-    }
-
-    protected override void OnDisable()
-    {
-        if (testDataSource != null)
-            testDataSource.OnDataChanged -= UpdateChart;
-
-        base.OnDisable();
+        EventSubscriber();
+        LoadChartHistory();
     }
 
     protected override void Initialize()
     {
         chartTags = new HashSet<string>(Tags);
-        lineChart.ClearData();
-        
-        
+        lineChart.RemoveAllSerie();
 
         foreach (var tag in chartTags)
         {
             var serie = lineChart.AddSerie<Line>(tag);
-
-            if (serie == null)
-            {
-                serie = lineChart.AddSerie<Line>(tag);
-            }
 
             seriesDictionary[tag] = serie;
 
@@ -71,6 +53,14 @@ public class ChartController : UiObjectBase
             buttonComp.SetButtonTag(tag);
             buttonComp.OnClickButton += OnLegendButtonClicked;
         }
+
+        var legend = lineChart.GetChartComponent<Legend>(0);
+
+        if (legend == null)
+            legend = lineChart.AddChartComponent<Legend>();
+
+        legend.show = true;
+        legend.data = Tags.ToList();
 
         base.Initialize();
     }
@@ -85,44 +75,20 @@ public class ChartController : UiObjectBase
 
     private void UpdateChart(Dictionary<string, Datas> PLCData)
     {
-        var firstData = PLCData.Values.FirstOrDefault();
+        var time = DateTime.Now.ToString("HH:mm:ss.fff");
+        AddXLabel(time);
 
-        if (firstData == null || firstData.LoggedData.Count == 0)
-            return;
-
-        var logs = firstData.LoggedData;
-
-        int startIndex = Mathf.Max(0, logs.Count - MaxPoints);
-
-        for (int i = startIndex; i < logs.Count; i++)
+        foreach (var tag in chartTags)
         {
-            var log = logs[i];
-
-            if (!TryParseLog(log, out var time, out _))
+            if (!seriesDictionary.TryGetValue(tag, out var serie))
                 continue;
 
-            AddXLabel(time.ToString("HH:mm:ss.fff"));
+            if (!PLCData.TryGetValue(tag, out var data))
+                continue;
 
-            foreach (var tag in chartTags)
-            {
-                if (!seriesDictionary.TryGetValue(tag, out var serie))
-                    continue;
-
-                if (!PLCData.TryGetValue(tag, out var data))
-                    continue;
-
-                if (i >= data.LoggedData.Count)
-                    continue;
-
-                if (TryParseLog(data.LoggedData[i], out _, out var value))
-                {
-                    AddYValue(serie, value);
-                }
-            }
+            AddYValue(serie, data.Value);
         }
     }
-
-    private const int TargetXAxisSplits = 10;
 
     private void AddXLabel(string label)
     {
@@ -132,11 +98,6 @@ public class ChartController : UiObjectBase
         {
             xAxis.RemoveData(0);
         }
-
-        xAxis.splitNumber = Mathf.Min(
-            TargetXAxisSplits,
-            xAxis.data.Count
-        );
     }
 
     private void AddYValue(Serie serie, float value) // Data

@@ -63,14 +63,14 @@ MonoBehaviour:
     m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
     m_TextColor: {r: 0.31764707, g: 0.3019608, b: 0.3019608, a: 1}
     m_TextBackgroundColor: {r: 0, g: 0, b: 0, a: 0}
-    m_FontSize: 20
-    m_TMPFont: {fileID: 0}
+    m_FontSize: 30
+    m_TMPFont: {fileID: 11400000, guid: ba1439e79f840cf45859f8b1d38a9190, type: 2}
     m_InactiveColor: {r: 0.8, g: 0.8, b: 0.8, a: 1}
   m_Axis:
     m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
     m_TextColor: {r: 0.31764707, g: 0.3019608, b: 0.3019608, a: 1}
     m_TextBackgroundColor: {r: 0, g: 0, b: 0, a: 0}
-    m_FontSize: 45
+    m_FontSize: 30
     m_TMPFont: {fileID: 0}
     m_LineType: 0
     m_LineWidth: 3
@@ -88,7 +88,7 @@ MonoBehaviour:
       serializedVersion: 2
       rgba: 0
     m_TickWidth: 1
-    m_TickLength: 5
+    m_TickLength: 10
     m_TickColor:
       serializedVersion: 2
       rgba: 4283256145
