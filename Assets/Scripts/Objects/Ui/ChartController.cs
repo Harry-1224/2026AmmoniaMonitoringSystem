@@ -187,42 +187,6 @@ public class ChartController : UiObjectBase
         }
     }
 
-    private void LoadTestHistory()
-    {
-        lineChart.ClearData();
-
-        foreach (var tag in chartTags)
-        {
-            if (!seriesDictionary.TryGetValue(tag, out var serie))
-                continue;
-
-            var data = testDataSource.GetData(tag);
-
-            if (data == null)
-                continue;
-
-            int startIndex = Mathf.Max(
-                0,
-                data.LoggedData.Count - MaxPoints);
-
-            for (int i = startIndex; i < data.LoggedData.Count; i++)
-            {
-                if (!TryParseLog(
-                        data.LoggedData[i],
-                        out var time,
-                        out var value))
-                {
-                    continue;
-                }
-
-                if (tag == Tags[0])
-                    AddXLabel(time.ToString("HH:mm:ss.fff"));
-
-                AddYValue(serie, value);
-            }
-        }
-    }
-
     protected override void EventSubscriber()
     {
         base.EventSubscriber();
