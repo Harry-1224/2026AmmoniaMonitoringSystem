@@ -27,7 +27,6 @@ public class ChartController : UiObjectBase
         
     }
 
-    private GameObject TestOBJ;
     protected override void OnEnable()
     {
         base.OnEnable();
@@ -65,6 +64,7 @@ public class ChartController : UiObjectBase
         base.Initialize();
     }
 
+    // 체크박스 버튼 클릭
     private void OnLegendButtonClicked(string tag, bool isActive)
     {
         if (!seriesDictionary.TryGetValue(tag, out var serie))
@@ -73,6 +73,7 @@ public class ChartController : UiObjectBase
         serie.show = isActive;
     }
 
+    // History 로드 후에는 수신한 시간 및 최근 값만 추가
     private void UpdateChart(Dictionary<string, Datas> PLCData)
     {
         var time = DateTime.Now.ToString("HH:mm:ss.fff");
@@ -90,7 +91,7 @@ public class ChartController : UiObjectBase
         }
     }
 
-    private void AddXLabel(string label)
+    private void AddXLabel(string label) // Time
     {
         lineChart.AddXAxisData(label);
 
@@ -145,6 +146,7 @@ public class ChartController : UiObjectBase
         if (string.IsNullOrEmpty(firstTag))
             return;
 
+        // 시간은 한 번만 로드
         var firstData = Manager.Data.CallData<Datas>(firstTag);
 
         if (firstData?.LoggedData == null || firstData.LoggedData.Count == 0)
@@ -171,6 +173,7 @@ public class ChartController : UiObjectBase
                 if (!seriesDictionary.TryGetValue(tag, out var serie))
                     continue;
 
+                // 데이터 매니저에서 로깅된 데이터 로드
                 var data = Manager.Data.CallData<Datas>(tag);
 
                 if (data == null || i >= data.LoggedData.Count)
