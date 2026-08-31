@@ -277,9 +277,12 @@ public class DataManager : ManagerBase
     #endregion
 
     #region LoggingSystem
+    public event Action<DateTime, Dictionary<string, float>> OnDataLogged;
     private void LoggingTimingActedHandler(DateTime loggingTime)
     {
         isDataLogged = true;
+
+        var loggedData = new Dictionary<string, float>();
 
         foreach (var item in DataDictionary)
         {
@@ -288,8 +291,11 @@ public class DataManager : ManagerBase
             string log = $"{loggingTime:yyyy-MM-dd HH:mm:ss.fff},{data.Value}";
 
             data.LoggedData.Add(log);
+            loggedData.Add(item.Key, data.Value);
         }
         //Debug.Log($"[DataManager] Logging 저장 완료 : {loggingTime:HH:mm:ss.fff}");
+
+        OnDataLogged?.Invoke(loggingTime, loggedData);
     }
 
     #endregion

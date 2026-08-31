@@ -10,8 +10,17 @@ public class ChartController : UiObjectBase
 {
     [SerializeField] RectTransform ButtonParent;
     [SerializeField] GameObject ButtonPrefab;
-    [SerializeField] private string[] Tags = 
-        { "AT101" , "AT102", "AT103", "TT101", "TT102"};
+    [SerializeField]
+    private List<string> Tags = new() { "AT101", "AT102", "AT103", "TT101", "TT102" };
+    [SerializeField] private int ButtonsPerPage = 9;
+    [SerializeField] private GameObject PreviousButton;
+    [SerializeField] private GameObject NextButton;
+
+    private readonly List<GameObject> legendButtons = new();
+    private int currentPage = 0;
+
+    private int TotalPageCount =>
+    Mathf.CeilToInt((float)legendButtons.Count / ButtonsPerPage);
 
     [Header("Chart Settings")]
     [SerializeField] LineChart lineChart;
@@ -37,13 +46,24 @@ public class ChartController : UiObjectBase
 
     protected override void Initialize()
     {
+        legendButtons.Clear();
+        foreach (var obj in legendButtons)
+        {
+            Destroy(obj);
+        }
+        
+        Tags.Clear();
+        foreach (var tag in Manager.Data.InstrumentInfos)
+        {
+            Tags.Add(tag.Key);
+        }
+
         chartTags = new HashSet<string>(Tags);
         lineChart.RemoveAllSerie();
 
         foreach (var tag in chartTags)
         {
             var serie = lineChart.AddSerie<Line>(tag);
-
             seriesDictionary[tag] = serie;
 
             var button = Instantiate(ButtonPrefab, ButtonParent);
@@ -51,6 +71,8 @@ public class ChartController : UiObjectBase
 
             buttonComp.SetButtonTag(tag);
             buttonComp.OnClickButton += OnLegendButtonClicked;
+
+            legendButtons.Add(button);
         }
 
         var legend = lineChart.GetChartComponent<Legend>(0);
@@ -58,10 +80,30 @@ public class ChartController : UiObjectBase
         if (legend == null)
             legend = lineChart.AddChartComponent<Legend>();
 
-        legend.show = true;
+        legend.show = false;
         legend.data = Tags.ToList();
 
+        UpdateButtonPage();
+
         base.Initialize();
+    }
+
+    private void UpdateButtonPage()
+    {
+        int startIndex = currentPage * ButtonsPerPage;
+        int endIndex = Mathf.Min(
+            startIndex + ButtonsPerPage,
+            legendButtons.Count
+        );
+
+        for (int i = 0; i < legendButtons.Count; i++)
+        {
+            bool isVisible = i >= startIndex && i < endIndex;
+            legendButtons[i].SetActive(isVisible);
+        }
+
+        PreviousButton.SetActive(currentPage > 0);
+        NextButton.SetActive(currentPage < TotalPageCount - 1);
     }
 
     // 체크박스 버튼 클릭
@@ -74,20 +116,19 @@ public class ChartController : UiObjectBase
     }
 
     // History 로드 후에는 수신한 시간 및 최근 값만 추가
-    private void UpdateChart(Dictionary<string, Datas> PLCData)
+    private void UpdateChart(DateTime time, Dictionary<string, float> loggedData)
     {
-        var time = DateTime.Now.ToString("HH:mm:ss.fff");
-        AddXLabel(time);
+        AddXLabel(time.ToString());
 
         foreach (var tag in chartTags)
         {
             if (!seriesDictionary.TryGetValue(tag, out var serie))
                 continue;
 
-            if (!PLCData.TryGetValue(tag, out var data))
+            if (!loggedData.TryGetValue(tag, out var data))
                 continue;
 
-            AddYValue(serie, data.Value);
+            AddYValue(serie, data);
         }
     }
 
@@ -190,17 +231,35 @@ public class ChartController : UiObjectBase
         }
     }
 
+    public void OnPreviousPage()
+    {
+        if (currentPage <= 0)
+            return;
+
+        currentPage--;
+        UpdateButtonPage();
+    }
+
+    public void OnNextPage()
+    {
+        if (currentPage >= TotalPageCount - 1)
+            return;
+
+        currentPage++;
+        UpdateButtonPage();
+    }
+
     protected override void EventSubscriber()
     {
         base.EventSubscriber();
 
-        Manager.Data.OnDataChanged += UpdateChart;
+        Manager.Data.OnDataLogged += UpdateChart;
     }
 
     protected override void EventUnsubscriber()
     {
         base.EventUnsubscriber();
 
-        Manager.Data.OnDataChanged -= UpdateChart;
+        Manager.Data.OnDataLogged -= UpdateChart;
     }
 }
