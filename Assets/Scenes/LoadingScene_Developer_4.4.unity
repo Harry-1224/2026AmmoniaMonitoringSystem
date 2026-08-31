@@ -17864,7 +17864,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NetworkManager
   slaveID: 1
-  ipAddress: 192.168.0.133
+  ipAddress: 192.168.0.6
   port: 502
   maxFailCount: 3
   timeout: 1000

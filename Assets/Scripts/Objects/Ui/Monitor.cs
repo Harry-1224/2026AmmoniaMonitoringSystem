@@ -434,7 +434,7 @@ public class Monitor : UiObjectBase
         buttonCards.Clear();
 
 
-        Transform cardRoot = transform.Find("MonitoringCards"); 
+        Transform cardRoot = transform.Find("MonitoringButtons"); 
 
         if (cardRoot != null)
         {

@@ -1834,7 +1834,7 @@ MonoBehaviour:
   MultiSlotValueRule: MultiValueText_
   MultiSlotLampRule: MultiLamp_
   MultiSlotNames:
-  - Intergation
+  - Integration
   - Set Value
   scheduleNameText: {fileID: 0}
   scheduleDescriptionText: {fileID: 0}
