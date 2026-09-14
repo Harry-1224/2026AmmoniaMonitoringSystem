@@ -377,8 +377,149 @@ public class DataManager : ManagerBase
             isReceived = false;
         }
     }
-
     private float ConvertPLCToData(InstrumentInfo info, ushort[] rawData)
+    {
+        // 1. 유효성 검사
+        if (info == null || rawData == null || rawData.Length == 0)
+            return 0;
+
+        ushort raw = 0;
+
+        // =========================================================
+        // AI / AO
+        // =========================================================
+        if (info.PointType == "AI" || info.PointType == "AO")
+        {
+            // =====================================================
+            // Float 타입
+            // Register 2개 사용
+            // =====================================================
+            if (string.Equals(
+                info.DataType,
+                "Float",
+                StringComparison.OrdinalIgnoreCase))
+            {
+                // Float는 Address와 Address + 1 사용
+                if (info.Address < 0 || info.Address + 1 >= rawData.Length)
+                {
+                    Debug.LogError(
+                        $"[ConvertPLCToData] Float Address Out of Range : " +
+                        $"{info.Tag} / Address={info.Address}"
+                    );
+
+                    return 0;
+                }
+
+                // Register 2개 읽기
+                ushort highWord = rawData[info.Address];
+                ushort lowWord = rawData[info.Address + 1];
+
+                // 16bit + 16bit → 32bit
+                uint raw32 =
+                    ((uint)highWord << 16) |
+                    lowWord;
+
+                // IEEE754 Float 변환
+                float floatValue = BitConverter.ToSingle(
+                    BitConverter.GetBytes(raw32),
+                    0
+                );
+
+                return floatValue;
+            }
+
+            // =====================================================
+            // 일반 16bit Analog 타입
+            // 기존 PLCMin / PLCMax Scaling 사용
+            // =====================================================
+
+            // Address 범위 체크
+            if (info.Address < 0 || info.Address >= rawData.Length)
+            {
+                Debug.LogError(
+                    $"[ConvertPLCToData] Address Out of Range : " +
+                    $"{info.Tag} / Address={info.Address}"
+                );
+
+                return 0;
+            }
+
+            raw = rawData[info.Address];
+
+            float plcMin = info.PLCMin;
+            float plcMax = info.PLCMax;
+
+            // 0으로 나누는 것 방지
+            float plcRange = plcMax - plcMin;
+
+            if (plcRange == 0)
+            {
+                Debug.LogError(
+                    $"[ConvertPLCToData] PLC Range is Zero : {info.Tag}"
+                );
+
+                return 0;
+            }
+
+            float realMin = info.RangeMin;
+            float realMax = info.RangeMax;
+
+            // PLC 값 → 0~1 정규화
+            float normalized =
+                ((float)raw - plcMin) /
+                plcRange;
+
+            // 실제 Engineering Range로 변환
+            float scaledValue =
+                normalized *
+                (realMax - realMin) +
+                realMin;
+
+            return scaledValue;
+        }
+
+        // =========================================================
+        // DI / DO
+        // =========================================================
+        else if (info.PointType == "DI" || info.PointType == "DO")
+        {
+            // Address → Word / Bit 분리
+            int wordIndex = info.Address / 10;
+            int bitIndex = info.Address % 10;
+
+            // Word 범위 체크
+            if (wordIndex < 0 || wordIndex >= rawData.Length)
+            {
+                Debug.LogError(
+                    $"[ConvertPLCToData] Address Out of Range : " +
+                    $"{info.Tag} / Address={info.Address}"
+                );
+
+                return 0;
+            }
+
+            raw = rawData[wordIndex];
+
+            // 해당 Bit 추출
+            int bit = (raw >> bitIndex) & 1;
+
+            return bit == 1 ? 1f : 0f;
+        }
+
+        // =========================================================
+        // 알 수 없는 PointType
+        // =========================================================
+        else
+        {
+            Debug.LogError(
+                $"[ConvertPLCToData] PointType is not confirmed : " +
+                $"{info.Tag} / PointType={info.PointType}"
+            );
+
+            return 0;
+        }
+    }
+    private float ConvertPLCToData(InstrumentInfo info, ushort[] rawData, int Before)
     {
         //1. 유효성 검사
         if (info == null || rawData == null || rawData.Length == 0)
