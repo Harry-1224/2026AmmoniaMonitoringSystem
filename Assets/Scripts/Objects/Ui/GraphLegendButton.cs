@@ -29,4 +29,13 @@ public class GraphLegendButton : UiObjectBase
 
         EventSystem.current?.SetSelectedGameObject(null);
     }
+
+    public void OnReset(bool isActive = false)
+    {
+        IsActive = isActive;
+        CheckImage.enabled = IsActive;
+        OnClickButton?.Invoke(Tag, IsActive);
+
+        EventSystem.current?.SetSelectedGameObject(null);
+    }
 }

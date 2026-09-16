@@ -25,12 +25,12 @@ public class ChartController : UiObjectBase
     [Header("Chart Settings")]
     [SerializeField] LineChart lineChart;
     private XAxis xAxis => lineChart.GetChartComponent<XAxis>(0);
-    [SerializeField] private const int MaxPoints = 100;
+    [SerializeField] private const int MaxPoints = 1000;
     [SerializeField] private const int MaxXAxisLabels = 10;
 
     private HashSet<string> chartTags;
     private readonly Dictionary<string, Serie> seriesDictionary = new();
-
+    
     protected override void Start()
     {
         
@@ -118,7 +118,7 @@ public class ChartController : UiObjectBase
     // History 로드 후에는 수신한 시간 및 최근 값만 추가
     private void UpdateChart(DateTime time, Dictionary<string, float> loggedData)
     {
-        AddXLabel(time.ToString());
+        AddXLabel(time.ToString("HH:mm:ss"));
 
         foreach (var tag in chartTags)
         {
@@ -163,7 +163,7 @@ public class ChartController : UiObjectBase
 
         if (!DateTime.TryParseExact(
                 split[0],
-                "yyyy-MM-dd HH:mm:ss.fff",
+                "yyyy-MM-dd HH:mm:ss",
                 CultureInfo.InvariantCulture,
                 DateTimeStyles.None,
                 out time))
@@ -207,7 +207,7 @@ public class ChartController : UiObjectBase
                 continue;
             }
 
-            AddXLabel(time.ToString("HH:mm:ss.fff"));
+            AddXLabel(time.ToString("HH:mm:ss"));
 
             foreach (var tag in Tags)
             {
@@ -247,6 +247,15 @@ public class ChartController : UiObjectBase
 
         currentPage++;
         UpdateButtonPage();
+    }
+
+    public void OnResetLeguend()
+    {
+        foreach(var button in legendButtons)
+        {
+            var buttonComp = button.GetComponent<GraphLegendButton>();
+            buttonComp.OnReset();
+        }
     }
 
     protected override void EventSubscriber()
