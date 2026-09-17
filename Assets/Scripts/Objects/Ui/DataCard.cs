@@ -493,7 +493,8 @@ public class DataCard : UiObjectBase
                 }
                 else
                 {
-                    Debug.Log($"[DataCard/{ObjectID}] Timer 설정 : " + $"{timerValue} → {timerValue / 100f:F2}초");
+                    //Debug.Log($"[DataCard/{ObjectID}] Timer 설정 : " + $"{timerValue} → {timerValue / 100f:F2}초");
+                    Debug.Log($"[DataCard/{ObjectID}] Timer 설정 : " + $"{timerValue} 초");
                 }
 
                 break;
@@ -1079,7 +1080,8 @@ public class DataCard : UiObjectBase
 
     private IEnumerator TimerDOControl(InstrumentInfo target, int timerValue)
     {
-        float waitSeconds = timerValue / 100f;
+        //float waitSeconds = timerValue / 100f;
+        float waitSeconds = timerValue;
 
         // ON
         Manager.Network.ReserveDateWriteing(target.PointType, (ushort)target.Address, 1);
